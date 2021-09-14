@@ -1,0 +1,21 @@
+Toolbox Packaging Instructions
+
+0. Ensure the Apps Packaging Project is up-to-date. This should only
+   include the entry-point function (the app launcher), so create/update
+   the Apps Packaging Project whilst the rest of the toolbox code is off
+   the path (e.g., close the project first).
+
+   Ensure all labels and published HTML examples are up-to-date, using the
+   project shortcuts for automation.
+
+   Ensure Contents.m is up-to-date.
+
+1. With the project open, select Project --> Share --> Toolbox.
+
+2. Do not use the project root as the top-level folder. Use the
+   subfolder tbx. This is the toolbox "root directory".
+
+3. Since the project is open, the path should be correct in the
+   toolbox packaging configuration file.
+
+4. Examples will be published to HTML separately for File Exchange.
