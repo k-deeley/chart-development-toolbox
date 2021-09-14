@@ -12,11 +12,11 @@ You can inspect the source code used for each chart, explore the features and fu
 
 ![](https://www.mathworks.com/matlabcentral/mlc-downloads/downloads/d47c73c1-4864-4beb-93d4-9642d80fcb1b/cc5dfeaa-9b16-4794-894f-55db858fafc2/images/1620730043.png)
 
-## Setup and Getting Started
+## Installation and Getting Started
 This submission is a MATLAB toolbox.
 1. Double-click on the toolbox installer (the .mltbx file) to install the toolbox.
-2. See the documentation files GettingStarted.mlx and CreatingSpecializedCharts.mlx for introductory information.
-3. Open the Chart Catalog app from the Apps gallery to view the example charts.
+2. See the documentation files `GettingStarted.mlx` and `CreatingSpecializedCharts.mlx` for introductory information.
+3. Open the `Chart Catalog` app from the Apps gallery to view the example charts.
 
 ### MathWorks Products (http://www.mathworks.com)
 
