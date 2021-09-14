@@ -18,7 +18,7 @@ This submission is a MATLAB toolbox.
 2. See the documentation files `GettingStarted.mlx` and `CreatingSpecializedCharts.mlx` for introductory information.
 3. Open the `Chart Catalog` app from the Apps gallery to view the example charts.
 
-### [MathWorks](https://www.mathworks.com) Products
+### [MathWorks](https://www.mathworks.com) Product Requirements
 
 The Chart Development Toolbox requires MATLAB release R2021a or later.
 - [MATLAB](https://www.mathworks.com/products/matlab.html)
