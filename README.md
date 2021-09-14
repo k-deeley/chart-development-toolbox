@@ -18,18 +18,15 @@ This submission is a MATLAB toolbox.
 2. See the documentation files `GettingStarted.mlx` and `CreatingSpecializedCharts.mlx` for introductory information.
 3. Open the `Chart Catalog` app from the Apps gallery to view the example charts.
 
-### MathWorks Products (http://www.mathworks.com)
+### [MathWorks](https://www.mathworks.com) Products
 
-Requires MATLAB release R2021a or newer.
+The Chart Development Toolbox requires MATLAB release R2021a or later.
 - [MATLAB](https://www.mathworks.com/products/matlab.html)
 - [Statistics and Machine Learning Toolbox](https://www.mathworks.com/products/statistics.html)
 
 Some charts in the catalog rely on additional toolboxes.
 
 ## License
-The license for chart-development-toolbox is available in the [license.txt](license.txt) file in this GitHub repository.
-
-## Community Support
-[MATLAB Central](https://www.mathworks.com/matlabcentral)
+The license for the Chart Development Toolbox is available in the [license.txt](license.txt) file in this GitHub repository.
 
 Copyright 2018-2021 The MathWorks, Inc.
