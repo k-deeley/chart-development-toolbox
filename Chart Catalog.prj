@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.apptool" plugin-version="1.0">
-  <configuration build-checksum="4018476988" file="C:\Users\kdeeley\Files\MathWorks\Publications\04_Charts\Toolbox\Chart Catalog.prj" location="C:\Users\kdeeley\Files\MathWorks\Publications\04_Charts\Toolbox" name="Chart Catalog" target="target.mlapps" target-name="Package App">
+  <configuration build-checksum="3415426316" file="C:\Users\kdeeley\Files\MathWorks\Publications\04_Charts\Toolbox\Chart Catalog.prj" location="C:\Users\kdeeley\Files\MathWorks\Publications\04_Charts\Toolbox" name="Chart Catalog" target="target.mlapps" target-name="Package App">
     <param.appname>Chart Catalog</param.appname>
     <param.authnamewatermark>Ken Deeley</param.authnamewatermark>
     <param.email>kdeeley@mathworks.com</param.email>
@@ -21,7 +21,7 @@
       <item>1</item>
     </param.products.id>
     <param.products.version>
-      <item>9.10</item>
+      <item>9.12</item>
     </param.products.version>
     <param.platforms />
     <param.output>${PROJECT_ROOT}\tbx\Chart Development Toolbox\apps</param.output>
@@ -40,7 +40,7 @@
     </build-deliverables>
     <workflow />
     <matlab>
-      <root>C:\Program Files\MATLAB\R2021a</root>
+      <root>C:\Program Files\MATLAB\R2022a</root>
       <toolboxes>
         <toolbox name="matlabcoder" />
         <toolbox name="neuralnetwork" />
