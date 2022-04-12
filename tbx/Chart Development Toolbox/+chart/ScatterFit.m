@@ -46,8 +46,7 @@ classdef ScatterFit < matlab.ui.componentcontainer.ComponentContainer
         ComputationRequired = false()
     end % properties ( Access = private )
     
-    properties ( GetAccess = ?tScatterFit, SetAccess = private, ...
-            Transient, NonCopyable )
+    properties ( Access = private, Transient, NonCopyable )
         % Chart layout.
         LayoutGrid(1, 1) matlab.ui.container.GridLayout
         % Chart axes.
@@ -72,13 +71,7 @@ classdef ScatterFit < matlab.ui.componentcontainer.ComponentContainer
         LineColorButton(1, 1) matlab.ui.control.Button
         % Check boxes for the axes' XGrid and YGrid visibility.
         GridCheckBoxes(1, 2) matlab.ui.control.CheckBox
-    end % properties ( GetAccess = ?tScatterFit, ...
-    % SetAccess = private, Transient, NonCopyable )
-    
-    properties ( Access = ?tScatterFit )
-        % Color picker.
-        ColorPicker(1, 1) ColorPicker = DefaultColorPicker()        
-    end % properties ( Access = ?tScatterFit )
+    end % properties ( Access = private, Transient, NonCopyable )
     
     properties ( Constant, Hidden )
         % Product dependencies.
@@ -552,7 +545,7 @@ classdef ScatterFit < matlab.ui.componentcontainer.ComponentContainer
             %for the best-fit line.
             
             % Prompt the user to select a color.
-            c = obj.ColorPicker.uisetcolor();
+            c = uisetcolor();
             figure( ancestor( obj, "figure" ) ) % Restore focus
             if isequal( c, 0 )
                 % Exit if the user cancels.

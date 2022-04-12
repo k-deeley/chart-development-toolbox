@@ -2,12 +2,12 @@ classdef CatalogLauncher < handle
     %CATALOGLAUNCHER Application launcher for the chart catalog.
     %
     % Copyright 2018-2021 The MathWorks, Inc.
-    
+
     properties ( SetAccess = private )
         % Main application figure window.
         Figure matlab.ui.Figure {mustBeScalarOrEmpty}
     end % properties ( SetAccess = private )
-    
+
     properties ( Constant, GetAccess = private )
         % Default colors.
         DefaultColors = colororder()
@@ -16,14 +16,14 @@ classdef CatalogLauncher < handle
         % Yellow highlight color.
         HighlightYellow = [0.969, 1, 0]
     end % properties ( Constant, GetAccess = private )
-    
+
     properties ( Access = private )
         % View menu.
         ViewMenu(1, 1) matlab.ui.container.Menu
         % Tab menu.
         TabMenu(1, 1) matlab.ui.container.Menu
         % Documentation menus.
-        DocumentationMenus = gobjects( 0 )        
+        DocumentationMenus = gobjects( 0 )
         % Logical scalar flag for reusing a sole tab.
         ReuseTab = true()
         % Getting started label layout.
@@ -37,30 +37,30 @@ classdef CatalogLauncher < handle
         % Placeholder for a reusable tab.
         SoleTab = gobjects( 0 )
     end % properties ( Access = private )
-    
+
     properties ( Dependent, Access = private )
         % Array of tabs to hold the HTML pages.
         TabList
         % Names of the open tabs.
         TabNames
     end % properties ( Dependent, Access = private )
-    
+
     methods
-        
+
         function obj = CatalogLauncher()
             %CATALOGLAUNCHER Build the chart catalog.
-            
+
             % Create the main application figure.
             obj.Figure = uifigure( "Name", "Chart Catalog", ...
                 "Units", "normalized", ...
                 "Position", [0.125, 0.125, 0.75, 0.75] );
-            
+
             % Create the view menu.
             obj.ViewMenu = uimenu( "Parent", obj.Figure, ...
                 "Enable", "off", ...
                 "Text", "View", ...
                 "Tooltip", "Select documentation tabs to close" );
-            
+
             % Create the options menu.
             optionsMenu = uimenu( "Parent", obj.Figure, ...
                 "Text", "Options", ...
@@ -71,13 +71,13 @@ classdef CatalogLauncher < handle
                 "for the chart documentation pages", ...
                 "Checked", "on", ...
                 "MenuSelectedFcn", @obj.onTabMenuSelected );
-            
+
             % Define the horizontal layout.
             horizontalLayout = uigridlayout( obj.Figure, [1, 2], ...
                 "ColumnWidth", ["1x", "1.33x"], ...
                 "Padding", 0, ...
                 "ColumnSpacing", 0 );
-            
+
             % Create a panel for the chart grid.
             chartPanel = uipanel( "Parent", horizontalLayout, ...
                 "Title", "Gallery", ...
@@ -85,7 +85,7 @@ classdef CatalogLauncher < handle
                 "FontWeight", "bold", ...
                 "BackgroundColor", [0, 0.66, 0.88], ...
                 "ForegroundColor", "white" );
-            
+
             % Create a panel for the documentation browser.
             obj.DocumentationPanel = uipanel( ...
                 "Parent", horizontalLayout, ...
@@ -94,12 +94,12 @@ classdef CatalogLauncher < handle
                 "FontWeight", "bold", ...
                 "BackgroundColor", "white", ...
                 "ForegroundColor", "black" );
-            
+
             % Create a tab group for the HTML documents.
             obj.TabGroupLayout = uigridlayout( obj.DocumentationPanel, ...
                 [1, 1], "Padding", 0 );
             obj.TabGroup = uitabgroup( "Parent", obj.TabGroupLayout );
-            
+
             % Create the getting started label.
             obj.LabelLayout = uigridlayout( obj.DocumentationPanel, ...
                 [1, 1], "Padding", 0 );
@@ -109,25 +109,29 @@ classdef CatalogLauncher < handle
                 "FontSize", 16, ...
                 "FontWeight", "bold", ...
                 "Text", "Select a chart to get started." );
-            
+
             % Define a grid layout for the chart tiles.
-            chartTileGrid = uigridlayout( chartPanel, [1, 4] );
-            
+            numCols = 4;
+            chartTileGrid = uigridlayout( chartPanel, [1, numCols] );
+
             % Load the chart imagery.
             S = load( fullfile( catalogRoot(), "data", "Tiles.mat" ) );
             chartNames = fieldnames( S.ChartTiles );
-            
+
             % Prepare the list of charts available to the user.
             userAccessibleCharts = accessibleCharts();
             chartList = intersect( chartNames, userAccessibleCharts );
             numCharts = numel( chartList );
-            
+
             % Create the individual clickable chart tiles within the grid
             % layout.
             for k = 1:numCharts
                 % Obtain the name of the current chart.
                 currentChartName = chartList(k);
                 p = uipanel( "Parent", chartTileGrid );
+                p.Layout.Row = ceil( k / numCols );
+                c = mod( k, numCols );
+                p.Layout.Column = c + numCols * (c == 0);                
                 g = uigridlayout( p, [1, 1], "Padding", 2 );
                 p = uipanel( "Parent", g, ...
                     "Title", currentChartName, ...
@@ -148,39 +152,34 @@ classdef CatalogLauncher < handle
                     currentChartName + " chart" );
             end % for
             
-            % Resize the grid layout rows to match the individual image
-            % tile heights.
-            chartTileGrid.RowHeight = repmat( "fit", 1, ...
-                length( chartTileGrid.RowHeight ) );
-            
         end % constructor
-        
+
         function value = get.TabList( obj )
-            
+
             value = obj.TabGroup.Children;
-            
+
         end % get.TabList
-        
+
         function value = get.TabNames( obj )
-            
+
             if isempty( obj.TabList )
                 value = string.empty( 0, 1 );
             else
                 value = string( {obj.TabList.Title}.' );
             end % if
-            
+
         end % get.TabNames
-        
+
     end % methods
-    
+
     methods ( Access = private )
-        
+
         function onTileClicked( obj, s, ~ )
             %ONTILECLICKED Respond to the user clicking on a chart tile.
-            
+
             % Determine the panel containing the image component.
             currentPanel = s.Parent.Parent;
-            
+
             % Highlight the panel momentarily.
             currentPanel.BackgroundColor = obj.HighlightYellow;
             currentPanel.ForegroundColor = "black";
@@ -188,17 +187,17 @@ classdef CatalogLauncher < handle
             drawnow()
             currentPanel.BackgroundColor = obj.PlotBlue;
             currentPanel.ForegroundColor = "white";
-            
+
             if isempty( obj.TabList )
                 % Place the getting started label in the background.
                 obj.DocumentationPanel.Children = ...
                     flip( obj.DocumentationPanel.Children );
                 drawnow()
             end % if
-            
+
             % Obtain the name of the selected chart.
             selectedChartName = s.Tag;
-            
+
             % Depending on the selected option, we either reuse the same
             % tab for all chart documentation pages, or create a new tab
             % each time.
@@ -270,25 +269,25 @@ classdef CatalogLauncher < handle
                         "Tag", selectedChartName, ...
                         "MenuSelectedFcn", @obj.onCloseDoc );
                 end % if
-                
+
             end % if
-            
+
         end % onTileClicked
-        
+
         function onHTMLDataChanged( ~, ~, e )
             %ONHTMLDATACHANGED Respond to user interaction with hyperlinks
             %in the uihtml components.
-            
+
             % Use the MATLAB web browser to handle the requested link from
             % the HTML version of the Live Script.
             web( e.Data.Link )
-            
+
         end % onHTMLDataChanged
-        
+
         function onCloseDoc( obj, s, ~ )
             %ONCLOSEDOC Close the corresponding documentation tab in
             %response to the user selecting a menu item.
-            
+
             if obj.ReuseTab
                 % Remove the sole tab.
                 delete( obj.SoleTab )
@@ -317,15 +316,15 @@ classdef CatalogLauncher < handle
                     obj.DocumentationPanel.Children = ...
                         flip( obj.DocumentationPanel.Children );
                 end % if
-                
+
             end % if
-            
+
         end % onCloseDoc
-        
+
         function onTabMenuSelected( obj, ~, ~ )
             %ONTABMENUSELECTED Toggle between separate tabs for the chart
             %doc pages or a single tab.
-            
+
             % Current checked status.
             checked = obj.TabMenu.Checked;
             if checked == "off"
@@ -340,18 +339,18 @@ classdef CatalogLauncher < handle
                 obj.DocumentationMenus = gobjects( 0 );
                 obj.ViewMenu.Enable = "off";
             end % if
-            
+
             % Update the logical flag.
             obj.ReuseTab = ~obj.ReuseTab;
-            
+
             % Update the menu item.
             obj.TabMenu.Checked = ...
                 setdiff( ["on", "off"], obj.TabMenu.Checked );
-            
+
         end % onTabMenuSelected
-        
+
     end % methods ( Access = private )
-    
+
 end % class definition
 
 function userAccessibleCharts = accessibleCharts()
