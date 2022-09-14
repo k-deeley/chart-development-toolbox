@@ -66,6 +66,12 @@ You can inspect the source code used for each chart, explore the features and fu
          <file>Chart Development Toolbox/+example/html/Rangefinder.html</file>
       </demoitem>
       <demoitem>
+         <label>Sankey</label>
+         <type>other</type>
+         <source>Sankey</source>
+         <file>Chart Development Toolbox/+example/html/Sankey.html</file>
+      </demoitem>
+      <demoitem>
          <label>ScatterBoxplot</label>
          <type>other</type>
          <source>ScatterBoxplot</source>

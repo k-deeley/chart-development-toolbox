@@ -11,7 +11,7 @@ The toolbox comprises several diverse examples of custom MATLAB charts, together
 
 You can inspect the source code used for each chart, explore the features and functionality of each chart, and run Live Script examples demonstrating the use of each chart. The toolbox also has documentation and resources to help you get started with developing your own charts.</param.description>
     <param.screenshot>C:\Users\kdeeley\Files\MathWorks\Publications\04_Charts\Article\F02.png</param.screenshot>
-    <param.version>2.1.1</param.version>
+    <param.version>2.1.2</param.version>
     <param.output>${PROJECT_ROOT}\Chart Development Toolbox.mltbx</param.output>
     <param.products.name>
       <item>MATLAB</item>
@@ -103,6 +103,11 @@ tbx/doc/CreatingSpecializedCharts.pdf</param.exclude.filters>
          &lt;file type="main"&gt;/Chart Development Toolbox/+example/Rangefinder.mlx&lt;/file&gt;
          &lt;file type="thumbnail"/&gt;
       &lt;/example&gt;
+      &lt;example name="Sankey" type="html"&gt;
+         &lt;file type="source"&gt;/Chart Development Toolbox/+example/html/Sankey.html&lt;/file&gt;
+         &lt;file type="main"&gt;/Chart Development Toolbox/+example/Sankey.mlx&lt;/file&gt;
+         &lt;file type="thumbnail"/&gt;
+      &lt;/example&gt;
       &lt;example name="ScatterBoxplot" type="html"&gt;
          &lt;file type="source"&gt;/Chart Development Toolbox/+example/html/ScatterBoxplot.html&lt;/file&gt;
          &lt;file type="main"&gt;/Chart Development Toolbox/+example/ScatterBoxplot.mlx&lt;/file&gt;
@@ -168,7 +173,7 @@ tbx/doc/CreatingSpecializedCharts.pdf</param.exclude.filters>
     <param.required.addons />
     <param.matlab.project.id>9ededdc4-c2e0-4951-ad2f-59b6bb7d2b60</param.matlab.project.id>
     <param.matlab.project.name>ChartCatalog</param.matlab.project.name>
-    <param.release.start>R2021a</param.release.start>
+    <param.release.start>R2022a</param.release.start>
     <param.release.end>latest</param.release.end>
     <param.release.current.only>false</param.release.current.only>
     <param.compatiblity.windows>true</param.compatiblity.windows>

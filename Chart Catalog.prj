@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.apptool" plugin-version="1.0">
-  <configuration build-checksum="3415426316" file="C:\Users\kdeeley\Files\MathWorks\Publications\04_Charts\Toolbox\Chart Catalog.prj" location="C:\Users\kdeeley\Files\MathWorks\Publications\04_Charts\Toolbox" name="Chart Catalog" target="target.mlapps" target-name="Package App">
+  <configuration build-checksum="441944428" file="C:\Users\kdeeley\Files\MathWorks\Publications\04_Charts\Toolbox\Chart Catalog.prj" location="C:\Users\kdeeley\Files\MathWorks\Publications\04_Charts\Toolbox" name="Chart Catalog" target="target.mlapps" target-name="Package App">
     <param.appname>Chart Catalog</param.appname>
     <param.authnamewatermark>Ken Deeley</param.authnamewatermark>
     <param.email>kdeeley@mathworks.com</param.email>

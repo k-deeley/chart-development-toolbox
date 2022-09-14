@@ -6,11 +6,14 @@ Toolbox Packaging Instructions
    the path (e.g., close the project first).
 
    Ensure all labels and published HTML examples are up-to-date, using the
-   project shortcuts for automation.
+   project shortcuts for automation. Copy the published HTML to the html 
+   sub-folder within +example. This avoids the need to re-publish when the
+   toolbox is packaged.
 
    Ensure Contents.m is up-to-date.
 
-1. With the project open, select Project --> Share --> Toolbox.
+1. With the project open, select Project --> Share --> Toolbox, or open the
+   existing Toolbox Packaging Project. Update the version number.
 
 2. Do not use the project root as the top-level folder. Use the
    subfolder tbx. This is the toolbox "root directory".
