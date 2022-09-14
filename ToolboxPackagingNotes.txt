@@ -22,3 +22,8 @@ Toolbox Packaging Instructions
    toolbox packaging configuration file.
 
 4. Examples will be published to HTML separately for File Exchange.
+
+5. In GitHub, create a new release. Make sure to create a new tag using
+   the latest version number (e.g., v2.1.2), and upload the .mltbx as the
+   release binary. Add the title and description. After creating the new
+   release on GitHub, the File Exchange entry should update automatically.
