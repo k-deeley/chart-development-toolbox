@@ -10,7 +10,7 @@ The toolbox comprises several diverse examples of custom MATLAB charts, together
 
 You can inspect the source code used for each chart, explore the features and functionality of each chart, and run Live Script examples demonstrating the use of each chart. The toolbox also has documentation and resources to help you get started with developing your own charts.
 
-![](https://www.mathworks.com/matlabcentral/mlc-downloads/downloads/d47c73c1-4864-4beb-93d4-9642d80fcb1b/cc5dfeaa-9b16-4794-894f-55db858fafc2/images/1620730043.png)
+![](https://www.mathworks.com/matlabcentral/mlc-downloads/downloads/d47c73c1-4864-4beb-93d4-9642d80fcb1b/77575032-9d87-4e07-a484-3c59b7f8afb0/images/1663168702.png)
 
 ## Installation and Getting Started
 This submission is a MATLAB toolbox.
@@ -29,4 +29,4 @@ Some charts in the catalog rely on additional toolboxes.
 ## License
 The license for the Chart Development Toolbox is available in the [license.txt](license.txt) file in this GitHub repository.
 
-Copyright 2018-2021 The MathWorks, Inc.
+Copyright 2018-2022 The MathWorks, Inc.
