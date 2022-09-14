@@ -2,7 +2,7 @@ classdef CircularNetFlow < matlab.graphics.chartcontainer.ChartContainer
     %CIRCULARNETFLOW Illustrates the directed to/from relationships between
     %pairs of categories.
     %
-    % Copyright 2018-2021 The MathWorks, Inc.
+    % Copyright 2018-2022 The MathWorks, Inc.
     
     properties ( Dependent )
         % Chart data table.

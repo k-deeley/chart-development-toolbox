@@ -2,7 +2,7 @@ classdef ValueAtRisk < matlab.ui.componentcontainer.ComponentContainer
     %VALUEATRISK Chart displaying the distribution of a return series
     %together with value at risk metrics and a distribution fit.
     %
-    % Copyright 2018-2021 The MathWorks, Inc.
+    % Copyright 2018-2022 The MathWorks, Inc.
     
     properties ( Dependent )
         % Underlying data for the chart, typically a series of returns.

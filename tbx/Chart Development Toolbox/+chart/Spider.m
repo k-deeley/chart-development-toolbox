@@ -3,7 +3,7 @@ classdef Spider < matlab.graphics.chartcontainer.ChartContainer
     %plotted around a web. The number of nodes in the web is equal to the
     %number of distinct measurements.
     %
-    % Copyright 2019-2021 The MathWorks, Inc.
+    % Copyright 2019-2022 The MathWorks, Inc.
     
     properties ( Dependent )
         %DATA Matrix of chart data: each row represents a distinct property

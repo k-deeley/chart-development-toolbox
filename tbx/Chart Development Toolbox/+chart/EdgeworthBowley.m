@@ -2,7 +2,7 @@ classdef EdgeworthBowley < matlab.graphics.chartcontainer.ChartContainer
     %EDGEWORTHBOWLEY Creates an Edgeworth-Bowley chart based on the utility
     %curves of two individuals and the Pareto-efficient contract curve.
     %
-    % Copyright 2018-2021 The MathWorks, Inc.
+    % Copyright 2018-2022 The MathWorks, Inc.
     
     properties ( Dependent )
         % Chart A-data: this is a matrix defining the utility curves for

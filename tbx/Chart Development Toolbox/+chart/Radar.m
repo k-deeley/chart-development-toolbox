@@ -2,7 +2,7 @@ classdef Radar < matlab.graphics.chartcontainer.ChartContainer
     %RADAR Chart displaying a line graph of dependent numeric variables
     %plotted against independent circular data.
     %
-    % Copyright 2018-2021 The MathWorks, Inc.
+    % Copyright 2018-2022 The MathWorks, Inc.
     
     properties ( Dependent )
         % Chart angular data.

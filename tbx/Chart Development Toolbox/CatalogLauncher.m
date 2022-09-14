@@ -1,7 +1,7 @@
 classdef CatalogLauncher < handle
     %CATALOGLAUNCHER Application launcher for the chart catalog.
     %
-    % Copyright 2018-2021 The MathWorks, Inc.
+    % Copyright 2018-2022 The MathWorks, Inc.
 
     properties ( SetAccess = private )
         % Main application figure window.

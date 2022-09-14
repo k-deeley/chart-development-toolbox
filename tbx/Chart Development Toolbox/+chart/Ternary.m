@@ -2,7 +2,7 @@ classdef Ternary < matlab.ui.componentcontainer.ComponentContainer
     %TERNARY Chart managing a barycentric plot of three variables which sum
     %to a constant.
     %
-    % Copyright 2018-2021 The MathWorks, Inc.
+    % Copyright 2018-2022 The MathWorks, Inc.
     
     properties ( Dependent )
         % Table of data, columns 1-3 are inputs and column 4 is the output.

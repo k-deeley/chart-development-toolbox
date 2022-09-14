@@ -3,7 +3,7 @@ classdef ScatterDensity < matlab.graphics.chartcontainer.ChartContainer
     %color scheme applied to the data points indicating the relative
     %data density.
     %
-    % Copyright 2019-2021 The MathWorks, Inc.
+    % Copyright 2019-2022 The MathWorks, Inc.
     
     properties ( Dependent )
         % Chart x-data.

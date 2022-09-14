@@ -2,7 +2,7 @@ classdef Annulus < matlab.ui.componentcontainer.ComponentContainer
     %ANNULUS Chart component, similar to a 3D pie chart, but using a ring
     %(annulus) to represent the data.
     %
-    % Copyright 2019-2021 The MathWorks, Inc.
+    % Copyright 2019-2022 The MathWorks, Inc.
     
     properties ( AbortSet, Dependent )
         % Chart data, comprising a positive vector.
@@ -467,7 +467,7 @@ classdef Annulus < matlab.ui.componentcontainer.ComponentContainer
         function setup( obj )
             %SETUP Initialize the chart graphics.
             
-            %Define the layout grid.
+            % Define the layout grid.
             obj.LayoutGrid = uigridlayout( obj, [1, 2], ...
                 "ColumnWidth", ["1x", "fit"] );
             
@@ -476,7 +476,7 @@ classdef Annulus < matlab.ui.componentcontainer.ComponentContainer
                 "DataAspectRatio", [1, 1, 1], ...
                 "Visible", "off", ...
                 "View", [0, 50] );
-            obj.Legend = legend( obj.Axes );
+            obj.Legend = legend( obj.Axes, "ButtonDownFcn", [] );
             title( obj.Axes, "Annulus Chart", "Visible", "on" )
             
             % Create a light object within the axes.

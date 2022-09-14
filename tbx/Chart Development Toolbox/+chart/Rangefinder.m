@@ -4,7 +4,7 @@ classdef Rangefinder < matlab.graphics.chartcontainer.ChartContainer
     %marker at the crossover point of the marginal medians and lines
     %indicating the marginal adjacent values.
     %
-    % Copyright 2018-2021 The MathWorks, Inc.
+    % Copyright 2018-2022 The MathWorks, Inc.
     
     properties ( Dependent )
         % Chart x-data.

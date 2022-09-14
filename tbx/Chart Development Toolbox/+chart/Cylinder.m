@@ -1,7 +1,7 @@
 classdef Cylinder < matlab.graphics.chartcontainer.ChartContainer
     %CYLINDER Chart representing a stacked cylinder graph.
     %
-    % Copyright 2018-2021 The MathWorks, Inc.
+    % Copyright 2018-2022 The MathWorks, Inc.
     
     properties ( Dependent )
         % Chart data.

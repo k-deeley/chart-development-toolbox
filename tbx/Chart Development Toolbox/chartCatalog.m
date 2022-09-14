@@ -4,7 +4,7 @@ function varargout = chartCatalog()
 % Launcher for the Chart Catalog application. Calling |chartCatalog| with an 
 % output argument returns a reference to the application figure window.
 %
-% Copyright 2018-2021 The MathWorks, Inc.
+% Copyright 2018-2022 The MathWorks, Inc.
 
 % Launch the application.
 CL = CatalogLauncher();

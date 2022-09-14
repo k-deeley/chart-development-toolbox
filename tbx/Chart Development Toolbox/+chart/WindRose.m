@@ -2,7 +2,7 @@ classdef WindRose < matlab.graphics.chartcontainer.ChartContainer
     %WINDROSE Chart for displaying speed and direction data on an angular
     %(polar) histogram.
     %
-    % Copyright 2018-2021 The MathWorks, Inc.
+    % Copyright 2018-2022 The MathWorks, Inc.
     
     properties ( Dependent )
         % Wind data table, containing direction and speed values.

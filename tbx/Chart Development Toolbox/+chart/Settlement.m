@@ -7,7 +7,7 @@ classdef Settlement < matlab.ui.componentcontainer.ComponentContainer
     %
     % See also BLSPRICE
     %
-    % Copyright 2019-2021 The MathWorks, Inc.
+    % Copyright 2019-2022 The MathWorks, Inc.
     
     properties ( Dependent )
         % The strike (i.e., exercise) price of the option.

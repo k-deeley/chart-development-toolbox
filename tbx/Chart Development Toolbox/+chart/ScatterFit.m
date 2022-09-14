@@ -2,7 +2,7 @@ classdef ScatterFit < matlab.ui.componentcontainer.ComponentContainer
     %SCATTERFIT Chart component managing 2D scattered data (x and y)
     %together with the corresponding best-fit line.
     %
-    % Copyright 2018-2021 The MathWorks, Inc.
+    % Copyright 2018-2022 The MathWorks, Inc.
     
     properties ( Dependent )
         % Chart x-data.

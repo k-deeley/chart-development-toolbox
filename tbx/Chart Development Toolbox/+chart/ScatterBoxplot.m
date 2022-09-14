@@ -2,7 +2,7 @@ classdef ScatterBoxplot < matlab.ui.componentcontainer.ComponentContainer
     %SCATTERBOXPLOT Chart managing a bivariate scatter plot and its
     %marginal boxplots.
     %
-    % Copyright 2018-2021 The MathWorks, Inc.
+    % Copyright 2018-2022 The MathWorks, Inc.
     
     properties ( Dependent )
         % Chart x-data.

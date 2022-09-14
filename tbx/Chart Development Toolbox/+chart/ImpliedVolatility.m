@@ -3,7 +3,7 @@ classdef ImpliedVolatility < matlab.ui.componentcontainer.ComponentContainer
     %price, time to expiry and implied volatility, together with an
     %interpolated implied volatility surface.
     %
-    % Copyright 2018-2021 The MathWorks, Inc.
+    % Copyright 2018-2022 The MathWorks, Inc.
     
     properties ( Dependent )
         % Table of option data, comprising the time to expiry, strike

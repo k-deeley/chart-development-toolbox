@@ -3,7 +3,7 @@ classdef SnailTrail < matlab.ui.componentcontainer.ComponentContainer
     %for a given asset return series relative to a given benchmark return
     %series.
     %
-    % Copyright 2018-2021 The MathWorks, Inc.
+    % Copyright 2018-2022 The MathWorks, Inc.
     
     properties ( Dependent )
         % Chart data, comprising a timetable with two return series.

@@ -1,7 +1,7 @@
 % Chart Development Toolbox
-% Version 2.0 (R2021a) 14-May-2021
+% Version 2.1.2 (R2022a) 14-Sep-2022
 
-%  Copyright 2018-2021 The MathWorks, Inc.
+%  Copyright 2018-2022 The MathWorks, Inc.
 
 % App Launcher
 %   chartCatalog    - Launch the chart catalog.
@@ -16,6 +16,7 @@
 %   LineSelector
 %   Radar
 %   Rangefinder
+%   Sankey
 %   ScatterBoxplot
 %   ScatterDensity
 %   ScatterFit

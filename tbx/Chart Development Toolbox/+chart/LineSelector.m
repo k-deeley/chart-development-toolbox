@@ -2,7 +2,7 @@ classdef LineSelector < matlab.graphics.chartcontainer.ChartContainer
     %LINESELECTOR Chart displaying a collection of line plots, possibly on
     %different scales.
     %
-    % Copyright 2018-2021 The MathWorks, Inc.
+    % Copyright 2018-2022 The MathWorks, Inc.
     
     properties ( Dependent )
         % Chart x-data.
