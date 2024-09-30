@@ -27,6 +27,6 @@ The Chart Development Toolbox requires MATLAB release R2021a or later.
 Some charts in the catalog rely on additional toolboxes.
 
 ## License
-The license for the Chart Development Toolbox is available in the [license.txt](license.txt) file in this GitHub repository.
+The license for the Chart Development Toolbox is available in the [LICENSE.txt](LICENSE.txt) file in this GitHub repository.
 
 Copyright 2018-2024 The MathWorks, Inc.
