@@ -115,7 +115,7 @@ classdef CatalogLauncher < handle
             chartTileGrid = uigridlayout( chartPanel, [1, numCols] );
 
             % Load the chart imagery.
-            S = load( fullfile( catalogRoot(), "data", "Tiles.mat" ) );
+            S = load( fullfile( chartsRoot(), "Tiles.mat" ) );
             chartNames = fieldnames( S.ChartTiles );
 
             % Prepare the list of charts available to the user.
@@ -360,7 +360,7 @@ function userAccessibleCharts = accessibleCharts()
 %products.
 
 % Start with a list of all the charts.
-chartNames = dir( fullfile( catalogRoot(), "+chart", "*.m" ) );
+chartNames = dir( fullfile( chartsRoot(), "*Chart.m" ) );
 chartNames = string( {chartNames.name}.' );
 % Remove the file extension.
 chartNames = erase( chartNames, ".m" );
