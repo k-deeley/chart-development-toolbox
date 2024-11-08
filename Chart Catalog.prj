@@ -21,10 +21,10 @@
       <item>1</item>
     </param.products.id>
     <param.products.version>
-      <item>9.12</item>
+      <item>24.2</item>
     </param.products.version>
     <param.platforms />
-    <param.output>${PROJECT_ROOT}\tbx\Chart Development Toolbox\apps</param.output>
+    <param.output>${PROJECT_ROOT}\tbx</param.output>
     <param.guid>1aa7516e-37a4-4050-b636-d75da2a2c9fe</param.guid>
     <unset>
       <param.platforms />
@@ -36,11 +36,11 @@
     <fileset.resources />
     <fileset.package />
     <build-deliverables>
-      <file location="${PROJECT_ROOT}\tbx\Chart Development Toolbox" name="apps" optional="false">C:\Users\kdeeley\Files\MathWorks\Publications\04_Charts\Toolbox\tbx\Chart Development Toolbox\apps</file>
+      <file location="${PROJECT_ROOT}" name="tbx" optional="false">C:\Users\kdeeley\Files\MathWorks\Publications\04_Charts\Toolbox\tbx</file>
     </build-deliverables>
     <workflow />
     <matlab>
-      <root>C:\Program Files\MATLAB\R2022a</root>
+      <root>C:\Program Files\MATLAB\R2024b</root>
       <toolboxes>
         <toolbox name="matlabcoder" />
         <toolbox name="neuralnetwork" />

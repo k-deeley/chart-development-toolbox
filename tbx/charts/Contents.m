@@ -1,7 +1,7 @@
 % Chart Development Toolbox
-% Version 2.2 (R2024b) 18-Nov-2024
+% Version 2.2 (R2024b) 31-Jan-2025
 
-% Copyright 2018-2024 The MathWorks, Inc.
+% Copyright 2018-2025 The MathWorks, Inc.
 
 % App Launcher
 %   chartCatalog - Launch the chart catalog.
