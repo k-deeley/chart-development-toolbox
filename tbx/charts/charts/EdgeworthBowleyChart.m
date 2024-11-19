@@ -1,9 +1,10 @@
 classdef EdgeworthBowleyChart < matlab.graphics.chartcontainer.ChartContainer
-    %EDGEWORTHBOWLEY Creates an Edgeworth-Bowley chart based on the utility
-    %curves of two individuals and the Pareto-efficient contract curve.
-    %
-    % Copyright 2018-2022 The MathWorks, Inc.
-    
+    %EDGEWORTHBOWLEYCHART Creates an Edgeworth-Bowley chart based on the
+    %utility curves of two individuals and the Pareto-efficient contract
+    %curve.
+
+    % Copyright 2018-2025 The MathWorks, Inc.
+
     properties ( Dependent )
         % Chart A-data: this is a matrix defining the utility curves for
         % the individual A.
@@ -16,62 +17,64 @@ classdef EdgeworthBowleyChart < matlab.graphics.chartcontainer.ChartContainer
         % Quantity of good 2.
         Quantity2(1, 1) double {mustBeReal}
     end % properties ( Dependent )
-    
+
     properties ( Access = private )
         % Internal storage for the AData property.
-        AData_ = double.empty( 0, 1 )
+        AData_(:, :) double {mustBeReal} = double.empty( 0, 1 )
         % Internal storage for the BData property.
-        BData_ = double.empty( 0, 1 )
+        BData_(:, :) double {mustBeReal} = double.empty( 0, 1 )
         % Internal storage for the Quantity1 property.
-        Quantity1_ = 0
+        Quantity1_(1, 1) double {mustBeReal} = 0
         % Internal storage for the Quantity2 property.
-        Quantity2_ = 0
+        Quantity2_(1, 1) double {mustBeReal} = 0
         % Fitted curve data for A.
-        ACurveFit
+        ACurveFit(:, :) double {mustBeReal} = double.empty( 0, 0 )
         % Fitted curve data for B.
-        BCurveFit
+        BCurveFit(:, :) double {mustBeReal} = double.empty( 0, 0 )
         % Pareto set.
-        ParetoSet = zeros( 2 )
+        ParetoSet(:, :) double {mustBeReal} = zeros( 2 )
         % A coefficients.
-        ACoefficients
+        ACoefficients(:, :) double {mustBeReal} = double.empty( 0, 0 )
         % B coefficients.
-        BCoefficients
+        BCoefficients(:, :) double {mustBeReal} = double.empty( 0, 0 )
         % Logical scalar specifying whether a computation is required.
-        ComputationRequired = false
+        ComputationRequired(1, 1) logical = false
     end % properties ( Access = private )
-    
+
     properties ( Access = private, Transient, NonCopyable )
         % Chart axes.
-        Axes(1, 1) matlab.graphics.axis.Axes
+        Axes(:, 1) matlab.graphics.axis.Axes {mustBeScalarOrEmpty}
         % Pareto-efficient curve.
-        ContractLine(1, 1) matlab.graphics.primitive.Line
+        ContractLine(:, 1) matlab.graphics.primitive.Line ...
+            {mustBeScalarOrEmpty}
         % Utility line for A.
         AUtilityLines(:, 1) matlab.graphics.primitive.Line
         % Utility line for B.
         BUtilityLines(:, 1) matlab.graphics.primitive.Line
         % Scattered data points.
-        ScatterPoints(1, 1) matlab.graphics.primitive.Line
+        ScatterPoints(:, 1) matlab.graphics.primitive.Line ...
+            {mustBeScalarOrEmpty}
     end % properties ( Access = private, Transient, NonCopyable )
-    
+
     properties ( Constant, Hidden )
         % Product dependencies.
-        Dependencies = ["MATLAB", ...
+        Dependencies(1, :) string = ["MATLAB", ...
             "Statistics and Machine Learning Toolbox"]
     end % properties ( Constant, Hidden )
-    
+
     methods
-        
+
         function value = get.AData( obj )
-            
+
             value =  obj.AData_;
-            
+
         end % get.AData
-        
+
         function set.AData( obj, value )
-            
+
             % Mark the chart for an update.
             obj.ComputationRequired = true;
-            
+
             % Update the internal chart data properties.
             obj.Quantity1_ = value(end, 1);
             obj.ParetoSet(end, 1) = obj.Quantity1_;
@@ -84,36 +87,36 @@ classdef EdgeworthBowleyChart < matlab.graphics.chartcontainer.ChartContainer
                 obj.Quantity2_ = max( maxA, maxB );
                 obj.ParetoSet(end, 2) = obj.Quantity2_;
                 % If A is resized ...
-                obj.BData_ = obj.BData_(1:size( value, 1 ), :);
+                obj.BData_ = obj.BData_(1:height( value ), :);
                 % If B is resized ...
                 obj.BCurveFit = NaN( size( obj.BData_ ) - [0, 1] );
                 obj.ACurveFit = NaN( size( value ) - [0, 1] );
             end % if
-            
+
             % Update the stored property.
             obj.AData_ = value;
             % Update the last point of ParetoSet.
             obj.ParetoSet(end, 1) = obj.Quantity1_;
             obj.ParetoSet(end, 2) = obj.Quantity2_;
-            
+
             % Update the fitted curve.
             if ~isempty( obj.ACurveFit )
-                obj.ACurveFit = obj.ACurveFit(1:size( value, 1 ), :);
+                obj.ACurveFit = obj.ACurveFit(1:height( value ), :);
             end % if
-            
+
         end % set.AData
-        
+
         function value = get.BData( obj )
-            
+
             value =  obj.BData_;
-            
+
         end % get.BData
-        
+
         function set.BData( obj, value )
-            
+
             % Mark the chart for an update.
             obj.ComputationRequired = true;
-            
+
             % Update the internal chart data properties.
             obj.Quantity1_ = value(end, 1);
             obj.ParetoSet(end, 1) = obj.Quantity1_;
@@ -125,79 +128,99 @@ classdef EdgeworthBowleyChart < matlab.graphics.chartcontainer.ChartContainer
                 maxA = max( obj.AData(:, 2:end), [], "all" );
                 obj.Quantity2_ = max( maxA, maxB );
                 obj.ParetoSet(end, 2) = obj.Quantity2_;
-                obj.AData_ = obj.AData_(1:size( value, 1 ), :);
+                obj.AData_ = obj.AData_(1:height( value ), :);
                 obj.ACurveFit = NaN( size( obj.AData_ ) - [0 1] );
                 obj.BCurveFit = NaN( size( value ) - [0 1] );
             end
-            
+
             % Update the stored property.
             obj.BData_ = value;
-            
+
         end % set.BData
-        
+
         function value = get.Quantity1( obj )
-            
+
             value = obj.Quantity1_;
-            
+
         end % get.Quantity1
-        
+
         function set.Quantity1( obj, value )
-            
+
             % Truncate AData and BData.
             truncateAndAssignQ1( obj, value )
-            
+
         end % set.Quantity1
-        
+
         function value = get.Quantity2( obj )
-            
+
             value = obj.Quantity2_;
-            
+
         end % get.Quantity2
-        
+
         function set.Quantity2( obj, Q )
-            
+
             truncateAndAssignQ2( obj, Q )
-            
+
         end % set.Quantity2
-        
+
     end % methods
-    
+
     methods
-        
+
+        function obj = EdgeworthBowleyChart( namedArgs )
+            %EDGEWORTHBOWLEYCHART Construct an EdgeworthBowleyChart, given
+            %optional name-value arguments.
+
+            arguments ( Input )
+                namedArgs.?EdgeworthBowleyChart
+            end % arguments ( Input )
+
+            % Call the superclass constructor.
+            f = figure( "Visible", "off" );
+            figureCleanup = onCleanup( @() delete( f ) );
+            obj@matlab.graphics.chartcontainer.ChartContainer( ...
+                "Parent", [] );
+            obj.Parent = [];
+
+            % Set any user-defined properties.
+            set( obj, namedArgs )
+
+        end % constructor
+
         function varargout = xlabel( obj, varargin )
-            
+
             [varargout{1:nargout}] = xlabel( obj.Axes, varargin{:} );
-            
+
         end % xlabel
-        
+
         function varargout = ylabel( obj, varargin )
-            
+
             [varargout{1:nargout}] = ylabel( obj.Axes, varargin{:} );
-            
+
         end % ylabel
-        
+
         function varargout = title( obj, varargin )
-            
+
             [varargout{1:nargout}] = title( obj.Axes, varargin{:} );
-            
+
         end % title
-        
+
         function grid( obj, varargin )
-            
+
             grid( obj.Axes, varargin{:} )
-            
+
         end % grid
-        
+
     end % methods
-    
+
     methods ( Access = protected )
-        
+
         function setup( obj )
             %SETUP Initialize the chart graphics.
-            
+
             % The chart's axes.
             obj.Axes = axes( "Parent", obj.getLayout() );
-            
+
             % The contract line.
             obj.ContractLine = line( "Parent", obj.Axes, ...
                 "XData", NaN, ...
@@ -206,21 +229,21 @@ classdef EdgeworthBowleyChart < matlab.graphics.chartcontainer.ChartContainer
                 "LineStyle", "-", ...
                 "Linewidth", 2, ...
                 "LineJoin", "round" );
-            
+
             % Utility lines for A.
             obj.AUtilityLines = line( "Parent", obj.Axes, ...
                 "XData", NaN, ...
                 "YData", NaN, ...
                 "LineWidth", 1.5, ...
                 "Color", [0.5 0.5 0.5] );
-            
+
             % Utility lines for B.
             obj.BUtilityLines = line( "Parent", obj.Axes, ...
                 "XData", NaN, ...
                 "YData", NaN, ...
                 "LineWidth", 1.5, ...
                 "Color", [0.5 0.5 0.5] );
-            
+
             % Scattered points.
             obj.ScatterPoints = line( "Parent", obj.Axes, ...
                 "XData", NaN, ...
@@ -229,49 +252,49 @@ classdef EdgeworthBowleyChart < matlab.graphics.chartcontainer.ChartContainer
                 "Marker", ".", ...
                 "MarkerSize", 8, ...
                 "LineStyle", "none" );
-            
+
             % Annotations.
             xlabel( obj.Axes, "Quantity 1" );
             ylabel( obj.Axes, "Quantity 2" );
             title( obj.Axes, "Edgeworth-Bowley Chart" )
             grid( obj.Axes, "on" )
-            
+
         end % setup
-        
+
         function update( obj )
             %UPDATE Refresh the chart graphics.
-            
+
             % Update the chart graphics.
             plotScatter( obj ) % Plot the AData and BData
             fitCurves( obj ) % Obtain the fitted curves
             plotFittedCurves( obj ) % Plot the fitted lines
             axis( obj.Axes, [0, obj.Quantity1_, ...
-                0, obj.Quantity2_] )            
+                0, obj.Quantity2_] )
             paretoSet( obj ) % Evaluate the Pareto set
             plotPareto( obj ) % Plot the Pareto Set
-            
+
         end % update
-        
+
     end % methods ( Access = protected )
-    
+
     methods ( Access = private )
-        
+
         function fitCurves( obj )
             %FITCURVES Obtain the curves fitted from AData and BData and
             %store the values in the ACurveFit and BCurveFit properties.
-            
+
             % Handle possible warning messages.
             w = warning();
             oc = onCleanup( @() warning( w ) );
             warning( "off" )
-            
-            ncols = size( obj.AData, 2 );
-            
+
+            ncols = width( obj.AData );
+
             % Fit AData
             if ~isempty( obj.AData_ )
                 x = obj.AData_(:, 1);
-                obj.ACoefficients = zeros( size( obj.AData_, 2 )-1, 3 );
-                idx = false( size( obj.AData_, 1 ), ncols-1 );
+                obj.ACoefficients = zeros( width( obj.AData_ )-1, 3 );
+                idx = false( height( obj.AData_ ), ncols-1 );
                 for k = 2:ncols
                     y = obj.AData_(:, k);
                     if any(~isnan(y)) % If y contains any number
@@ -291,12 +314,12 @@ classdef EdgeworthBowleyChart < matlab.graphics.chartcontainer.ChartContainer
                 idx = obj.ACurveFit > obj.Quantity2_;
                 obj.ACurveFit(idx)= NaN;
             end % if
-            
+
             % Fit BData
             if ~isempty( obj.BData_ )
                 x = obj.BData_(:, 1);
-                obj.BCoefficients = zeros( size( obj.AData_, 2 )-1, 3 );
-                idx = false( size( obj.BData_, 1 ), ncols-1 );
+                obj.BCoefficients = zeros( width( obj.AData_ )-1, 3 );
+                idx = false( height( obj.BData_ ), ncols-1 );
                 for k = 2:ncols
                     y = obj.BData_(:, k);
                     if any(~isnan(y))
@@ -321,13 +344,13 @@ classdef EdgeworthBowleyChart < matlab.graphics.chartcontainer.ChartContainer
                     obj.BCurveFit < 0;
                 obj.BCurveFit(idx) = NaN;
             end % if
-            
+
             % Check the hyperbolas are consistent (they do not intersect).
-            
+
             % AData.
             if ~isempty( obj.ACoefficients )
                 k = 0;
-                for i = 2:size( obj.ACoefficients, 1 )
+                for i = 2 : height( obj.ACoefficients )
                     if ~isnan( obj.ACoefficients(i-1-k, 3) )
                         a3 = obj.ACoefficients(i-1-k, 3);
                     end % Check the previous third element is not a NaN
@@ -344,11 +367,11 @@ classdef EdgeworthBowleyChart < matlab.graphics.chartcontainer.ChartContainer
                     end % if
                 end % for
             end % if
-            
+
             % BData.
             if ~isempty( obj.BCoefficients )
                 k = 0;
-                for i = 2:size( obj.BCoefficients, 1 )
+                for i = 2 : height( obj.BCoefficients )
                     if ~isnan( obj.BCoefficients(i-1-k, 3) )
                         b3 = obj.BCoefficients(i-1-k, 3);
                     end % Check the previous third element is not a NaN
@@ -365,18 +388,18 @@ classdef EdgeworthBowleyChart < matlab.graphics.chartcontainer.ChartContainer
                     end % if
                 end % for
             end % if
-            
+
         end % fitCurves
-        
+
         function plotFittedCurves( obj )
             %PLOTFITTEDCURVES Plot the fitted curves.
-            
+
             if ~isempty( obj.ACurveFit ) % Check there is obj.AData_
-                nCurvesA = size( obj.ACurveFit, 2 );
+                nCurvesA = width( obj.ACurveFit );
                 x = obj.AData_(:, 1);
                 for k = 1:nCurvesA
                     y = obj.ACurveFit(:, k);
-                    if size( obj.AUtilityLines, 1 ) < k
+                    if height( obj.AUtilityLines ) < k
                         obj.AUtilityLines(k, 1) = ...
                             line( "Parent", obj.Axes, ...
                             "XData", x, ...
@@ -393,18 +416,19 @@ classdef EdgeworthBowleyChart < matlab.graphics.chartcontainer.ChartContainer
                     end % if
                 end % for
             end % if
-            
+
             if ~isempty( obj.BCurveFit ) % Check there is obj.BData_
                 % Invert the curves
                 BCF = obj.BCurveFit;
                 BCF = flipud( BCF );
                 BCF = obj.Quantity2_ - BCF;
-                nCurvesB = size( BCF, 2 );
+                nCurvesB = width( BCF );
                 x = obj.BData_(:, 1);
                 for k = 1:nCurvesB
                     y = BCF(:, k);
-                    if size( obj.BUtilityLines, 1 ) < k
-                        obj.BUtilityLines(k, 1) = line( "Parent", obj.Axes, ...
+                    if height( obj.BUtilityLines ) < k
+                        obj.BUtilityLines(k, 1) = line( ...
+                            "Parent", obj.Axes, ...
                             "XData", x, ...
                             "YData", y, ...
                             "LineStyle", "-",...
@@ -418,27 +442,27 @@ classdef EdgeworthBowleyChart < matlab.graphics.chartcontainer.ChartContainer
                     end % if
                 end % for
             end % if
-            
+
         end % plotFittedCurves
-        
+
         function paretoSet( obj )
             %PARETOSET Obtain the Pareto set from the curves stored in the
             %ACurvedFit and BCurveFit properties and store it in the
             %ParetoSet property.
-            
+
             % Initialize the property.
             obj.ParetoSet = [obj.Quantity1, obj.Quantity2; 0, 0];
-            
+
             % Compute the Pareto set.
             if ~isempty( obj.ACurveFit ) && ~isempty( obj.BCurveFit )
                 Mx = obj.Quantity1;
                 My = obj.Quantity2;
-                for k = 1:size( obj.ACoefficients, 1 )-1
+                for k = 1 : height( obj.ACoefficients ) - 1
                     a1 = obj.ACoefficients(k, 1);
                     a2 = obj.ACoefficients(k, 2);
                     a3 = obj.ACoefficients(k, 3);
                     distance = obj.Quantity1_ * obj.Quantity2_;
-                    for l = 1:size( obj.BCoefficients, 1 )-1
+                    for l = 1:height( obj.BCoefficients )-1
                         b1 = obj.BCoefficients(l, 1);
                         b2 = obj.BCoefficients(l, 2);
                         b3 = obj.BCoefficients(l, 3);
@@ -468,66 +492,66 @@ classdef EdgeworthBowleyChart < matlab.graphics.chartcontainer.ChartContainer
                         obj.ParetoSet = [obj.ParetoSet(1,:); ParetoPoint; obj.ParetoSet(2:end,:)];
                     end % if
                 end % for
-                
+
                 % Smooth the line.
                 queryPoints = 0:0.01:Mx;
                 PS = pchip(obj.ParetoSet(:,1)', obj.ParetoSet(:,2)', queryPoints);
                 obj.ParetoSet = [queryPoints', PS'];
-                
+
             end % if
-            
+
         end % paretoSet
-        
+
         function plotScatter( obj )
             %PLOTSCATTER Visualize the values from AData_ and BData_ to the
             %corresponding chart graphics.
-            
+
             % Reverse the BData matrix.
             BD = obj.BData_;
             BD(:, 2:end) = flipud( BD(:, 2:end) );
             BD(:, 2:end) = obj.Quantity2_ - BD(:, 2:end);
-            ncolsA = size( obj.AData_, 2 );
-            ncolsB = size( obj.BData_, 2 );
+            ncolsA = width( obj.AData_ );
+            ncolsB = width( obj.BData_ );
             if isempty( obj.AData_ )
-                nrows = size( obj.BData_, 1 );
+                nrows = height( obj.BData_ );
             else
-                nrows = size( obj.AData_, 1 );
+                nrows = height( obj.AData_ );
             end % if
-            
+
             y = zeros( nrows*(ncolsA+ncolsB-2), 1 );
             x = zeros( nrows*(ncolsA+ncolsB-2), 1 );
-            
+
             for k = 2:ncolsA
                 x((k-2)*nrows+1:(k-1)*nrows) = obj.AData_(:, 1);
                 y((k-2)*nrows+1:(k-1)*nrows) = obj.AData_(:, k);
             end % for
-            
+
             for k = 2+ncolsB:2*ncolsB
                 x((k-2)*nrows+1:(k-1)*nrows) = obj.BData_(:, 1);
                 y((k-2)*nrows+1:(k-1)*nrows) = BD(:, k-ncolsB);
             end % for
-            
+
             xlim( obj.Axes, [0, obj.Quantity1] )
             ylim( obj.Axes, [0, obj.Quantity2] )
             set( obj.ScatterPoints, "XData", x, "YData", y )
-            
+
         end % plotScatter
-        
+
         function plotPareto( obj )
             %PLOTPARETO Update the contract line using the values from the
             %Pareto set.
-            
+
             if ~isempty( obj.AData_ ) && ~isempty( obj.BData_ ) && ...
                     ~isempty( obj.ParetoSet )
                 x = obj.ParetoSet(:, 1);
                 y = obj.ParetoSet(:, 2);
                 set( obj.ContractLine, "XData", x, "YData", y )
             end % if
-            
+
         end % plotPareto
-        
+
         function truncateAndAssignQ1( obj, Q )
-            
+
             % If Q differs from the current quantity by too large a margin,
             % recall the method with an adjusted value of Q.
             currentQ = obj.Quantity1_;
@@ -536,16 +560,16 @@ classdef EdgeworthBowleyChart < matlab.graphics.chartcontainer.ChartContainer
             elseif (Q-currentQ) < -1
                 truncateAndAssignQ1( obj, Q+1 );
             end % if
-            
+
             % Update the chart's internal data properties.
             currentQ = obj.Quantity1_;
             if Q > currentQ
                 step = diff( obj.AData_(1:2, 1) );
                 num_steps = (Q-currentQ)/step+1;
                 obj.AData_ = [obj.AData_; (currentQ:step:Q)', ...
-                    NaN( num_steps, size( obj.AData_, 2 )-1)];
+                    NaN( num_steps, width( obj.AData_ )-1)];
                 obj.BData_ = [obj.BData_; (currentQ:step:Q)', ...
-                    NaN( num_steps, size( obj.BData_, 2)-1)];
+                    NaN( num_steps, width( obj.BData_ )-1)];
                 obj.ACurveFit = obj.AData(:, 2:end);
                 obj.BCurveFit = obj.BData(:, 2:end);
                 obj.ParetoSet = [0 0; 0 0];
@@ -556,15 +580,15 @@ classdef EdgeworthBowleyChart < matlab.graphics.chartcontainer.ChartContainer
                 obj.BCurveFit = obj.BData(:, 2:end);
                 obj.ParetoSet = [0 0; 0 0];
             end
-            
+
             % Store the quantity and update the Pareto set.
             obj.Quantity1_ = Q;
             obj.ParetoSet(end, 1) = obj.Quantity1_;
-            
+
         end % truncateAndAssignQ1
-        
+
         function truncateAndAssignQ2( obj, Q )
-            
+
             % If Q differs from the current quantity by too large a margin,
             % recall the method with an adjusted value of Q.
             currentQ = obj.Quantity2_;
@@ -573,25 +597,25 @@ classdef EdgeworthBowleyChart < matlab.graphics.chartcontainer.ChartContainer
             elseif (Q-currentQ) < -1
                 truncateAndAssignQ2( obj, Q+1 );
             end % if
-            
+
             % Update the chart's internal data properties.
             % If any Y data is bigger than the maximum quantity
             if Q < currentQ
                 idx = obj.AData_(:, 2:end) > Q;
-                obj.AData_([false( size( idx, 1 ), 1 ), idx]) = NaN;
+                obj.AData_([false( height( idx ), 1 ), idx]) = NaN;
                 idx = obj.BData_(:, 2:end) > Q;
-                obj.BData_([false( size( idx, 1 ), 1 ), idx]) = NaN;
+                obj.BData_([false( height( idx ), 1 ), idx]) = NaN;
                 obj.ACurveFit = obj.AData(:, 2:end);
                 obj.BCurveFit = obj.BData(:, 2:end);
                 obj.ParetoSet = zeros( 2 );
             end % if
-            
+
             % Store the quantity and update the Pareto set.
             obj.Quantity2_ = Q;
             obj.ParetoSet(end, 2) = obj.Quantity2_;
-            
+
         end % truncateAndAssignQ2
-        
+
     end % methods ( Access = private )
-    
-end % class definition
+
+end % classdef

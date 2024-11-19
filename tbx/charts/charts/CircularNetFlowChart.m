@@ -1,99 +1,125 @@
 classdef CircularNetFlowChart < matlab.graphics.chartcontainer.ChartContainer
-    %CIRCULARNETFLOW Illustrates the directed to/from relationships between
-    %pairs of categories.
-    %
-    % Copyright 2018-2022 The MathWorks, Inc.
+    %CIRCULARNETFLOWCHART Illustrates the directed to/from relationships 
+    %between pairs of categories.
+
+    % Copyright 2018-2025 The MathWorks, Inc.
     
     properties ( Dependent )
         % Chart data table.
-        LinkData
+        LinkData(:, :) table {mustBeLinkData}
         % Offset for the outer labels.
-        OuterLabelOffset(1, 1) double {mustBeFinite, mustBePositive} = 35
+        OuterLabelOffset(1, 1) double {mustBeFinite, mustBePositive}
     end % properties ( Dependent )
     
     properties
         % Transparency of the link patches.
-        FaceAlpha(1, 1) double {mustBePositive} = 0.5
+        FaceAlpha(1, 1) double {mustBeInRange( FaceAlpha, 0, 1 )} = 0.5
     end % Public properties
     
     properties ( Dependent, SetAccess = private )
         % Derived net flow, presented as a table.
-        NetFlow
+        NetFlow(:, :) table
         % Net amounts sent.
-        NetSent
+        NetSent(:, :) table
         % Net amounts received.
-        NetReceived
+        NetReceived(:, :) table
         % Chart data labels.
-        Labels
+        Labels(1, :) string
     end % properties ( Dependent, SetAccess = private )
     
     properties ( Dependent, Access = private )
         % Number of sources/sinks.
-        NumSources
+        NumSources(1, 1) double {mustBeInteger, mustBePositive}
         % Row/column indices and values of the positive net flow.
-        PositiveNetFlow
+        PositiveNetFlow(:, 3) double {mustBePositive, mustBeFinite}
         % List of colors used for the various graphics objects.
-        Colors
+        Colors(:, 3) double {mustBeInRange( Colors, 0, 1 )}
         % Colormap used for the patch objects.
-        PatchColormap
+        PatchColormap(:, 3) double {mustBeInRange( PatchColormap, 0, 1 )}
         % Angular positions of the arc endpoints, measured in radians
         % anticlockwise from the easterly direction.
-        AngularPositions
+        AngularPositions(:, 1) double {mustBeReal, mustBeFinite}
         % Sizes of the interior, receiving nodes. These are proportional to
         % the total amount received by each node.
-        NodeSizes
+        NodeSizes(:, 1) double {mustBeNonnegative, mustBeFinite}
         % Angular positions of the nodes.
-        NodePositions
+        NodePositions(:, 1) double {mustBeReal, mustBeFinite}
     end % properties ( Dependent, Access = private )
     
     properties ( Access = private, Transient, NonCopyable )
         % Chart axes.
-        Axes(1, 1) matlab.graphics.axis.Axes
+        Axes(:, 1) matlab.graphics.axis.Axes {mustBeScalarOrEmpty}
         % Circumferential arcs.
-        Arcs
+        Arcs(:, 1) matlab.graphics.primitive.Line
         % Receiving nodes in the interior of the disk.
-        ReceivingNodes
+        ReceivingNodes(:, 1) matlab.graphics.primitive.Line
         % Link patches.
-        LinkPatches
+        LinkPatches(:, 1) matlab.graphics.primitive.Patch
         % Link patch text labels.
-        PatchLabels
+        PatchLabels(:, 1) matlab.graphics.primitive.Text
         % Outer labels for each source.
-        OuterLabels
+        OuterLabels(:, 1) matlab.graphics.primitive.Text
         % Inner labels for each node.
-        NodeLabels
+        NodeLabels(:, 1) matlab.graphics.primitive.Text
     end % properties ( Access = private, Transient, NonCopyable )
     
     properties ( Access = private )
         % Backing property for the chart data table.
-        LinkData_ = table.empty( 0, 0 )
+        LinkData_(:, :) table {mustBeLinkData} = defaultLinkData()
         % Logical scalar specifying whether a computation is required.
-        ComputationRequired = false
-        % Outer radius.
-        OuterRadius = 100
-        % Inner radius.
-        InnerRadius = 30
-        % Scale factor for the inner node sizes.
-        NodeScaleFactor = 200
-        % Number of transition points for interpolated patch shading.
-        NumTransitionPoints = 100
-        % Angular gap size between the outer circular arcs.
-        AngularGap = pi / 400
-        % Offset for the circumferential patch labels.
-        PatchLabelOffset = 10
-        % Patch label font size.
-        PatchLabelFontSize = 0.03
+        ComputationRequired(1, 1) logical = false
         % Backing property for the outer label offset.
-        OuterLabelOffset_ = 35
-        % Outer label font size.
-        OuterLabelFontSize = 0.04
+        OuterLabelOffset_(1, 1) double {mustBePositive, mustBeFinite} = 35
     end % properties ( Access = private )
+
+    properties ( Constant, GetAccess = private )
+        % Outer radius.
+        OuterRadius(1, 1) double {mustBePositive, mustBeFinite} = 100
+        % Inner radius.
+        InnerRadius(1, 1) double {mustBePositive, mustBeFinite} = 30
+        % Scale factor for the inner node sizes.
+        NodeScaleFactor(1, 1) double {mustBePositive, mustBeFinite} = 200
+        % Number of transition points for interpolated patch shading.
+        NumTransitionPoints(1, 1) double ...
+            {mustBeInteger, mustBePositive} = 100
+        % Angular gap size between the outer circular arcs.
+        AngularGap(1, 1) double {mustBePositive, mustBeFinite} = pi / 400
+        % Offset for the circumferential patch labels.
+        PatchLabelOffset(1, 1) double {mustBePositive, mustBeFinite} = 10
+        % Patch label font size.
+        PatchLabelFontSize(1, 1) double ...
+            {mustBeInRange( PatchLabelFontSize, 0, 1 )} = 0.03        
+        % Outer label font size.
+        OuterLabelFontSize(1, 1) double ...
+            {mustBeInRange( OuterLabelFontSize, 0, 1 )} = 0.04
+    end % properties ( Constant, GetAccess = private )
     
     properties ( Constant, Hidden )
         % Product dependencies.
-        Dependencies = "MATLAB"
+        Dependencies(1, :) string = "MATLAB"
     end % properties ( Constant, Hidden )
     
     methods
+
+        function obj = CircularNetFlowChart( namedArgs )
+            %CIRCULARNETFLOWCHART Construct a CircularNetFlowChart, given
+            %optional name-value arguments.
+
+            arguments ( Input )
+                namedArgs.?CircularNetFlowChart
+            end % arguments ( Input )
+
+            % Call the superclass constructor.
+            f = figure( "Visible", "off" );
+            figureCleanup = onCleanup( @() delete( f ) );
+            obj@matlab.graphics.chartcontainer.ChartContainer( ...
+                "Parent", f )
+            obj.Parent = [];
+
+            % Set any user-defined properties.
+            set( obj, namedArgs )
+
+        end % constructor
         
         function value = get.LinkData( obj )
             
@@ -104,25 +130,7 @@ classdef CircularNetFlowChart < matlab.graphics.chartcontainer.ChartContainer
         function set.LinkData( obj, value )
             
             % Mark the chart for an update.
-            obj.ComputationRequired = true;
-            
-            % Check the proposed chart data.
-            validateattributes( value, "table", ["square", "nonempty"], ...
-                "CircularNetFlow", "the link data table" )
-            try
-                A = value{:, :};
-            catch MExc
-                M = MException( MExc.identifier, ...
-                    "Table data cannot be concatenated into a matrix." );
-                throw( M )
-            end % try/catch
-            
-            validateattributes( A, "double", ...
-                ["real", "square", "finite", "nonnegative"], ...
-                "CircularNetFlow", "the link data matrix" )
-            d = diag( A );
-            assert( ~any( d ), "CircularNetFlow:InvalidLinkData", ...
-                "Diagonal elements of the link data must be zero." )
+            obj.ComputationRequired = true;            
             
             % Set the internal data property.
             obj.LinkData_ = value;
@@ -131,7 +139,7 @@ classdef CircularNetFlowChart < matlab.graphics.chartcontainer.ChartContainer
         
         function value = get.Labels( obj )
             
-            value = obj.LinkData_.Properties.VariableNames;
+            value = string( obj.LinkData_.Properties.VariableNames );
             
         end % get.Labels
         
@@ -145,10 +153,11 @@ classdef CircularNetFlowChart < matlab.graphics.chartcontainer.ChartContainer
             
             % Update the internal property.
             obj.OuterLabelOffset_ = value;
+
             % Reposition the outer labels.
             [outerLabelX, outerLabelY] = pol2cart( obj.NodePositions, ...
                 obj.OuterRadius + obj.OuterLabelOffset );
-            for k = 1:obj.NumSources
+            for k = 1 : obj.NumSources
                 set( obj.OuterLabels(k), "Position", ...
                     [outerLabelX(k), outerLabelY(k), 0] )
             end % for
@@ -162,11 +171,14 @@ classdef CircularNetFlowChart < matlab.graphics.chartcontainer.ChartContainer
             d = obj.LinkData{:, :};
             flowFromSource = tril( d );
             flowFromSink = triu( d );
+
             % Compute the net flow, as an upper triangular matrix.
             netflow = flowFromSink - flowFromSource.';
+            
             % Ensure the net flow matrix is skew-symmetric, i.e., populate
             % the lower triangular part.
             netflow = netflow - triu( netflow ).';
+            
             % Tabulate the result.
             value = array2table( netflow, "VariableNames", obj.Labels, ...
                 "RowNames", obj.Labels );
@@ -194,7 +206,7 @@ classdef CircularNetFlowChart < matlab.graphics.chartcontainer.ChartContainer
         
         function value = get.NumSources( obj )
             
-            value = size( obj.LinkData, 1 );
+            value = height( obj.LinkData );
             
         end % get.NumSources
         
@@ -214,9 +226,10 @@ classdef CircularNetFlowChart < matlab.graphics.chartcontainer.ChartContainer
             
             % Default list of colors used for plotting.
             value = obj.Axes.ColorOrder;
+
             % Interpolate this list to produce the required number of
             % colors.
-            colIdx = 1:size( value, 1 );
+            colIdx = 1 : height( value );
             colQueryIdx = linspace( 1, colIdx(end), obj.NumSources );
             value = interp1( colIdx, value, colQueryIdx );
             
@@ -229,18 +242,18 @@ classdef CircularNetFlowChart < matlab.graphics.chartcontainer.ChartContainer
             % contributes NumTransitionPoints rows to the overall patch
             % colormap.
             N = obj.NumTransitionPoints;
-            numPosFlow = size( obj.PositiveNetFlow, 1 );
+            numPosFlow = height( obj.PositiveNetFlow );
             value = NaN( N * numPosFlow, 3 );
             for k = 1 : numPosFlow
                 % For each patch, create a smooth transition from the
                 % source color to the sink color. Vertically concatenate
                 % the results in the overall patch colormap.
-                sourceColor = obj.Colors( obj.PositiveNetFlow(k, 1), : );
-                sinkColor = obj.Colors( obj.PositiveNetFlow(k, 2), : );
+                sourceColor = obj.Colors(obj.PositiveNetFlow(k, 1), :);
+                sinkColor = obj.Colors(obj.PositiveNetFlow(k, 2), :);
                 transitionMap = ...
-                    [linspace(sourceColor(1), sinkColor(1), N).', ...
-                    linspace(sourceColor(2), sinkColor(2), N).', ...
-                    linspace(sourceColor(3), sinkColor(3), N).'];
+                    [linspace( sourceColor(1), sinkColor(1), N ).', ...
+                    linspace( sourceColor(2), sinkColor(2), N ).', ...
+                    linspace( sourceColor(3), sinkColor(3), N ).'];
                 value((N * (k-1) + 1) : N * k, :) = transitionMap;
             end % for
             
@@ -306,15 +319,16 @@ classdef CircularNetFlowChart < matlab.graphics.chartcontainer.ChartContainer
                 % Create the chart graphics.
                 % First, draw the circumferential arcs.
                 hold( obj.Axes, "on" )
-                for k = obj.NumSources:-1:1
-                    theta(:, k) = ...
-                        linspace( obj.AngularPositions(k) + obj.AngularGap, ...
+                for k = obj.NumSources : -1 : 1
+                    theta(:, k) = linspace( ...
+                        obj.AngularPositions(k) + obj.AngularGap, ...
                         obj.AngularPositions(k+1) - obj.AngularGap );
                 end % for
                 rho = obj.OuterRadius * ones( size( theta ) );
                 [X, Y] = pol2cart( theta, rho );
-                obj.Arcs = gobjects( obj.NumSources, 1 );
-                for k = 1:obj.NumSources
+                delete( obj.Arcs )
+                obj.Arcs = matlab.graphics.primitive.Line.empty( 0, 1 );
+                for k = 1 : obj.NumSources
                     obj.Arcs(k) = line( "Parent", obj.Axes, ...
                         "XData", X(:, k), ...
                         "YData", Y(:, k), ...
@@ -326,8 +340,10 @@ classdef CircularNetFlowChart < matlab.graphics.chartcontainer.ChartContainer
                 % disk.
                 [nodeX, nodeY] = ...
                     pol2cart( obj.NodePositions, obj.InnerRadius );
-                obj.ReceivingNodes = gobjects( obj.NumSources, 1 );
-                for k = 1:obj.NumSources
+                delete( obj.ReceivingNodes )
+                obj.ReceivingNodes = ...
+                    matlab.graphics.primitive.Line.empty( 0, 1 );
+                for k = 1 : obj.NumSources
                     obj.ReceivingNodes(k) = line( "Parent", obj.Axes, ...
                         "XData", nodeX(k), ...
                         "YData", nodeY(k), ...
@@ -341,18 +357,26 @@ classdef CircularNetFlowChart < matlab.graphics.chartcontainer.ChartContainer
                 % transitions for each patch, we need to set the axes
                 % colormap.
                 colormap( obj.Axes, obj.PatchColormap )
+
                 % Compute the angular differences, including the gap sizes.
                 dtheta = diff( obj.AngularPositions ) - 2 * obj.AngularGap;
+                
                 % Compute the angular starting positions.
                 thetaStart = ...
                     obj.AngularPositions(1:end-1) + obj.AngularGap;
+                
                 % Extract parameters required for the loop.
                 pnf = obj.PositiveNetFlow;
                 N = obj.NumTransitionPoints;
-                numPosFlow = size( pnf, 1 );
-                % Preallocate.
-                obj.LinkPatches = gobjects( numPosFlow, 1 );
-                obj.PatchLabels = gobjects( numPosFlow, 1 );
+                numPosFlow = height( pnf );
+                
+                % Prepare the patches and labels.
+                delete( obj.LinkPatches )
+                obj.LinkPatches = ...
+                    matlab.graphics.primitive.Patch.empty( 0, 1 );
+                delete( obj.PatchLabels )
+                obj.PatchLabels = ...
+                    matlab.graphics.primitive.Text.empty( 0, 1 );
                 for k = 1 : numPosFlow
                     % Compute the proportion of each circumferential arc to
                     % use as the base of the patch.
@@ -418,8 +442,10 @@ classdef CircularNetFlowChart < matlab.graphics.chartcontainer.ChartContainer
                 [outerLabelX, outerLabelY] = ...
                     pol2cart( obj.NodePositions, ...
                     obj.OuterRadius + obj.OuterLabelOffset );
-                obj.OuterLabels = gobjects( obj.NumSources, 1 );
-                for k = 1:obj.NumSources
+                delete( obj.OuterLabels )
+                obj.OuterLabels = ...
+                    matlab.graphics.primitive.Text.empty( 0, 1 );
+                for k = 1 : obj.NumSources
                     % Form the outer label text from the user-provided text
                     % label and the net sent amounts.
                     s = obj.Labels{k} + " (" + ...
@@ -443,14 +469,15 @@ classdef CircularNetFlowChart < matlab.graphics.chartcontainer.ChartContainer
                 nodeLabelFontSize = 0.03 + 0.02 * ...
                     (obj.NodeSizes - min( obj.NodeSizes )) / ...
                     (max( obj.NodeSizes ) - min( obj.NodeSizes ));
-                obj.NodeLabels = gobjects( obj.NumSources, 1 );
-                for k = 1:obj.NumSources
+                delete( obj.NodeLabels )
+                obj.NodeLabels = ...
+                    matlab.graphics.primitive.Text.empty( 0, 1 );
+                for k = 1 : obj.NumSources
                     obj.NodeLabels(k) = text( obj.Axes, ...
                         nodeX(k), ...
                         nodeY(k), ...
                         netReceivedText(k, :), ...
-                        "FontWeight", "bold", ...
-                        "Color", 0.1 * ones( 1, 3 ), ...
+                        "FontWeight", "bold", ...                        
                         "HorizontalAlignment", "center", ...
                         "VerticalAlignment", "middle", ...
                         "FontUnits", "normalized", ...
@@ -484,4 +511,40 @@ classdef CircularNetFlowChart < matlab.graphics.chartcontainer.ChartContainer
         
     end % methods ( Access = protected )
     
-end % class definition
+end % classdef
+
+function mustBeLinkData( t )
+%MUSTBELINKDATA Validate that the given table, t, contains link data.
+
+% Check that the table is nonempty and square.
+mustBeNonempty( t )
+assert( height( t ) == width( t ), ...
+    "CircularNetFlowChart:NonSquareData", ...
+    "The link data table must be square." )
+
+% Check that the variables are of type double.
+variableTypes = varfun( @class, t, "OutputFormat",  "cell" );
+assert( all( variableTypes == "double" ), ...
+    "CircularNetFlowChart:NonDoubleData", ...
+    "All link data table variables must be of type double." )
+
+% Check that the values are nonnegative and finite.
+linkData = t.Variables;
+mustBeNonnegative( linkData )
+mustBeFinite( linkData )
+
+% Check that the diagonal elements are zero.
+linkDiag = diag( linkData );
+assert( all( linkDiag == 0 ), ...
+    "CircularNetFlowChart:NonZeroDiagonal", ...
+    "All diagonal elements of the link data must be zero." )
+
+end % mustBeLinkData
+
+function t = defaultLinkData()
+%DEFAULTLINKDATA Create a default link data table, t.
+
+X = 0;
+t = table( X );
+
+end % defaultLinkData

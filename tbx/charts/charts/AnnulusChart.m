@@ -5,51 +5,52 @@ classdef AnnulusChart < matlab.ui.componentcontainer.ComponentContainer
    
     properties ( AbortSet, Dependent )        
         % Specifies whether all the annulus' wedges are exploded.
-        Exploded(1, 1) matlab.lang.OnOffSwitchState = "off"
+        Exploded(1, 1) matlab.lang.OnOffSwitchState
         % Specifies whether percentages are shown on the labels.
-        LabelPercentages(1, 1) matlab.lang.OnOffSwitchState = "on"
+        LabelPercentages(1, 1) matlab.lang.OnOffSwitchState
         % Specifies whether percentages are shown in the legend.
-        LegendPercentages(1, 1) matlab.lang.OnOffSwitchState = "off"
+        LegendPercentages(1, 1) matlab.lang.OnOffSwitchState
     end % properties ( AbortSet, Dependent )
     
     properties ( Dependent )
         % Chart data, comprising a positive vector.
-        Data(:, 1) double {mustBeNonempty, mustBePositive} = 1
+        Data(:, 1) double {mustBeNonempty, mustBePositive}
         % Wedge label text.
-        LabelText(:, 1) string = string.empty( 0, 1 )
+        LabelText(:, 1) string
         % Visibility of the wedge labels.
-        VisibleLabels(1, 1) matlab.lang.OnOffSwitchState = "on"
+        VisibleLabels(1, 1) matlab.lang.OnOffSwitchState
         % Wedge label font size.
-        LabelFontSize(1, 1) double {mustBePositive, mustBeFinite} = 9
+        LabelFontSize(1, 1) double {mustBePositive, mustBeFinite}
         % Wedge face colors.
-        FaceColor(:, 3) double {mustBeInRange( FaceColor, 0, 1 )}
+        FaceColor
         % Legend text.
-        LegendText(:, 1) string = string.empty( 0, 1 )
+        LegendText(:, 1) string
         % Legend color.
         LegendColor
         % Legend location.
-        LegendLocation(1, 1) string = ""
+        LegendLocation(1, 1) string
         % Number of columns in the legend.
-        LegendNumColumns(1, 1) double {mustBeInteger, mustBePositive} = 1
+        LegendNumColumns(1, 1) double {mustBeInteger, mustBePositive}
         % Legend orientation.
         LegendOrientation(1, 1) string ...
             {mustBeMember( LegendOrientation, ...
-            ["vertical", "horizontal"] )} = "vertical"
+            ["vertical", "horizontal"] )}
         % Legend title.
-        LegendTitle(1, 1) string = ""
+        LegendTitle(1, 1) string
         % Visibility of the chart legend.
-        LegendVisible(1, 1) matlab.lang.OnOffSwitchState = "on"
+        LegendVisible(1, 1) matlab.lang.OnOffSwitchState
         % Font size used in the legend.
-        LegendFontSize(1, 1) double {mustBePositive, mustBeFinite} = 9
+        LegendFontSize(1, 1) double {mustBePositive, mustBeFinite}
         % Box property of the legend.
-        LegendBox(1, 1) matlab.lang.OnOffSwitchState = "on"
+        LegendBox(1, 1) matlab.lang.OnOffSwitchState
         % Chart controls.
-        Controls(1, 1) matlab.lang.OnOffSwitchState = "off"
+        Controls(1, 1) matlab.lang.OnOffSwitchState
     end % properties ( Dependent )
     
     properties ( Dependent, SetAccess = private )
         % Chart data, in percentage form.
-        DataPercentages
+        DataPercentages(:, 1) double {mustBeNonempty, ...
+            mustBeInRange( DataPercentages, 0, 100 )}
     end % properties ( Dependent, SetAccess = private )
     
     properties ( Access = private )
@@ -161,13 +162,15 @@ classdef AnnulusChart < matlab.ui.componentcontainer.ComponentContainer
         function set.LabelText( obj, value )
             
             % Check that we have the right number of strings.
-            assert( length( value ) == length( obj.Data_ ), ...
+            assert( numel( value ) == numel( obj.Data_ ), ...
                 "AnnulusChart:LabelTextLengthMismatch", ...
                 "The number of labels must match the number " + ...
                 "of data values." )
+            
             % Update the internal, stored property.
             obj.LabelText_ = value;
             drawnow()
+            
             % Update the legend and label text.
             obj.updateWedgeLabels()
             obj.updateLegend()
@@ -181,6 +184,7 @@ classdef AnnulusChart < matlab.ui.componentcontainer.ComponentContainer
             else
                 value = obj.WedgeLabels(1).Visible;
             end % if
+            
             value = matlab.lang.OnOffSwitchState( value );
             
         end % get.VisibleLabels
@@ -189,6 +193,7 @@ classdef AnnulusChart < matlab.ui.componentcontainer.ComponentContainer
             
             % Update the wedge labels.
             set( obj.WedgeLabels, "Visible", value )
+            
             % Update the contros.
             obj.VisibleLabelsCheckBox.Value = value;
             
@@ -216,8 +221,10 @@ classdef AnnulusChart < matlab.ui.componentcontainer.ComponentContainer
             
             % Update the internal stored value.
             obj.LabelPercentages_ = value;
+            
             % Update the control.
             obj.LabelPercentagesCheckBox.Value = value;
+            
             % Update the label text.
             obj.updateWedgeLabels()
             
@@ -244,18 +251,18 @@ classdef AnnulusChart < matlab.ui.componentcontainer.ComponentContainer
                 obj.WedgeExpanded(expandedWedgesIdx) = false;
                 obj.moveWedge( expandedWedgesIdx )
                 % Mark all wedges for explosion.
-                obj.WedgeExpanded = true( 1, length( obj.Data_ ) );
+                obj.WedgeExpanded = true( 1, numel( obj.Data_ ) );
             else
                 % Expand any previously retracted wedges.
                 retractedWedgesIdx = find( ~obj.WedgeExpanded );
                 obj.WedgeExpanded(retractedWedgesIdx) = true;
                 obj.moveWedge( retractedWedgesIdx )
                 % Mark all wedges for retraction.
-                obj.WedgeExpanded = false( 1, length( obj.Data_ ) );
+                obj.WedgeExpanded = false( 1, numel( obj.Data_ ) );
             end % if
             
             % Explode/retract the wedges.
-            obj.moveWedge( 1:length( obj.Data_ ) )
+            obj.moveWedge( 1:numel( obj.Data_ ) )
             
         end % set.Exploded
         
@@ -267,7 +274,8 @@ classdef AnnulusChart < matlab.ui.componentcontainer.ComponentContainer
         end % get.FaceColor
         
         function set.FaceColor( obj, value )
-            
+
+            value = validatecolor( value, "multiple" );            
             obj.updateColors( value )
             
         end % set.FaceColor
@@ -281,13 +289,15 @@ classdef AnnulusChart < matlab.ui.componentcontainer.ComponentContainer
         function set.LegendText( obj, value )
             
             % Check that we have the right number of strings.
-            assert( length( value ) == length( obj.Data_ ), ...
+            assert( numel( value ) == numel( obj.Data_ ), ...
                 "AnnulusChart:LegendTextLengthMismatch", ...
                 "The number of legend entries must match the number " + ...
                 "of data values." )
+            
             % Store the internal value.
             obj.LegendText_ = value;
             drawnow()
+            
             % Update the legend.
             obj.updateLegend()
             
@@ -300,7 +310,10 @@ classdef AnnulusChart < matlab.ui.componentcontainer.ComponentContainer
         end % get.LegendColor
         
         function set.LegendColor( obj, value )
-            
+
+            if ~isequal( value, "none" )
+                value = validatecolor( value, "one" );
+            end % if
             obj.Legend.Color = value;
             
         end % set.LegendColor
@@ -315,6 +328,7 @@ classdef AnnulusChart < matlab.ui.componentcontainer.ComponentContainer
             
             % Update the legend.
             obj.Legend.Location = value;
+            
             % Update the control.
             obj.LegendLocationDropDown.Value = value;
             
@@ -330,6 +344,7 @@ classdef AnnulusChart < matlab.ui.componentcontainer.ComponentContainer
             
             % Update the legend.
             obj.Legend.NumColumns = value;
+            
             % Update the control.
             obj.LegendNumColumnsSpinner.Value = value;
             
@@ -345,6 +360,7 @@ classdef AnnulusChart < matlab.ui.componentcontainer.ComponentContainer
             
             % Update the legend.
             obj.Legend.Orientation = value;
+            
             % Update the control.
             obj.LegendOrientationDropDown.Value = value;
             
@@ -372,8 +388,10 @@ classdef AnnulusChart < matlab.ui.componentcontainer.ComponentContainer
             
             % Store the internal value.
             obj.LegendPercentages_ = value;
+            
             % Update the control.
             obj.LegendPercentagesCheckBox.Value = value;
+            
             % Update the legend.
             obj.updateLegend()
             
@@ -389,6 +407,7 @@ classdef AnnulusChart < matlab.ui.componentcontainer.ComponentContainer
             
             % Update the legend.
             obj.Legend.Visible = value;
+            
             % Update the control.
             obj.LegendVisibleCheckBox.Value = value;
             
@@ -416,6 +435,7 @@ classdef AnnulusChart < matlab.ui.componentcontainer.ComponentContainer
             
             % Update the legend.
             obj.Legend.Box = value;
+            
             % Update the control.
             obj.LegendBoxCheckBox.Value = value;
             
@@ -476,8 +496,9 @@ classdef AnnulusChart < matlab.ui.componentcontainer.ComponentContainer
             
             % Call the view function on the chart's axes.
             [varargout{1:nargout}] = view( obj.Axes, varargin{:} );
+            
             % Update the wedge label positions.
-            obj.updateLabelPositions( 1:length( obj.Data_ ) )
+            obj.updateLabelPositions( 1:numel( obj.Data_ ) )
             
         end % view
         
@@ -486,8 +507,9 @@ classdef AnnulusChart < matlab.ui.componentcontainer.ComponentContainer
             
             % Reset the view.
             view( obj.Axes, [0, 50] )
+
             % Update the label positions.
-            obj.updateLabelPositions( 1:length( obj.Data_ ) )
+            obj.updateLabelPositions( 1:numel( obj.Data_ ) )
             
         end % resetView
         
@@ -915,7 +937,7 @@ classdef AnnulusChart < matlab.ui.componentcontainer.ComponentContainer
             sgn = -1 + 2 * obj.WedgeExpanded(wedgeIdx);
             
             % Loop over the wedges to move.
-            for w = 1:length( wedgeIdx )
+            for w = 1:numel( wedgeIdx )
                 
                 % Compute the average angle within the angular span.
                 averageAngle = 0.5 * (...
@@ -973,7 +995,7 @@ classdef AnnulusChart < matlab.ui.componentcontainer.ComponentContainer
             %legend items.
             
             % Loop over the number of wedges/labels/legend items.
-            for k = 1:length( obj.Data_ )
+            for k = 1:numel( obj.Data_ )
                 % Use a darker shade for each text label compared to its
                 % associated wedge.
                 obj.WedgeLabels(k).Color = 0.5 * colors(k, :);
@@ -1002,4 +1024,4 @@ classdef AnnulusChart < matlab.ui.componentcontainer.ComponentContainer
         
     end % methods ( Access = private )
     
-end % class definition
+end % classdef

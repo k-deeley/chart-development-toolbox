@@ -1,14 +1,14 @@
 classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
-    %VALUEATRISK Chart displaying the distribution of a return series
+    %VALUEATRISKCHART Chart displaying the distribution of a return series
     %together with value at risk metrics and a distribution fit.
-    %
-    % Copyright 2018-2022 The MathWorks, Inc.
-    
+
+    % Copyright 2018-2025 The MathWorks, Inc.
+
     properties ( Dependent )
         % Underlying data for the chart, typically a series of returns.
         Data(:, 1) double {mustBeReal, mustBeNonempty, mustBeFinite} = 0
     end % properties ( Dependent )
-    
+
     properties ( Dependent, AbortSet )
         % Value at risk level, used for both the VaR and CVaR metrics.
         VaRLevel(1, 1) double {mustBeReal, ...
@@ -18,14 +18,14 @@ classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
             {mustBeMember( DistributionName, ["Kernel", "Normal", ...
             "Logistic", "tLocationScale"] )} = "Kernel"
     end % properties ( Dependent, AbortSet )
-    
+
     properties
         % Axes x-grid.
         XGrid = "on"
         % Axes y-grid.
         YGrid = "on"
     end % properties
-    
+
     properties ( Dependent )
         % Visibility of the PDF of the distribution fit.
         FittedPDFVisible(1, 1) matlab.lang.OnOffSwitchState
@@ -44,7 +44,7 @@ classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
         % Visibility of the chart controls.
         Controls(1, 1) matlab.lang.OnOffSwitchState
     end % properties ( Dependent )
-    
+
     properties ( Access = private )
         % Internal storage for the chart's data.
         Data_ = 0
@@ -55,7 +55,7 @@ classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
         % Logical vector specifying whether computations are required.
         ComputationRequired = false( 1, 2 )
     end % properties ( Access = private )
-    
+
     properties ( Access = private, Transient, NonCopyable )
         % Chart layout.
         LayoutGrid(1, 1) matlab.ui.container.GridLayout
@@ -81,30 +81,30 @@ classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
         CVaRLineCheckBox(1, 1) matlab.ui.control.CheckBox
         % Spinner to control the histogram's EdgeAlpha property.
         EdgeAlphaSpinner(1, 1) matlab.ui.control.Spinner
-        % Pushbutton for selecting the histogram EdgeColor.
-        EdgeColorButton(1, 1) matlab.ui.control.Button
+        % Color picker for selecting the histogram EdgeColor.
+        EdgeColorPicker(1, 1) matlab.ui.control.ColorPicker
         % Spinner to control the histogram's FaceAlpha property.
         FaceAlphaSpinner(1, 1) matlab.ui.control.Spinner
-        % Pushbutton for selecting the histogram FaceColor.
-        FaceColorButton(1, 1) matlab.ui.control.Button
+        % Color picker for selecting the histogram FaceColor.
+        FaceColorPicker(1, 1) matlab.ui.control.ColorPicker
     end % properties ( Access = private, Transient, NonCopyable )
-    
+
     properties ( Constant, Hidden )
         % Product dependencies.
-        Dependencies = ["MATLAB", ...
+        Dependencies(1, :) string = ["MATLAB", ...
             "Statistics and Machine Learning Toolbox"]
     end % properties ( Constant, Hidden )
-    
+
     methods
-        
+
         function value = get.Data( obj )
-            
+
             value = obj.Data_;
-            
+
         end % get.Data
-        
+
         function set.Data( obj, value )
-            
+
             % Use fitdist to validate that the proposed data is acceptable.
             % Exit without updating if anything is wrong with the data
             % (this is distribution-dependent).
@@ -113,223 +113,213 @@ classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
             catch e
                 throw( e )
             end % try/catch
-            
+
             obj.Data_ = value;
             obj.ComputationRequired(1) = true;
-            
+
         end % set.Data
-        
+
         function value = get.VaRLevel( obj )
-            
+
             value = obj.VaRLevel_;
-            
+
         end % get.VaRLevel
-        
+
         function set.VaRLevel( obj, value )
-            
+
             obj.VaRLevel_ = value;
             obj.ComputationRequired(2) = true;
-            
+
         end % set.VaRLevel
-        
+
         function value = get.DistributionName( obj )
-            
+
             value = obj.DistributionName_;
-            
+
         end % get.DistributionName
-        
+
         function set.DistributionName( obj, value )
-            
+
             % Update the stored property and the dropdown control.
             obj.DistributionName_ = value;
             obj.DistributionDropDown.Value = value;
+
             % Mark the chart for an update.
             obj.ComputationRequired(1) = true;
-            
+
         end % set.DistributionName
-        
+
         function value = get.FittedPDFVisible( obj )
-            
+
             value = obj.FittedPDF.Visible;
-            
+
         end % get.FittedPDFVisible
-        
+
         function set.FittedPDFVisible( obj, value )
-            
+
             obj.FittedPDF.Visible = value;
             obj.FittedPDFCheckBox.Value = value;
-            
+
         end % set.FittedPDFVisible
-        
+
         function value = get.VaRLineVisible( obj )
-            
+
             value = obj.VaRLine.Visible;
-            
+
         end % get.VaRLineVisible
-        
+
         function set.VaRLineVisible( obj, value )
-            
+
             obj.VaRLine.Visible = value;
             obj.VaRLineCheckBox.Value = value;
-            
+
         end % set.VaRLineVisible
-        
+
         function value = get.CVaRLineVisible( obj )
-            
+
             value = obj.CVaRLine.Visible;
-            
+
         end % get.CVaRLineVisible
-        
+
         function set.CVaRLineVisible( obj, value )
-            
+
             obj.CVaRLine.Visible = value;
             obj.CVaRLineCheckBox.Value = value;
-            
+
         end % set.CVaRLineVisible
-        
+
         function value = get.EdgeAlpha( obj )
-            
+
             value = obj.Histogram.EdgeAlpha;
-            
+
         end % get.EdgeAlpha
-        
+
         function set.EdgeAlpha( obj, value )
-            
+
             % Update the spinner control.
             obj.EdgeAlphaSpinner.Value = value;
             % Update the histogram.
             obj.Histogram.EdgeAlpha = value;
-            
+
         end % set.EdgeAlpha
-        
+
         function value = get.EdgeColor( obj )
-            
+
             value = obj.Histogram.EdgeColor;
-            
+
         end % get.EdgeColor
-        
+
         function set.EdgeColor( obj, value )
-            
-            % Deal with the "none" and "auto" options.
-            assert( ~(isequal( value, "none" ) || ...
-                isequal( value, "auto" )), ...
-                "ValueAtRisk:UnsupportedEdgeColor", ...
-                "The 'none' and 'auto' color options are not supported." )
-            
+
             % Update the histogram.
+            value = validatecolor( value );
             obj.Histogram.EdgeColor = value;
-            
-            % Update the color selection button.
-            edgeColor = reshape( obj.EdgeColor, [1, 1, 3] );
-            obj.EdgeColorButton.Icon = repmat( edgeColor, [15, 15] );
-            
+
+            % Update the color picker.
+            obj.EdgeColorPicker.Value = value;
+
         end % set.EdgeColor
-        
+
         function value = get.FaceAlpha( obj )
-            
+
             value = obj.Histogram.FaceAlpha;
-            
+
         end % get.FaceAlpha
-        
+
         function set.FaceAlpha( obj, value )
-            
+
             % Update the spinner control.
             obj.FaceAlphaSpinner.Value = value;
+
             % Update the histogram.
             obj.Histogram.FaceAlpha = value;
-            
+
         end % set.FaceAlpha
-        
+
         function value = get.FaceColor( obj )
-            
+
             value = obj.Histogram.FaceColor;
-            
+
         end % get.FaceColor
-        
+
         function set.FaceColor( obj, value )
-            
-            % Deal with the "none" and "auto" options.
-            assert( ~(isequal( value, "none" ) || ...
-                isequal( value, "auto" )), ...
-                "ValueAtRisk:UnsupportedFaceColor", ...
-                "The 'none' and 'auto' color options are not supported." )
-            
+
             % Update the histogram.
+            value = validatecolor( value );
             obj.Histogram.FaceColor = value;
-            
-            % Update the color selection button.
-            faceColor = reshape( obj.FaceColor, [1, 1, 3] );
-            obj.FaceColorButton.Icon = repmat( faceColor, [15, 15] );
-            
+
+            % Update the color picker.
+            obj.FaceColorPicker.Value = value;
+
         end % set.FaceColor
-        
+
         function value = get.Controls( obj )
-            
+
             value = obj.ToggleButton.Value;
-            
+
         end % get.Controls
-        
+
         function set.Controls( obj, value )
-            
+
             % Update the toggle button.
             obj.ToggleButton.Value = value;
             % Invoke the toggle button callback.
             obj.onToggleButtonPressed()
-            
+
         end % set.Controls
-        
+
     end % methods
-    
+
     methods
-        
+
         function varargout = xlabel( obj, varargin )
-            
+
             [varargout{1:nargout}] = xlabel( obj.Axes, varargin{:} );
-            
+
         end % xlabel
-        
+
         function varargout = ylabel( obj, varargin )
-            
+
             [varargout{1:nargout}] = ylabel( obj.Axes, varargin{:} );
-            
+
         end % ylabel
-        
+
         function varargout = title( obj, varargin )
-            
+
             [varargout{1:nargout}] = title( obj.Axes, varargin{:} );
-            
+
         end % title
-        
+
         function grid( obj, varargin )
-            
+
             % Invoke grid on the axes.
             grid( obj.Axes, varargin{:} )
             % Update the chart's grid properties.
             obj.XGrid = obj.Axes.XGrid;
             obj.YGrid = obj.Axes.YGrid;
-            
+
         end % grid
-        
+
         function varargout = legend( obj, varargin )
-            
+
             [varargout{1:nargout}] = legend( obj.Axes, varargin{:} );
-            
+
         end % legend
-        
+
     end % methods
-    
+
     methods ( Access = protected )
-        
+
         function setup( obj )
             %SETUP Initialize the chart graphics.
-            
+
             % Define the layout grid.
             obj.LayoutGrid = uigridlayout( obj, [1, 2], ...
                 "ColumnWidth", ["1x", "fit"] );
-            
-            % Create the chart's axes.            
+
+            % Create the chart's axes.
             obj.Axes = axes( "Parent", obj.LayoutGrid );
-            
+
             % Add a state button to show/hide the chart's controls.
             tb = axtoolbar( obj.Axes, "default" );
             obj.ToggleButton = axtoolbarbtn( tb, "state", ...
@@ -337,13 +327,13 @@ classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
                 "Tooltip", "Hide chart controls", ...
                 "Icon", "Cog.png", ...
                 "ValueChangedFcn", @obj.onToggleButtonPressed );
-            
+
             % Create the histogram.
             hold( obj.Axes, "on" )
             obj.Histogram = histogram( obj.Axes, NaN, ...
                 "FaceColor", obj.Axes.ColorOrder(1, :), ...
                 "Normalization", "pdf" );
-            
+
             % Overlay the density on the histogram.
             c = obj.Axes.ColorOrder;
             obj.FittedPDF = line( "Parent", obj.Axes, ...
@@ -351,20 +341,20 @@ classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
                 "YData", NaN, ...
                 "LineWidth", 2.5, ...
                 "Color", c(2, :) );
-            
+
             % Overlay the VaR lines.
             obj.VaRLine = xline( obj.Axes, 0, "m", "LineWidth", 2, ...
                 "LabelHorizontalAlignment", "left" );
             obj.CVaRLine = xline( obj.Axes, 0, "r", "LineWidth", 2, ...
                 "LabelHorizontalAlignment", "left" );
-            
+
             % Annotate the axes and add the legend.
             xlabel( obj.Axes, "Data" )
             ylabel( obj.Axes, "Probability density" )
-            title( obj.Axes, "ValueAtRisk Chart" )            
+            title( obj.Axes, "ValueAtRisk Chart" )
             legend( obj.Axes, ["Data", "Fit", "VaR", "CVaR"] )
             hold( obj.Axes, "off" )
-            
+
             % Add the chart controls. Start with the control panel and its
             % main layout grid.
             p = uipanel( "Parent", obj.LayoutGrid, ...
@@ -414,14 +404,11 @@ classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
                 "RowHeight", repmat( "fit", 4, 1 ), ...
                 "ColumnWidth", ["fit", "1x"] );
             % Add controls for the edge and face transparency and color.
-            edgeColor = reshape( obj.EdgeColor, [1, 1, 3] );
-            obj.EdgeColorButton = uibutton( "Parent", g, ...
-                "Text", "Edge color", ...
+            obj.EdgeColorPicker = uicolorpicker( "Parent", g, ...
                 "Tooltip", "Select the histogram edge color", ...
-                "Icon", repmat( edgeColor, [15, 15] ), ...
-                "IconAlignment", "right", ...
-                "ButtonPushedFcn", @obj.onEdgeColorSelected );
-            obj.EdgeColorButton.Layout.Column = [1, 2];
+                "Value", obj.EdgeColor, ...
+                "ValueChangedFcn", @obj.onEdgeColorPicked );
+            obj.EdgeColorPicker.Layout.Column = [1, 2];
             uilabel( g, "Text", "Edge alpha:", ...
                 "HorizontalAlignment", "right" );
             obj.EdgeAlphaSpinner = uispinner( g, ...
@@ -430,14 +417,11 @@ classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
                 "Limits", [0, 1], ...
                 "Step", 0.1, ...
                 "ValueChangedFcn", @obj.onEdgeAlphaSelected );
-            faceColor = reshape( obj.FaceColor, [1, 1, 3] );
-            obj.FaceColorButton = uibutton( "Parent", g, ...
-                "Text", "Face color", ...
+            obj.FaceColorPicker = uicolorpicker( "Parent", g, ...
+                "Value", obj.FaceColor, ...
                 "Tooltip", "Select the histogram face color", ...
-                "Icon", repmat( faceColor, [15, 15] ), ...
-                "IconAlignment", "right", ...
-                "ButtonPushedFcn", @obj.onFaceColorSelected );
-            obj.FaceColorButton.Layout.Column = [1, 2];
+                "ValueChangedFcn", @obj.onFaceColorPicked );
+            obj.FaceColorPicker.Layout.Column = [1, 2];
             uilabel( g, "Text", "Face alpha:", ...
                 "HorizontalAlignment", "right" );
             obj.FaceAlphaSpinner = uispinner( g, ...
@@ -446,54 +430,54 @@ classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
                 "Limits", [0, 1], ...
                 "Step", 0.1, ...
                 "ValueChangedFcn", @obj.onFaceAlphaSelected );
-            
+
         end % setup
-        
+
         function update( obj )
             %UPDATE Refresh the chart graphics.
-            
+
             if obj.ComputationRequired(1)
-                
+
                 % Update the non-parametric distribution fit.
                 mdl = fitdist( obj.Data, obj.DistributionName_ );
-                
+
                 % Evaluate it on the sample range.
                 sampleVals = linspace( ...
                     min( obj.Data ), max( obj.Data ), 1000 );
                 pdfVals = pdf( mdl, sampleVals );
-                
+
                 % Update the density plot.
                 set( obj.FittedPDF, "XData", sampleVals, "YData", pdfVals )
-                
+
                 % Update the histogram with the new data.
                 set( obj.Histogram, "Data", obj.Data, "BinMethod", "auto" )
-                
+
                 % Update the VaR lines.
                 obj.updateVaRLines()
-                
+
                 % Mark the chart clean.
                 obj.ComputationRequired = false( 1, 2 );
-                
+
             end % if
-            
+
             if obj.ComputationRequired(2)
-                
+
                 % Update the VaR lines only.
                 obj.updateVaRLines()
                 % Mark the chart clean.
                 obj.ComputationRequired(2) = false;
-                
+
             end % if
-            
+
             % Refresh the chart's decorative properties.
             set( obj.Axes, "XGrid", obj.XGrid, "YGrid", obj.YGrid )
-            
+
         end % update
-        
+
         function updateVaRLines( obj )
             %UPDATEVARLINES Update the VaR lines if the VaR level has been
             %changed.
-            
+
             % Compute the new VaR and CVaR.
             VaR = quantile( obj.Data, 1 - obj.VaRLevel );
             CVaR = mean( obj.Data(obj.Data < VaR) );
@@ -502,18 +486,18 @@ classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
                 "Label", "VaR (" + percentVaRLevel + ") = " + VaR )
             set( obj.CVaRLine, "Value", CVaR, ...
                 "Label", "CVaR (" + percentVaRLevel + ") = " + CVaR )
-            
+
         end % updateVaRLines
-        
+
     end % methods ( Access = protected )
-    
+
     methods ( Access = private )
-        
+
         function onToggleButtonPressed( obj, ~, ~ )
             %ONTOGGLEBUTTONPRESSED Hide/show the chart controls.
-            
+
             toggleDown = obj.ToggleButton.Value;
-            
+
             if toggleDown
                 % Show the controls.
                 obj.LayoutGrid.ColumnWidth{2} = "fit";
@@ -523,90 +507,74 @@ classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
                 obj.LayoutGrid.ColumnWidth{2} = "0x";
                 obj.ToggleButton.Tooltip = "Show chart controls";
             end % if
-            
+
         end % onToggleButtonPressed
-        
+
         function onDistributionSelected( obj, ~, ~ )
             %ONDISTRIBUTIONSELECTED Update the chart when the user selects
             %a probability distribution from the dropdown menu.
-            
+
             obj.DistributionName = obj.DistributionDropDown.Value;
-            
+
         end % onDistributionSelected
-        
+
         function toggleFittedPDFVisibility( obj, s, ~ )
             %TOGGLEFITTEDPDFVISIBILITY Toggle the visibility of the fitted
             %PDF.
-            
+
             obj.FittedPDF.Visible = s.Value;
-            
+
         end % toggleFittedPDFVisibility
-        
+
         function toggleVaRLineVisibility( obj, s, ~ )
             %TOGGLEVARLINEVISIBILITY Toggle the visibility of the VaR line.
-            
+
             obj.VaRLine.Visible = s.Value;
-            
+
         end % toggleVaRLineVisibility
-        
+
         function toggleCVaRLineVisibility( obj, s, ~ )
             %TOGGLECVARLINEVISIBILITY Toggle the visibility of the CVaR
             %line.
-            
+
             obj.CVaRLine.Visible = s.Value;
-            
+
         end % toggleCVaRLineVisibility
-        
+
         function onEdgeAlphaSelected( obj, s, ~ )
             %ONEDGEALPHASELECTED Update the histogram's EdgeAlpha when the
             %user modifies the spinner.
-            
+
             obj.EdgeAlpha = s.Value;
-            
+
         end % onEdgeAlphaSelected
-        
-        function onEdgeColorSelected( obj, ~, ~ )
-            %ONEDGECOLORSELECTED Update the histogram's EdgeColor when the
+
+        function onEdgeColorPicked( obj, ~, ~ )
+            %ONEDGECOLORPICKED Update the histogram's EdgeColor when the
             %user selects a color.
-            
-            % Prompt the user to select a color.
-            c = uisetcolor();
-            figure( ancestor( obj, "figure" ) ) % Restore focus
-            if isequal( c, 0 )
-                % Exit if the user cancels.
-                return
-            else
-                % Update the edge color.
-                obj.EdgeColor = c;
-            end % if
-            
-        end % onEdgeColorSelected
-        
+
+            % Update the edge color.
+            obj.EdgeColor = obj.EdgeColorPicker.Value;
+
+        end % onEdgeColorPicked
+
         function onFaceAlphaSelected( obj, s, ~ )
             %ONEDGEALPHASELECTED Update the histogram's EdgeAlpha when the
             %user modifies the spinner.
-            
+
             obj.FaceAlpha = s.Value;
-            
+
         end % onFaceAlphaSelected
-        
-        function onFaceColorSelected( obj, ~, ~ )
-            %ONFACECOLORSELECTED Update the histogram's FaceColor when the
+
+        function onFaceColorPicked( obj, ~, ~ )
+            %ONFACECOLORPICKED Update the histogram's FaceColor when the
             %user selects a color.
-            
-            % Prompt the user to select a color.
-            c = uisetcolor();
-            figure( ancestor( obj, "figure" ) ) % Restore focus
-            if isequal( c, 0 )
-                % Exit if the user cancels.
-                return
-            else
-                % Update the face color.
-                obj.FaceColor = c;
-            end % if
-            
-        end % onFaceColorSelected
-        
+
+            % Update the face color.
+            obj.FaceColor = obj.FaceColorPicker.Value;
+
+        end % onFaceColorPicked
+
     end % methods ( Access = private )
-    
-end % class definition
+
+end % classdef

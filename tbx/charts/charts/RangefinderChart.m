@@ -1,74 +1,76 @@
 classdef RangefinderChart < matlab.graphics.chartcontainer.ChartContainer
-    %RANGEFINDER Rangefinder chart for bivariate scattered data.
+    %RANGEFINDERCHART Rangefinder chart for bivariate scattered data.
     %The rangefinder chart displays a 2D scatter plot overlaid with a
     %marker at the crossover point of the marginal medians and lines
     %indicating the marginal adjacent values.
-    %
-    % Copyright 2018-2022 The MathWorks, Inc.
-    
+
+    % Copyright 2018-2025 The MathWorks, Inc.
+
     properties ( Dependent )
         % Chart x-data.
         XData(:, 1) double {mustBeReal}
         % Chart y-data.
         YData(:, 1) double {mustBeReal}
     end % properties ( Dependent )
-    
+
     properties
         % Marker for the discrete plot.
-        Marker = "o"
+        Marker(1, 1) string {mustBeMarker} = "o"
         % Size data for the discrete plot.
-        SizeData = 36
+        SizeData(:, 1) double {mustBePositive, mustBeFinite} = 36
         % Color of the discrete plot.
-        CData = [0, 0.4470, 0.7410]
+        CData(:, 3) double {mustBeInRange( CData, 0, 1 )} = ...
+            [0, 0.4470, 0.7410]
         % Axes x-grid.
-        XGrid = "on"
+        XGrid(1, 1) matlab.lang.OnOffSwitchState = "on"
         % Axes y-grid.
-        YGrid = "on"
+        YGrid(1, 1) matlab.lang.OnOffSwitchState = "on"
     end % properties
-    
+
     properties ( Access = private )
         % Internal storage for the XData property.
-        XData_ = double.empty( 0, 1 )
+        XData_(:, 1) double {mustBeReal} = double.empty( 0, 1 )
         % Internal storage for the YData property.
-        YData_ = double.empty( 0, 1 )
+        YData_(:, 1) double {mustBeReal} = double.empty( 0, 1 )
         % Logical scalar specifying whether a computation is required.
-        ComputationRequired = false
+        ComputationRequired(1, 1) logical = false
     end % properties ( Access = private )
-    
+
     properties ( Access = private, Transient, NonCopyable )
         % Chart axes.
-        Axes(1, 1) matlab.graphics.axis.Axes
+        Axes(:, 1) matlab.graphics.axis.Axes {mustBeScalarOrEmpty}
         % Scatter series for the discrete bivariate data.
-        ScatterSeries(1, 1) matlab.graphics.chart.primitive.Scatter
+        ScatterSeries(:, 1) matlab.graphics.chart.primitive.Scatter ...
+            {mustBeScalarOrEmpty}
         % Line objects used for the median crossover.
         MedianCrossoverLines(4, 1) matlab.graphics.primitive.Line
         % Line objects used for the adjacent values.
         AdjacentLines(4, 1) matlab.graphics.chart.primitive.Line
     end % properties ( Access = private, Transient, NonCopyable )
-    
+
     properties ( Constant, Hidden )
         % Product dependencies.
-        Dependencies = ["MATLAB", ...
+        Dependencies(1, :) string = ["MATLAB", ...
             "Statistics and Machine Learning Toolbox"]
     end % properties ( Constant, Hidden )
-    
+
     methods
-        
+
         function value = get.XData( obj )
-            
+
             value = obj.XData_;
-            
+
         end % get.XData
-        
+
         function set.XData( obj, value )
-            
+
             % Mark the chart for an update.
             obj.ComputationRequired = true;
-            
+
             % Decide how to modify the chart data.
             nX = numel( value );
             nY = numel( obj.YData_ );
-            
+
             if nX < nY % If the new x-data is too short ...
                 % ... then chop the chart y-data.
                 obj.YData_ = obj.YData_(1:nX);
@@ -76,12 +78,12 @@ classdef RangefinderChart < matlab.graphics.chartcontainer.ChartContainer
                 % Otherwise, if nX >= nY, then pad the y-data.
                 obj.YData_(end+1:nX, 1) = NaN;
             end % if
-            
+
             % Set the internal x-data.
             obj.XData_ = value;
-            
+
             % Reset the scatter series' color and size data if necessary.
-            nC = size( obj.CData, 1 );
+            nC = height( obj.CData );
             if nC > 1 && nX ~= nC
                 obj.CData = obj.Axes.ColorOrder(1, :);
             end % if
@@ -89,24 +91,24 @@ classdef RangefinderChart < matlab.graphics.chartcontainer.ChartContainer
             if nS > 1 && nX ~= nS
                 obj.SizeData = 36;
             end % if
-            
+
         end % set.XData
-        
+
         function value = get.YData( obj )
-            
+
             value = obj.YData_;
-            
+
         end % get.YData
-        
+
         function set.YData( obj, value )
-            
+
             % Mark the chart for an update.
             obj.ComputationRequired = true;
-            
+
             % Decide how to modify the chart data.
             nY = numel( value );
             nX = numel( obj.XData_ );
-            
+
             if nY < nX % If the new y-data is too short ...
                 % ... then chop the chart x-data.
                 obj.XData_ = obj.XData_(1:nY);
@@ -114,12 +116,12 @@ classdef RangefinderChart < matlab.graphics.chartcontainer.ChartContainer
                 % Otherwise, if nY >= nX, then pad the x-data.
                 obj.XData_(end+1:nY, 1) = NaN;
             end % if
-            
+
             % Set the internal y-data.
             obj.YData_ = value;
-            
+
             % Reset the color and size data if necessary.
-            nC = size( obj.CData, 1 );
+            nC = height( obj.CData );
             if nC > 1 && nY ~= nC
                 obj.CData = obj.Axes.ColorOrder(1, :);
             end % if
@@ -127,74 +129,74 @@ classdef RangefinderChart < matlab.graphics.chartcontainer.ChartContainer
             if nS > 1 && nY ~= nS
                 obj.SizeData = 36;
             end % if
-            
+
         end % set.YData
-        
+
     end % methods
-    
+
     methods
-        
+
         function varargout = xlabel( obj, varargin )
-            
+
             [varargout{1:nargout}] = xlabel( obj.Axes, varargin{:} );
-            
+
         end % xlabel
-        
+
         function varargout = ylabel( obj, varargin )
-            
+
             [varargout{1:nargout}] = ylabel( obj.Axes, varargin{:} );
-            
+
         end % ylabel
-        
+
         function varargout = title( obj, varargin )
-            
+
             [varargout{1:nargout}] = title( obj.Axes, varargin{:} );
-            
+
         end % title
-        
+
     end % methods
-    
+
     methods ( Access = protected )
-        
+
         function setup( obj )
             %SETUP Initialize the chart graphics.
-            
+
             % Create the chart's axes.
             obj.Axes = axes( "Parent", obj.getLayout() );
-            
+
             % Initialize the scatter plot.
             obj.ScatterSeries = scatter( obj.Axes, NaN, NaN );
-            
+
             % Next, create the median crossover. This comprises two
             % perpendicular line segments with markers at their crossover
             % point.
-            crossoverColor = "k";
             crossoverMarkers = ["none", "none", "o", "x"];
             crossoverMarkerSizes = [6, 6, 20, 20];
-            for k = 1:4
+            for k = 1 : 4
                 obj.MedianCrossoverLines(k) = line( ...
                     "Parent", obj.Axes, ...
                     "XData", NaN, ...
                     "YData", NaN, ...
-                    "Color", crossoverColor, ...
                     "Marker", crossoverMarkers(k), ...
                     "MarkerSize", crossoverMarkerSizes(k), ...
                     "LineWidth", 2 );
             end % for
             
-            % Create the line segments for the adjacent values.
-            segmentColor = obj.Axes.ColorOrder(4, :);
             hold( obj.Axes, "on" )
-            for k = 1:4
-                obj.AdjacentLines(k) = plot( obj.Axes, NaN, NaN, ...
-                    "Color", segmentColor, ...
-                    "LineWidth", 3 );
+            
+            for k = 1 : 4
+                
+                % Create the line segments for the adjacent values.                        
+                obj.AdjacentLines(k) = plot( obj.Axes, NaN, NaN, ...                    
+                    "LineWidth", 3 );                
+
                 % Define the labels for the custom datatips.
                 if k <= 2
                     lbl = "(x):";
                 else
                     lbl = "(y):";
                 end % if
+
                 obj.AdjacentLines(k).DataTipTemplate. ...
                     DataTipRows(1).Label = "Lower adjacent value " + lbl;
                 obj.AdjacentLines(k).DataTipTemplate. ...
@@ -207,28 +209,30 @@ classdef RangefinderChart < matlab.graphics.chartcontainer.ChartContainer
                     DataTipRows(5).Label = "Upper adjacent value " + lbl;
                 obj.AdjacentLines(k).DataTipTemplate. ...
                     DataTipRows(6).Label = "Interquartile range " + lbl;
+
             end % for
+
             hold( obj.Axes, "off" )
             
         end % setup
-        
+
         function update( obj )
             %UPDATE Refresh the chart graphics.
-            
+
             if obj.ComputationRequired
-                
+
                 % Update the scatter plot.
                 set( obj.ScatterSeries, "XData", obj.XData_, ...
                     "YData", obj.YData_ )
-                
+
                 % Compute the marginal quartiles.
                 qx = quantile( obj.XData_, [0.25, 0.50, 0.75] );
                 qy = quantile( obj.YData_, [0.25, 0.50, 0.75] );
-                
+
                 % Compute the interquartile ranges.
                 iqrx = qx(3) - qx(1);
                 iqry = qy(3) - qy(1);
-                
+
                 % Update the median crossover graphics.
                 set( obj.MedianCrossoverLines(1), ...
                     "XData", qx([1, 3]), ...
@@ -242,7 +246,7 @@ classdef RangefinderChart < matlab.graphics.chartcontainer.ChartContainer
                 set( obj.MedianCrossoverLines(4), ...
                     "XData", qx(2), ...
                     "YData", qy(2) )
-                
+
                 % Update the adjacent lines. To do this, we compute the
                 % upper and lower limits.
                 xLimits = [qx(1)-1.5*iqrx, qx(3)+1.5*iqrx];
@@ -255,7 +259,7 @@ classdef RangefinderChart < matlab.graphics.chartcontainer.ChartContainer
                     max(obj.XData_(internalxIdx))];
                 adjy = [min(obj.YData_(internalyIdx)), ...
                     max(obj.YData_(internalyIdx))];
-                
+
                 % Deal with the case when no adjacent values exist.
                 if isempty( adjx )
                     adjx = NaN( 1, 2 );
@@ -263,7 +267,7 @@ classdef RangefinderChart < matlab.graphics.chartcontainer.ChartContainer
                 if isempty( adjy )
                     adjy = NaN( 1, 2 );
                 end % if
-                
+
                 % Update the adjacent lines.
                 set( obj.AdjacentLines(1), ...
                     "XData", [adjx(1), adjx(1)], ...
@@ -277,34 +281,36 @@ classdef RangefinderChart < matlab.graphics.chartcontainer.ChartContainer
                 set( obj.AdjacentLines(4), ...
                     "XData", qx([1, 3]), ...
                     "YData", [adjy(2), adjy(2)] )
-                
+
                 % Update the values in the custom datatips.
-                for k = 1:4
+                for k = 1 : 4
                     if k <= 2
                         newTipVals = [adjx(1), qx, adjx(2), iqrx];
                     else
                         newTipVals = [adjy(1), qy, adjy(2), iqry];
                     end % if
-                    for kk = 1:length( newTipVals )
+                    for kk = 1 : numel( newTipVals )
                         obj.AdjacentLines(k).DataTipTemplate. ...
                             DataTipRows(kk).Value = ...
                             newTipVals(kk) * [1, 1];
                     end % for
                 end % for
-                
+
                 % Mark the chart clean.
                 obj.ComputationRequired = false;
-                
+
             end % if
-            
+
             % Refresh the chart's decorative properties.
             set( obj.ScatterSeries, "Marker", obj.Marker, ...
                 "SizeData", obj.SizeData, ...
                 "CData", obj.CData )
             set( obj.Axes, "XGrid", obj.XGrid, "YGrid", obj.YGrid )
-            
+            set( obj.AdjacentLines, ...
+                "Color", obj.MedianCrossoverLines(1).Color )
+
         end % update
-        
+
     end % methods ( Access = protected )
-    
-end % class definition
+
+end % classdef

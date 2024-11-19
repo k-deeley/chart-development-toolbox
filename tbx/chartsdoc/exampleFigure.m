@@ -14,7 +14,7 @@ arguments ( Output )
     f(1, 1) matlab.ui.Figure
 end % arguments ( Output )
 
-f = uifigure( "Units", "Normalized", ...
+f = uifigure( "Units", "normalized", ...
     "Position", [0.30, 0.20, 0.40, 0.50] );
 set( f, namedArgs )
 

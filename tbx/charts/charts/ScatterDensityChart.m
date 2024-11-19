@@ -1,9 +1,9 @@
 classdef ScatterDensityChart < matlab.graphics.chartcontainer.ChartContainer
-    %SCATTERDENSITY Chart managing 2D scattered data (x and y), using a
-    %color scheme applied to the data points indicating the relative
+    %SCATTERDENSITYCHART Chart managing 2D scattered data (x and y), using 
+    %a color scheme applied to the data points indicating the relative
     %data density.
-    %
-    % Copyright 2019-2022 The MathWorks, Inc.
+    
+    % Copyright 2019-2025 The MathWorks, Inc.
     
     properties ( Dependent )
         % Chart x-data.
@@ -19,45 +19,48 @@ classdef ScatterDensityChart < matlab.graphics.chartcontainer.ChartContainer
     
     properties
         % Marker for the scatter series.
-        Marker = "."
+        Marker(1, 1) string {mustBeMarker} = "."
         % Size data for the scatter series.
-        SizeData = 36
+        SizeData(:, 1) double {mustBePositive, mustBeFinite} = 36
         % Axes x-grid.
-        XGrid = "on"
+        XGrid(1, 1) matlab.lang.OnOffSwitchState = "on"
         % Axes y-grid.
-        YGrid = "on"        
+        YGrid(1, 1) matlab.lang.OnOffSwitchState = "on"        
     end % properties
     
     properties ( Dependent )
         % Axes color limits.
-        CLim
+        CLim(1, 2) double {mustBeReal, mustBeIncreasing}
     end % properties ( Dependent )
     
     properties ( Access = private )
         % Internal storage for the XData property.
-        XData_ = double.empty( 0, 1 )
+        XData_(:, 1) double {mustBeReal} = double.empty( 0, 1 )
         % Internal storage for the YData property.
-        YData_ = double.empty( 0, 1 )
+        YData_(:, 1) double {mustBeReal} = double.empty( 0, 1 )
         % Internal storage for the Radius property.
-        Radius_ = 0.25
+        Radius_(1, 1) double {mustBeNonnegative, mustBeFinite} = 0.25
         % Internal storage for the DensityMethod property.
-        DensityMethod_ = "noboundary"
+        DensityMethod_(1, 1) string {mustBeMember( DensityMethod_, ...
+            ["boundary", "noboundary"] ) } = "noboundary"
         % Logical scalar specifying whether a computation is required.
-        ComputationRequired = false
+        ComputationRequired(1, 1) logical = false
     end % properties ( Access = private )
     
     properties ( Access = private, Transient, NonCopyable )
         % Chart axes.
-        Axes(1, 1) matlab.graphics.axis.Axes
+        Axes(:, 1) matlab.graphics.axis.Axes {mustBeScalarOrEmpty}
         % Scatter series for the (x, y) data.
-        ScatterSeries(1, 1) matlab.graphics.chart.primitive.Scatter
+        ScatterSeries(:, 1) matlab.graphics.chart.primitive.Scatter ...
+            {mustBeScalarOrEmpty}
         % Rectangle object drawn to show the domain boundary.
-        BoundingBox(1, 1) matlab.graphics.primitive.Rectangle
+        BoundingBox(:, 1) matlab.graphics.primitive.Rectangle ...
+            {mustBeScalarOrEmpty}
     end % properties ( Access = private, Transient, NonCopyable )
     
     properties ( Constant, Hidden )
         % Product dependencies.
-        Dependencies = ["MATLAB", ...
+        Dependencies(1, :) string = ["MATLAB", ...
             "Statistics and Machine Learning Toolbox"]
     end % properties ( Constant, Hidden )
     
@@ -178,6 +181,26 @@ classdef ScatterDensityChart < matlab.graphics.chartcontainer.ChartContainer
     end % methods
     
     methods
+
+        function obj = ScatterDensityChart( namedArgs )
+            %SCATTERDENSITYCHART Construct a ScatterDensityChart object,
+            %given optional name-value arguments.
+
+            arguments ( Input )
+                namedArgs.?ScatterDensityChart
+            end % arguments ( Input )
+
+            % Call the superclass constructor.
+            f = figure( "Visible", "off" );
+            figureCleanup = onCleanup( @() delete( f ) );
+            obj@matlab.graphics.chartcontainer.ChartContainer( ...
+                "Parent", f )
+            obj.Parent = [];
+
+            % Set any user-defined properties.
+            set( obj, namedArgs )
+
+        end % constructor
         
         function varargout = xlabel( obj, varargin )
             
@@ -334,7 +357,7 @@ classdef ScatterDensityChart < matlab.graphics.chartcontainer.ChartContainer
         
     end % methods ( Access = protected )
     
-end % class definition
+end % classdef
 
 function A = intersectionArea( xc, yc, r, xmin, xmax, ymin, ymax )
 %INTERSECTIONAREA Compute the area of the intersection of a circle of

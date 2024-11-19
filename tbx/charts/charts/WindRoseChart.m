@@ -149,7 +149,7 @@ classdef WindRoseChart < matlab.graphics.chartcontainer.ChartContainer
     
     properties ( Constant, Hidden )
         % Product dependencies.
-        Dependencies = "MATLAB"
+        Dependencies(1, :) string = "MATLAB"
     end % properties ( Constant, Hidden )
     
     methods
@@ -183,7 +183,7 @@ classdef WindRoseChart < matlab.graphics.chartcontainer.ChartContainer
             
             % Check the new value.
             assert( issorted( value, "strictascend" ) && ...
-                length( value ) >= 2 && value(1) == 0 && ...
+                numel( value ) >= 2 && value(1) == 0 && ...
                 value(end) == Inf, "WindRose:InvalidSpeedBinEdges", ...
                 "The speed bin edge vector must be of the form " + ...
                 "[0, v(1), v(2), ..., v(n), Inf] where v(i) < v(i+1)" + ...
@@ -319,8 +319,8 @@ classdef WindRoseChart < matlab.graphics.chartcontainer.ChartContainer
             % bins. For each of direction-speed bin, create a patch object.
             % Similarly, create the text boxes for the direction-speed
             % data.
-            numDirectionBins = length( obj.DirectionBinCenters );
-            numSpeedBins = length( obj.SpeedBinEdges_ ) - 1;
+            numDirectionBins = numel( obj.DirectionBinCenters );
+            numSpeedBins = numel( obj.SpeedBinEdges_ ) - 1;
             patchColors = parula( numSpeedBins );
             obj.Patches = repmat( patch( "Parent", [] ), ...
                 numDirectionBins, numSpeedBins );
@@ -392,8 +392,8 @@ classdef WindRoseChart < matlab.graphics.chartcontainer.ChartContainer
                 % whether new objects need to be created or old objects
                 % need to be deleted.
                 previousNumSpeedBins = size( obj.Patches, 2 );
-                currentNumSpeedBins = length( obj.SpeedBinEdges_ ) - 1;
-                numDirectionBins = length( obj.DirectionBinCenters );
+                currentNumSpeedBins = numel( obj.SpeedBinEdges_ ) - 1;
+                numDirectionBins = numel( obj.DirectionBinCenters );
                 if currentNumSpeedBins < previousNumSpeedBins
                     % Delete the graphics objects.
                     delete( obj.Patches(:, currentNumSpeedBins+1:end) )
@@ -545,8 +545,8 @@ classdef WindRoseChart < matlab.graphics.chartcontainer.ChartContainer
             % matrix elements are the number of data points in each
             % combined direction/speed bin.
             
-            numDirectionBins = length( obj.DirectionBinCenters );
-            numSpeedBins = length( obj.SpeedBinEdges ) - 1;
+            numDirectionBins = numel( obj.DirectionBinCenters );
+            numSpeedBins = numel( obj.SpeedBinEdges ) - 1;
             obj.ObservationCounts = ...
                 zeros( numDirectionBins, numSpeedBins );
             windDirection = obj.WindData_.Direction;
@@ -602,7 +602,7 @@ classdef WindRoseChart < matlab.graphics.chartcontainer.ChartContainer
             radTextX = sind( obj.RadialLabelAngle ) * obj.CircleRadii;
             radTextY = cosd( obj.RadialLabelAngle ) * obj.CircleRadii;
             radText = num2str( obj.CircleRadii(:), "%.1f%%" );
-            for k = 1:length( obj.RadialLabels )
+            for k = 1:numel( obj.RadialLabels )
                 set( obj.RadialLabels(k), ...
                     "Position", [radTextX(k), radTextY(k), 0], ...
                     "String", radText(k, :) )

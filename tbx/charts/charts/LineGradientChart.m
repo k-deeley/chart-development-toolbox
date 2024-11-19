@@ -1,8 +1,8 @@
 classdef LineGradientChart < matlab.graphics.chartcontainer.ChartContainer
-    %LINEGRADIENT Chart for managing a variable-color curve plotted against
-    %a date/time vector.
-    %
-    % Copyright 2018-2022 The MathWorks, Inc.
+    %LINEGRADIENTCHART Chart for managing a variable-color curve plotted 
+    %against a date/time vector.
+    
+    % Copyright 2018-2025 The MathWorks, Inc.
     
     properties ( Dependent )
         % Chart x-data.
@@ -13,32 +13,33 @@ classdef LineGradientChart < matlab.graphics.chartcontainer.ChartContainer
     
     properties
         % Width of the line.
-        LineWidth = 0.5
+        LineWidth(1, 1) double {mustBePositive, mustBeFinite} = 0.5
         % Axes x-grid.
-        XGrid = "on"
+        XGrid(1, 1) matlab.lang.OnOffSwitchState = "on"
         % Axes y-grid.
-        YGrid = "on"
+        YGrid(1, 1) matlab.lang.OnOffSwitchState = "on"
     end % properties
     
     properties ( Access = private )
         % Internal storage for the XData property.
-        XData_ = NaT( 2, 1 )
+        XData_(2, :) datetime = NaT( 2, 1 )
         % Internal storage for the YData property.
-        YData_ = NaN( 2, 1 )
+        YData_(2, :) double {mustBeReal} = NaN( 2, 1 )
         % Logical scalar specifying whether a computation is required.
-        ComputationRequired = false
+        ComputationRequired(1, 1) logical = false
     end % properties ( Access = private )
     
     properties ( Access = private, Transient, NonCopyable )
         % Chart axes.
-        Axes(1, 1) matlab.graphics.axis.Axes
+        Axes(:, 1) matlab.graphics.axis.Axes {mustBeScalarOrEmpty}
         % Line with a color gradient, implemented internally as a surface.
-        Surface(1, 1) matlab.graphics.primitive.Surface
+        Surface(:, 1) matlab.graphics.primitive.Surface ...
+            {mustBeScalarOrEmpty}
     end % properties ( Access = private, Transient, NonCopyable )
     
     properties ( Constant, Hidden )
         % Product dependencies.
-        Dependencies = "MATLAB"
+        Dependencies(1, :) string = "MATLAB"
     end % properties ( Constant, Hidden )
     
     methods
@@ -102,6 +103,26 @@ classdef LineGradientChart < matlab.graphics.chartcontainer.ChartContainer
     end % methods
     
     methods
+
+        function obj = LineGradientChart( namedArgs )
+            %LINEGRADIENTCHART Construct a LineGradientChart, given
+            %optional name-value arguments.
+
+            arguments ( Input )
+                namedArgs.?LineGradientChart
+            end % arguments ( Input )
+
+            % Call the superclass constructor.
+            f = figure( "Visible", "off" );
+            figureCleanup = onCleanup( @() delete( f ) );
+            obj@matlab.graphics.chartcontainer.ChartContainer( ...
+                "Parent", f );
+            obj.Parent = [];
+
+            % Set any user-defined properties.
+            set( obj, namedArgs )
+
+        end % constructor
         
         function varargout = xlabel( obj, varargin )
             
@@ -125,6 +146,7 @@ classdef LineGradientChart < matlab.graphics.chartcontainer.ChartContainer
             
             % Invoke grid on the axes.
             grid( obj.Axes, varargin{:} )
+            
             % Ensure the properties are up-to-date.
             obj.XGrid = obj.Axes.XGrid;
             obj.YGrid = obj.Axes.YGrid;
@@ -183,13 +205,13 @@ classdef LineGradientChart < matlab.graphics.chartcontainer.ChartContainer
         
     end % methods ( Access = private )
     
-end % class definition
+end % classdef
 
 function mustBeSorted( d )
 %MUSTBESORTED Validate that the input datetime vector is sorted.
 
 assert( issorted( d ), ...
-    "LineGradient:DecreasingData", ...
+    "LineGradientChart:DecreasingData", ...
     "The LineGradient chart's x-data must be nondecreasing." )
 
 end % mustBeSorted
