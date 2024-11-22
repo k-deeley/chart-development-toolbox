@@ -1,6 +1,6 @@
-classdef RadarChart < matlab.graphics.chartcontainer.ChartContainer
-    %RADAR Chart displaying a line graph of dependent numeric variables
-    %plotted against independent circular data.
+classdef PolarChart < Chart
+    %POLARCHART Chart displaying a line graph of dependent numeric 
+    %variables plotted against independent circular data.
 
     % Copyright 2018-2025 The MathWorks, Inc.
 
@@ -94,6 +94,19 @@ classdef RadarChart < matlab.graphics.chartcontainer.ChartContainer
     end % methods
 
     methods
+
+        function obj = PolarChart( namedArgs )
+            %POLARCHART Construct a PolarChart object, given optional
+            %name-value arguments.
+
+            arguments ( Input )
+                namedArgs.?PolarChart
+            end % arguments ( Input )
+
+            % Set any user-defined properties.
+            set( obj, namedArgs )
+
+        end % constructor
 
         function varargout = title( obj, varargin )
 

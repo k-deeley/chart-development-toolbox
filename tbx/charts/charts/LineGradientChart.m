@@ -1,4 +1,4 @@
-classdef LineGradientChart < matlab.graphics.chartcontainer.ChartContainer
+classdef LineGradientChart < Chart
     %LINEGRADIENTCHART Chart for managing a variable-color curve plotted 
     %against a date/time vector.
     
@@ -110,14 +110,7 @@ classdef LineGradientChart < matlab.graphics.chartcontainer.ChartContainer
 
             arguments ( Input )
                 namedArgs.?LineGradientChart
-            end % arguments ( Input )
-
-            % Call the superclass constructor.
-            f = figure( "Visible", "off" );
-            figureCleanup = onCleanup( @() delete( f ) );
-            obj@matlab.graphics.chartcontainer.ChartContainer( ...
-                "Parent", f );
-            obj.Parent = [];
+            end % arguments ( Input )            
 
             % Set any user-defined properties.
             set( obj, namedArgs )

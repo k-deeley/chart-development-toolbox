@@ -1,4 +1,4 @@
-classdef SankeyChart < matlab.graphics.chartcontainer.ChartContainer
+classdef SankeyChart < Chart
     %SANKEYCHART Illustrates the flow between different states.
 
     % Copyright 2018-2025 The MathWorks, Inc.
@@ -116,14 +116,7 @@ classdef SankeyChart < matlab.graphics.chartcontainer.ChartContainer
 
             arguments ( Input )
                 namedArgs.?SankeyChart
-            end % arguments ( Input )
-
-            % Call the superclass constructor.
-            f = figure( "Visible", "off" );
-            figureCleanup = onCleanup( @() delete( f ) );
-            obj@matlab.graphics.chartcontainer.ChartContainer( ...
-                "Parent", f )
-            obj.Parent = [];
+            end % arguments ( Input )            
 
             % Set any user-defined properties.
             set( obj, namedArgs )

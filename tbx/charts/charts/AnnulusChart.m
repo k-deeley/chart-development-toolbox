@@ -1,4 +1,4 @@
-classdef AnnulusChart < matlab.ui.componentcontainer.ComponentContainer
+classdef AnnulusChart < Component
     %ANNULUSCHART Annulus (ring) chart, similar to a 3D pie chart.
 
     % Copyright 2019-2025 The MathWorks, Inc.
@@ -473,13 +473,7 @@ classdef AnnulusChart < matlab.ui.componentcontainer.ComponentContainer
 
             arguments ( Input )
                 namedArgs.?AnnulusChart
-            end % arguments ( Input )
-
-            % Call the superclass constructor.
-            obj@matlab.ui.componentcontainer.ComponentContainer( ...
-                "Parent", [], ...
-                "Units", "normalized", ...
-                "Position", [0, 0, 1, 1] )
+            end % arguments ( Input )            
 
             % Set any user-defined properties.
             set( obj, namedArgs )

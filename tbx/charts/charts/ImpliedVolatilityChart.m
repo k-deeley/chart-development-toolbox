@@ -1,4 +1,4 @@
-classdef ImpliedVolatilityChart < matlab.ui.componentcontainer.ComponentContainer
+classdef ImpliedVolatilityChart < Component
     %IMPLIEDVOLATILITYCHART Chart managing 3D scattered data comprising
     %strike price, time to expiry and implied volatility, together with an
     %interpolated implied volatility surface.
@@ -208,13 +208,7 @@ classdef ImpliedVolatilityChart < matlab.ui.componentcontainer.ComponentContaine
 
             arguments ( Input )
                 namedArgs.?ImpliedVolatilityChart 
-            end % arguments ( Input )
-
-            % Call the superclass constructor.
-            obj@matlab.ui.componentcontainer.ComponentContainer( ...
-                "Parent", [], ...
-                "Units", "normalized", ...
-                "Position", [0, 0, 1, 1] )
+            end % arguments ( Input )            
 
             % Set any user-defined properties.
             set( obj, namedArgs )

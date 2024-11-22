@@ -1,4 +1,4 @@
-classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
+classdef ValueAtRiskChart < Component
     %VALUEATRISKCHART Chart displaying the distribution of a return series
     %together with value at risk metrics and a distribution fit.
 
@@ -6,24 +6,24 @@ classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
 
     properties ( Dependent )
         % Underlying data for the chart, typically a series of returns.
-        Data(:, 1) double {mustBeReal, mustBeNonempty, mustBeFinite} = 0
+        Data(:, 1) double {mustBeReal, mustBeNonempty, mustBeFinite}
     end % properties ( Dependent )
 
     properties ( Dependent, AbortSet )
         % Value at risk level, used for both the VaR and CVaR metrics.
         VaRLevel(1, 1) double {mustBeReal, ...
-            mustBeInRange( VaRLevel, 0.90, 1.00, "exclude-upper" )} = 0.95
+            mustBeInRange( VaRLevel, 0.90, 1.00, "exclude-upper" )}
         % Probability distribution name.
         DistributionName(1, 1) string ...
             {mustBeMember( DistributionName, ["Kernel", "Normal", ...
-            "Logistic", "tLocationScale"] )} = "Kernel"
+            "Logistic", "tLocationScale"] )}
     end % properties ( Dependent, AbortSet )
 
     properties
         % Axes x-grid.
-        XGrid = "on"
+        XGrid(1, 1) matlab.lang.OnOffSwitchState = "on"
         % Axes y-grid.
-        YGrid = "on"
+        YGrid(1, 1) matlab.lang.OnOffSwitchState = "on"
     end % properties
 
     properties ( Dependent )
@@ -34,11 +34,11 @@ classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
         % Visibility of the CVaR line.
         CVaRLineVisible(1, 1) matlab.lang.OnOffSwitchState
         % Histogram edge transparency.
-        EdgeAlpha
+        EdgeAlpha(1, 1) double {mustBeInRange( EdgeAlpha, 0, 1 )}
         % Histogram edge color.
         EdgeColor
         % Histogram bar face transparency.
-        FaceAlpha
+        FaceAlpha(1, 1) double {mustBeInRange( FaceAlpha, 0, 1 )}
         % Histogram bar face color.
         FaceColor
         % Visibility of the chart controls.
@@ -47,46 +47,63 @@ classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
 
     properties ( Access = private )
         % Internal storage for the chart's data.
-        Data_ = 0
+        Data_(:, 1) double {mustBeReal, mustBeNonempty, mustBeFinite} = 0
         % Internal storage for the VaR level.
-        VaRLevel_ = 0.95
+        VaRLevel_(1, 1) double {mustBeReal, ...
+            mustBeInRange( VaRLevel_, 0.90, 1.00, "exclude-upper" )} = 0.95
         % Internal storage for the distribution name.
-        DistributionName_ = "Kernel"
+        DistributionName_(1, 1) string ...
+            {mustBeMember( DistributionName_, ["Kernel", "Normal", ...
+            "Logistic", "tLocationScale"] )} = "Kernel"
         % Logical vector specifying whether computations are required.
-        ComputationRequired = false( 1, 2 )
+        ComputationRequired(1, 2) logical = false( 1, 2 )
     end % properties ( Access = private )
 
     properties ( Access = private, Transient, NonCopyable )
         % Chart layout.
-        LayoutGrid(1, 1) matlab.ui.container.GridLayout
+        LayoutGrid(:, 1) matlab.ui.container.GridLayout ...
+            {mustBeScalarOrEmpty}
         % Chart axes.
-        Axes(1, 1) matlab.graphics.axis.Axes
+        Axes(:, 1) matlab.graphics.axis.Axes {mustBeScalarOrEmpty}
         % Toggle button for the chart controls.
-        ToggleButton(1, 1) matlab.ui.controls.ToolbarStateButton
+        ToggleButton(:, 1) matlab.ui.controls.ToolbarStateButton ...
+            {mustBeScalarOrEmpty}
         % Chart histogram to display the data.
-        Histogram(1, 1) matlab.graphics.chart.primitive.Histogram
+        Histogram(:, 1) matlab.graphics.chart.primitive.Histogram ...
+            {mustBeScalarOrEmpty}
         % Line object for the distribution fit.
-        FittedPDF(1, 1) matlab.graphics.primitive.Line
+        FittedPDF(:, 1) matlab.graphics.primitive.Line ...
+            {mustBeScalarOrEmpty}
         % Vertical constant line for the value at risk.
-        VaRLine(1, 1) matlab.graphics.chart.decoration.ConstantLine
+        VaRLine(:, 1) matlab.graphics.chart.decoration.ConstantLine ...
+            {mustBeScalarOrEmpty}
         % Vertical constant line for the conditional value at risk.
-        CVaRLine(1, 1) matlab.graphics.chart.decoration.ConstantLine
+        CVaRLine(:, 1) matlab.graphics.chart.decoration.ConstantLine ...
+            {mustBeScalarOrEmpty}
         % Dropdown menu for the probability distribution.
-        DistributionDropDown(1, 1) matlab.ui.control.DropDown
+        DistributionDropDown(:, 1) matlab.ui.control.DropDown ...
+            {mustBeScalarOrEmpty}
         % Check box for the fitted PDF.
-        FittedPDFCheckBox(1, 1) matlab.ui.control.CheckBox
+        FittedPDFCheckBox(:, 1) matlab.ui.control.CheckBox ...
+            {mustBeScalarOrEmpty}
         % Check box for the VaR line.
-        VaRLineCheckBox(1, 1) matlab.ui.control.CheckBox
+        VaRLineCheckBox(:, 1) matlab.ui.control.CheckBox ...
+            {mustBeScalarOrEmpty}
         % Check box for the CVaR line.
-        CVaRLineCheckBox(1, 1) matlab.ui.control.CheckBox
+        CVaRLineCheckBox(:, 1) matlab.ui.control.CheckBox ...
+            {mustBeScalarOrEmpty}
         % Spinner to control the histogram's EdgeAlpha property.
-        EdgeAlphaSpinner(1, 1) matlab.ui.control.Spinner
+        EdgeAlphaSpinner(:, 1) matlab.ui.control.Spinner ...
+            {mustBeScalarOrEmpty}
         % Color picker for selecting the histogram EdgeColor.
-        EdgeColorPicker(1, 1) matlab.ui.control.ColorPicker
+        EdgeColorPicker(:, 1) matlab.ui.control.ColorPicker ...
+            {mustBeScalarOrEmpty}
         % Spinner to control the histogram's FaceAlpha property.
-        FaceAlphaSpinner(1, 1) matlab.ui.control.Spinner
+        FaceAlphaSpinner(:, 1) matlab.ui.control.Spinner ...
+            {mustBeScalarOrEmpty}
         % Color picker for selecting the histogram FaceColor.
-        FaceColorPicker(1, 1) matlab.ui.control.ColorPicker
+        FaceColorPicker(:, 1) matlab.ui.control.ColorPicker ...
+            {mustBeScalarOrEmpty}
     end % properties ( Access = private, Transient, NonCopyable )
 
     properties ( Constant, Hidden )
@@ -198,6 +215,7 @@ classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
 
             % Update the spinner control.
             obj.EdgeAlphaSpinner.Value = value;
+            
             % Update the histogram.
             obj.Histogram.EdgeAlpha = value;
 
@@ -263,6 +281,7 @@ classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
 
             % Update the toggle button.
             obj.ToggleButton.Value = value;
+            
             % Invoke the toggle button callback.
             obj.onToggleButtonPressed()
 
@@ -271,6 +290,19 @@ classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
     end % methods
 
     methods
+
+        function obj = ValueAtRiskChart( namedArgs )
+            %VALUEATRISKCHART Construct a ValueAtRiskChart object, given
+            %optional name-value arguments.
+
+            arguments ( Input )
+                namedArgs.?ValueAtRiskChart
+            end % arguments ( Input )
+
+            % Set any user-defined properties.
+            set( obj, namedArgs )
+
+        end % constructor
 
         function varargout = xlabel( obj, varargin )
 
@@ -294,6 +326,7 @@ classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
 
             % Invoke grid on the axes.
             grid( obj.Axes, varargin{:} )
+            
             % Update the chart's grid properties.
             obj.XGrid = obj.Axes.XGrid;
             obj.YGrid = obj.Axes.YGrid;
@@ -315,17 +348,19 @@ classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
 
             % Define the layout grid.
             obj.LayoutGrid = uigridlayout( obj, [1, 2], ...
-                "ColumnWidth", ["1x", "fit"] );
+                "ColumnWidth", ["1x", "0x"] );
 
             % Create the chart's axes.
             obj.Axes = axes( "Parent", obj.LayoutGrid );
 
             % Add a state button to show/hide the chart's controls.
             tb = axtoolbar( obj.Axes, "default" );
+            iconPath = fullfile( chartsRoot(), "charts", "images", ...
+                "Cog.png" );
             obj.ToggleButton = axtoolbarbtn( tb, "state", ...
-                "Value", "on", ...
-                "Tooltip", "Hide chart controls", ...
-                "Icon", "Cog.png", ...
+                "Value", "off", ...
+                "Tooltip", "Show chart controls", ...
+                "Icon", iconPath, ...
                 "ValueChangedFcn", @obj.onToggleButtonPressed );
 
             % Create the histogram.
@@ -343,9 +378,11 @@ classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
                 "Color", c(2, :) );
 
             % Overlay the VaR lines.
-            obj.VaRLine = xline( obj.Axes, 0, "m", "LineWidth", 2, ...
+            obj.VaRLine = xline( obj.Axes, 0, "Color", c(3, :), ...
+                "LineWidth", 2, ...
                 "LabelHorizontalAlignment", "left" );
-            obj.CVaRLine = xline( obj.Axes, 0, "r", "LineWidth", 2, ...
+            obj.CVaRLine = xline( obj.Axes, 0, "Color", c(4, :), ...
+                "LineWidth", 2, ...
                 "LabelHorizontalAlignment", "left" );
 
             % Annotate the axes and add the legend.
@@ -364,6 +401,7 @@ classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
             g = uigridlayout( p, [5, 2], ...
                 "RowHeight", repmat( "fit", 5, 1 ), ...
                 "ColumnWidth", ["fit", "1x"] );
+            
             % Add the distribution selection dropdown.
             uilabel( g, "Text", "Distribution fit: ", ...
                 "HorizontalAlignment", "right" );
@@ -373,6 +411,7 @@ classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
                 "Tooltip", ...
                 "Select the probability distribution to fit to the data", ...
                 "ValueChangedFcn", @obj.onDistributionSelected );
+            
             % Add checkboxes to control visibility of the PDF and value at
             % risk lines.
             obj.FittedPDFCheckBox = uicheckbox( g, ...
@@ -396,6 +435,7 @@ classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
                 "Tooltip", "Hide or show the CVaR line", ...
                 "ValueChangedFcn", @obj.toggleCVaRLineVisibility );
             obj.CVaRLineCheckBox.Layout.Column = [1, 2];
+            
             % Place the histogram controls in a separate panel.
             p = uipanel( g, "Title", "Histogram Appearance", ...
                 "FontWeight", "bold" );
@@ -403,12 +443,14 @@ classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
             g = uigridlayout( p, [4, 2], ...
                 "RowHeight", repmat( "fit", 4, 1 ), ...
                 "ColumnWidth", ["fit", "1x"] );
+            
             % Add controls for the edge and face transparency and color.
+            uilabel( g, "Text", "Edge color:", ...
+                "HorizontalAlignment", "right" );
             obj.EdgeColorPicker = uicolorpicker( "Parent", g, ...
                 "Tooltip", "Select the histogram edge color", ...
                 "Value", obj.EdgeColor, ...
-                "ValueChangedFcn", @obj.onEdgeColorPicked );
-            obj.EdgeColorPicker.Layout.Column = [1, 2];
+                "ValueChangedFcn", @obj.onEdgeColorPicked );            
             uilabel( g, "Text", "Edge alpha:", ...
                 "HorizontalAlignment", "right" );
             obj.EdgeAlphaSpinner = uispinner( g, ...
@@ -417,11 +459,12 @@ classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
                 "Limits", [0, 1], ...
                 "Step", 0.1, ...
                 "ValueChangedFcn", @obj.onEdgeAlphaSelected );
+            uilabel( g, "Text", "Face color:", ...
+                "HorizontalAlignment", "right" );
             obj.FaceColorPicker = uicolorpicker( "Parent", g, ...
                 "Value", obj.FaceColor, ...
                 "Tooltip", "Select the histogram face color", ...
-                "ValueChangedFcn", @obj.onFaceColorPicked );
-            obj.FaceColorPicker.Layout.Column = [1, 2];
+                "ValueChangedFcn", @obj.onFaceColorPicked );            
             uilabel( g, "Text", "Face alpha:", ...
                 "HorizontalAlignment", "right" );
             obj.FaceAlphaSpinner = uispinner( g, ...
@@ -464,6 +507,7 @@ classdef ValueAtRiskChart < matlab.ui.componentcontainer.ComponentContainer
 
                 % Update the VaR lines only.
                 obj.updateVaRLines()
+                
                 % Mark the chart clean.
                 obj.ComputationRequired(2) = false;
 

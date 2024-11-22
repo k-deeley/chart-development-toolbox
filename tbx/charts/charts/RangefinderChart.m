@@ -1,4 +1,4 @@
-classdef RangefinderChart < matlab.graphics.chartcontainer.ChartContainer
+classdef RangefinderChart < Chart
     %RANGEFINDERCHART Rangefinder chart for bivariate scattered data.
     %The rangefinder chart displays a 2D scatter plot overlaid with a
     %marker at the crossover point of the marginal medians and lines
@@ -135,6 +135,19 @@ classdef RangefinderChart < matlab.graphics.chartcontainer.ChartContainer
     end % methods
 
     methods
+
+        function obj = RangefinderChart( namedArgs )
+            %RANGEFINDERCHART Construct a RangefinderChart object, given
+            %optional name-value arguments.
+
+            arguments ( Input )
+                namedArgs.?RangefinderChart
+            end % arguments ( Input )
+
+            % Set any user-defined properties.
+            set( obj, namedArgs )
+
+        end % constructor
 
         function varargout = xlabel( obj, varargin )
 

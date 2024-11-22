@@ -1,4 +1,4 @@
-classdef SpiderChart < matlab.graphics.chartcontainer.ChartContainer
+classdef SpiderChart < Chart
     %SPIDERCHART Manages the display of values from distinct measurements
     %plotted around a web. The number of nodes in the web is equal to the
     %number of distinct measurements.
@@ -207,14 +207,7 @@ classdef SpiderChart < matlab.graphics.chartcontainer.ChartContainer
 
             arguments ( Input )
                 namedArgs.?SpiderChart
-            end % arguments ( Input )
-
-            % Call the superclass constructor.
-            f = figure( "Visible", "off" );
-            figureCleanup = onCleanup( @() delete( f ) );
-            obj@matlab.graphics.chartcontainer.ChartContainer( ...
-                "Parent", f );
-            obj.Parent = [];
+            end % arguments ( Input )            
 
             % Set any user-defined properties.
             set( obj, namedArgs )

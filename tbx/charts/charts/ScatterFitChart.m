@@ -1,4 +1,4 @@
-classdef ScatterFitChart < matlab.ui.componentcontainer.ComponentContainer
+classdef ScatterFitChart < Component
     %SCATTERFITCHART Chart component managing 2D scattered data (x and y)
     %together with the corresponding best-fit line.
 
@@ -317,13 +317,7 @@ classdef ScatterFitChart < matlab.ui.componentcontainer.ComponentContainer
 
             arguments ( Input )
                 namedArgs.?ScatterFitChart
-            end % arguments ( Input )
-
-            % Call the superclass constructor.
-            obj@matlab.ui.componentcontainer.ComponentContainer( ...
-                "Parent", [], ...
-                "Units", "normalized", ...
-                "Position", [0, 0, 1, 1] )
+            end % arguments ( Input )            
 
             % Set any user-specified properties.
             set( obj, namedArgs )

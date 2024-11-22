@@ -1,4 +1,4 @@
-classdef SnailTrailChart < matlab.ui.componentcontainer.ComponentContainer
+classdef SnailTrailChart < Component
     %SNAILTRAILCHART Chart for displaying excess return against tracking
     %error for a given asset return series relative to a given benchmark
     %return series.
@@ -298,13 +298,7 @@ classdef SnailTrailChart < matlab.ui.componentcontainer.ComponentContainer
 
             arguments ( Input )
                 namedArgs.?SnailTrailChart
-            end % arguments ( Input )
-
-            % Call the superclass constructor.
-            obj@matlab.ui.componentcontainer.ComponentContainer( ...
-                "Parent", [], ...
-                "Units", "normalized", ...
-                "Position", [0, 0, 1, 1] )
+            end % arguments ( Input )            
 
             % Set any user-defined properties.
             set( obj, namedArgs )

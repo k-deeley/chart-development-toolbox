@@ -1,4 +1,4 @@
-classdef ScatterDensityChart < matlab.graphics.chartcontainer.ChartContainer
+classdef ScatterDensityChart < Chart
     %SCATTERDENSITYCHART Chart managing 2D scattered data (x and y), using 
     %a color scheme applied to the data points indicating the relative
     %data density.
@@ -188,14 +188,7 @@ classdef ScatterDensityChart < matlab.graphics.chartcontainer.ChartContainer
 
             arguments ( Input )
                 namedArgs.?ScatterDensityChart
-            end % arguments ( Input )
-
-            % Call the superclass constructor.
-            f = figure( "Visible", "off" );
-            figureCleanup = onCleanup( @() delete( f ) );
-            obj@matlab.graphics.chartcontainer.ChartContainer( ...
-                "Parent", f )
-            obj.Parent = [];
+            end % arguments ( Input )           
 
             % Set any user-defined properties.
             set( obj, namedArgs )

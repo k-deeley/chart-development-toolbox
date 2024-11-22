@@ -1,4 +1,4 @@
-classdef SettlementChart < matlab.ui.componentcontainer.ComponentContainer
+classdef SettlementChart < Component
     %SETTLEMENTCHART Chart displaying option prices against strike prices.
     %A settlement chart plots option prices on the y-axis against strike
     %prices on the x-axis. The option prices comprise put prices below
@@ -296,13 +296,7 @@ classdef SettlementChart < matlab.ui.componentcontainer.ComponentContainer
 
             arguments ( Input )
                 namedArgs.?SettlementChart
-            end % arguments ( Input )
-
-            % Call the superclass constructor.
-            obj@matlab.ui.componentcontainer.ComponentContainer( ...
-                "Parent", [], ...
-                "Units", "normalized", ...
-                "Position", [0, 0, 1, 1] )
+            end % arguments ( Input )           
 
             % Set any user-defined properties.
             set( obj, namedArgs )

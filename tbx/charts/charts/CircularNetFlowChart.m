@@ -1,4 +1,4 @@
-classdef CircularNetFlowChart < matlab.graphics.chartcontainer.ChartContainer
+classdef CircularNetFlowChart < Chart
     %CIRCULARNETFLOWCHART Illustrates the directed to/from relationships 
     %between pairs of categories.
 
@@ -108,14 +108,7 @@ classdef CircularNetFlowChart < matlab.graphics.chartcontainer.ChartContainer
             arguments ( Input )
                 namedArgs.?CircularNetFlowChart
             end % arguments ( Input )
-
-            % Call the superclass constructor.
-            f = figure( "Visible", "off" );
-            figureCleanup = onCleanup( @() delete( f ) );
-            obj@matlab.graphics.chartcontainer.ChartContainer( ...
-                "Parent", f )
-            obj.Parent = [];
-
+            
             % Set any user-defined properties.
             set( obj, namedArgs )
 

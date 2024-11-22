@@ -1,4 +1,4 @@
-classdef CylinderChart < matlab.graphics.chartcontainer.ChartContainer
+classdef CylinderChart < Chart
     %CYLINDERCHART Chart representing a stacked cylinder graph.
 
     % Copyright 2018-2025 The MathWorks, Inc.
@@ -114,16 +114,7 @@ classdef CylinderChart < matlab.graphics.chartcontainer.ChartContainer
 
             arguments ( Input )
                 namedArgs.?CylinderChart
-            end % arguments ( Input )
-
-            % Call the superclass constructor.
-            f = figure( "Visible", "off" );
-            figureCleanup = onCleanup( @() delete( f ) );
-            obj@matlab.graphics.chartcontainer.ChartContainer( ...
-                "Parent", f, ...
-                "Units", "normalized", ...
-                "Position", [0, 0, 1, 1] )
-            obj.Parent = [];
+            end % arguments ( Input )            
 
             % Set any user-defined properties.
             set( obj, namedArgs )

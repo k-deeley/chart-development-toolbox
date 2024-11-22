@@ -1,4 +1,4 @@
-classdef EdgeworthBowleyChart < matlab.graphics.chartcontainer.ChartContainer
+classdef EdgeworthBowleyChart < Chart
     %EDGEWORTHBOWLEYCHART Creates an Edgeworth-Bowley chart based on the
     %utility curves of two individuals and the Pareto-efficient contract
     %curve.
@@ -173,14 +173,7 @@ classdef EdgeworthBowleyChart < matlab.graphics.chartcontainer.ChartContainer
 
             arguments ( Input )
                 namedArgs.?EdgeworthBowleyChart
-            end % arguments ( Input )
-
-            % Call the superclass constructor.
-            f = figure( "Visible", "off" );
-            figureCleanup = onCleanup( @() delete( f ) );
-            obj@matlab.graphics.chartcontainer.ChartContainer( ...
-                "Parent", [] );
-            obj.Parent = [];
+            end % arguments ( Input )            
 
             % Set any user-defined properties.
             set( obj, namedArgs )

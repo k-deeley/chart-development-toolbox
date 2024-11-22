@@ -1,4 +1,4 @@
-classdef ScatterBoxChart < matlab.ui.componentcontainer.ComponentContainer
+classdef ScatterBoxChart < Component
     %SCATTERBOXCHART Chart managing a bivariate scatter plot and its
     %marginal boxplots.
     
@@ -498,13 +498,7 @@ classdef ScatterBoxChart < matlab.ui.componentcontainer.ComponentContainer
 
             arguments ( Input )
                 namedArgs.?ScatterBoxChart
-            end % arguments ( Input )
-
-            % Call the superclass constructor.
-            obj@matlab.ui.componentcontainer.ComponentContainer( ...
-                "Parent", [], ...
-                "Units", "normalized", ...
-                "Position", [0, 0, 1, 1] )
+            end % arguments ( Input )            
 
             % Set any user-defined properties.
             set( obj, namedArgs )

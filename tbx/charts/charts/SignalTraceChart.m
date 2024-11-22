@@ -1,4 +1,4 @@
-classdef SignalTraceChart < matlab.graphics.chartcontainer.ChartContainer
+classdef SignalTraceChart < Chart
     %SIGNALTRACECHART Chart for managing a collection of non-overlapping
     %signal traces plotted against a numeric time vector.
 
@@ -142,14 +142,7 @@ classdef SignalTraceChart < matlab.graphics.chartcontainer.ChartContainer
 
             arguments ( Input )
                 namedArgs.?SignalTraceChart
-            end % arguments ( Inputs )
-
-            % Call the superclass constructor.
-            f = figure( "Visible", "off" );
-            figureCleanup = onCleanup( @() delete( f ) );
-            obj@matlab.graphics.chartcontainer.ChartContainer( ...
-                "Parent", f )
-            obj.Parent = [];
+            end % arguments ( Inputs )           
 
             % Set any user-defined properties.
             set( obj, namedArgs )

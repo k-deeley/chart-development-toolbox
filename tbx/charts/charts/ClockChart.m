@@ -1,4 +1,4 @@
-classdef ClockChart < matlab.graphics.chartcontainer.ChartContainer
+classdef ClockChart < Chart
     %CLOCKCHART Illustrates the use of timer objects within charts.
 
     % Copyright 2024-2025 The MathWorks, Inc.
@@ -46,14 +46,7 @@ classdef ClockChart < matlab.graphics.chartcontainer.ChartContainer
 
             arguments ( Input )
                 namedArgs.?ClockChart
-            end % arguments ( Input )
-
-            % Call the superclass constructor.
-            f = figure( "Visible", "off" );
-            figureCleanup = onCleanup( @() delete( f ) );
-            obj@matlab.graphics.chartcontainer.ChartContainer( ...
-                "Parent", f )
-            obj.Parent = [];
+            end % arguments ( Input )            
 
             % Create the timer.
             obj.Timer = timer( "Period", 1, ...
