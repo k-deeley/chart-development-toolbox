@@ -1,38 +1,47 @@
 classdef Blip < matlab.mixin.SetGetExactNames
     %BLIP Class managing a radar blip. Radar blips are intended for use
-    %with the RadarScope chart.
+    %with a polar axes, or the RadarScope chart.
+
+    % Copyright 2021-2025 The MathWorks, Inc.
 
     properties ( Dependent )
-        % Position of the blip's point in (theta, rho) polar coordinates.
-        Position(1, 2) {mustBeReal, mustBeFinite}
+        % Blip parent.
+        Parent
         % Blip color.
-        Color {mustBeColor}
+        Color {validatecolor}
         % Blip visibility.
         Visible(1, 1) matlab.lang.OnOffSwitchState
-        % Text tag associated with the point.
-        Tag(1, 1) string
+        % Text string associated with the point.
+        String(1, 1) string
     end % properties ( Dependent )
 
-    properties ( Dependent, Access = ?RadarScopeChart )
-        % Blip parent.
-        Parent(:, 1) matlab.graphics.axis.PolarAxes {mustBeScalarOrEmpty}
-    end % properties ( Dependent, Access = ?RadarScope )
+    properties ( Dependent, SetObservable )
+        % Position of the blip's point in (theta, rho) polar coordinates.
+        Position(1, 2) {mustBeReal, mustBeFinite}
+    end % properties ( Dependent, SetObservable )
 
-    properties ( Access = private, Transient, NonCopyable )
+    properties ( Constant )
+        % Amber color.
+        Amber {validatecolor} = [1, 0.5, 0]
+    end % properties ( Constant )
+
+    properties ( Access = private )
         % Line object for the point.
-        Point(1, 1) matlab.graphics.chart.primitive.Line
+        Point(:, 1) matlab.graphics.chart.primitive.Line ...
+            {mustBeScalarOrEmpty}
         % Text object for the label.
-        Label(1, 1) matlab.graphics.primitive.Text
-    end % properties ( Access = private, Transient, NonCopyable )
+        Label(:, 1) matlab.graphics.primitive.Text ...
+            {mustBeScalarOrEmpty}
+    end % properties ( Access = private )
 
     methods
 
         function obj = Blip( namedArgs )
             %BLIP Construct a radar blip object.
 
-            arguments
+            arguments ( Input )
                 namedArgs.?Blip
-            end % arguments
+            end % arguments ( Input )
 
             % Create the graphics objects: a polar plot requires a
             % polar axes as the parent. We create an unplugged polar axes
@@ -56,6 +65,7 @@ classdef Blip < matlab.mixin.SetGetExactNames
                 "Color", amber, ...
                 "DeleteFcn", @obj.onGraphicsDeleted );
             pax.Children = flip( pax.Children );
+
             % Unplug the point and label from the temporary polar axes.
             set( pax.Children, "Parent", [] )
 
@@ -80,6 +90,7 @@ classdef Blip < matlab.mixin.SetGetExactNames
 
         function set.Parent( obj, value )
 
+            % Move the point and label to the new parent.
             set( [obj.Point, obj.Label], "Parent", value )
 
         end % set.Parent
@@ -123,17 +134,17 @@ classdef Blip < matlab.mixin.SetGetExactNames
 
         end % set.Visible
 
-        function value = get.Tag( obj )
+        function value = get.String( obj )
 
             value = string( obj.Label.String );
 
-        end % get.Tag
+        end % get.String
 
-        function set.Tag( obj, value )
+        function set.String( obj, value )
 
             obj.Label.String = value;
 
-        end % set.Tag
+        end % set.String
 
     end % methods
 
@@ -149,4 +160,4 @@ classdef Blip < matlab.mixin.SetGetExactNames
 
     end % methods ( Access = private )
 
-end % class definition
+end % classdef

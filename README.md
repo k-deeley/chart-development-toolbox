@@ -29,4 +29,4 @@ Some charts in the catalog rely on additional toolboxes.
 ## License
 The license for the Chart Development Toolbox is available in the [LICENSE.txt](LICENSE.txt) file in this GitHub repository.
 
-Copyright 2018-2024 The MathWorks, Inc.
+Copyright 2018-2025 The MathWorks, Inc.

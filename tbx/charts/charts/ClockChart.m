@@ -58,8 +58,11 @@ classdef ClockChart < Chart
 
             % Create a listener to delete the timer when the chart is
             % deleted.
+            weakObj = matlab.lang.WeakReference( obj );
+            callback = @( varargin ) weakObj.Handle.onChartDeleted( ...
+                varargin{:} );
             obj.DestructionListener = listener( obj, ...
-                "ObjectBeingDestroyed", @obj.onChartDeleted );
+                "ObjectBeingDestroyed", callback );
 
             % Set any user-specified properties.
             set( obj, namedArgs )

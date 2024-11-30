@@ -42,11 +42,11 @@ classdef WindRoseChart < Chart
         LineStyle(1, 1) string {mustBeLineStyle} = "-"
         % Patch edge color.
         EdgeColor {mustBeColor( EdgeColor, ...
-            ["flat", "none", "interp"] )} = "k"
+            ["flat", "none", "interp"] )} = [0.5, 0.5, 0.5]
         % Patch edge alpha.
         EdgeAlpha(1, 1) double {mustBeInRange( EdgeAlpha, 0, 1 )} = 1
         % Backdrop color.
-        BackdropColor {validatecolor} = [0.8725, 0.8725, 0.8725]
+        BackdropColor {validatecolor} = [0.85, 0.85, 0.85]
         % Backdrop line width.
         BackdropLineWidth(1, 1) double {mustBePositive, mustBeFinite} = 0.5
         % Backdrop line style.
@@ -83,9 +83,7 @@ classdef WindRoseChart < Chart
         % Legend font weight.
         LegendFontWeight(1, 1) string {mustBeFontWeight} = "normal"
         % Legend line width.
-        LegendLineWidth(1, 1) double {mustBePositive, mustBeFinite} = 0.5
-        % Legend text color.
-        LegendTextColor {mustBeColor( LegendTextColor, "none" )} = "k"
+        LegendLineWidth(1, 1) double {mustBePositive, mustBeFinite} = 0.5        
         % Legend title string.
         LegendTitle(1, 1) string = "Windspeed (m/s)"
     end % properties
@@ -221,10 +219,9 @@ classdef WindRoseChart < Chart
         function set.RadialLabelDirection( obj, value )
 
             % Perform a reverse lookup to determine the required angle
-            % (clockwise from North).
-            angles = num2cell( obj.RayAngles );
-            directions = values( obj.DirectionLookup, angles );
-            obj.RadialLabelAngle = angles{directions == value};
+            % (clockwise from North).            
+            directions = values( obj.DirectionLookup );
+            obj.RadialLabelAngle = obj.RayAngles(directions == value);
 
             % Update the labels.
             obj.updateRadialLabels()
@@ -368,9 +365,7 @@ classdef WindRoseChart < Chart
                     obj.TextBoxes(k1, k2) = text( "Parent", obj.Axes, ...
                         "PickableParts", "none", ...
                         "HorizontalAlignment", "left", ...
-                        "VerticalAlignment", "middle", ...
-                        "BackgroundColor", "w", ...
-                        "EdgeColor", "k", ...
+                        "VerticalAlignment", "middle", ...                       
                         "LineWidth", 1.5, ...
                         "Visible", "off" );
                 end % for k2
@@ -559,8 +554,7 @@ classdef WindRoseChart < Chart
                 "FontAngle", obj.LegendFontAngle, ...
                 "FontSize", obj.LegendFontSize, ...
                 "FontWeight", obj.LegendFontWeight, ...
-                "LineWidth", obj.LegendLineWidth, ...
-                "TextColor", obj.LegendTextColor )
+                "LineWidth", obj.LegendLineWidth )
             obj.Legend.Title.String = obj.LegendTitle;
 
         end % update
@@ -671,7 +665,7 @@ classdef WindRoseChart < Chart
             currentFaceColor = obj.Patches(clickedPatch).FaceColor;
             obj.Patches(clickedPatch).FaceColor = ...
                 [1, 1, 1] - currentFaceColor;
-            pause( 0.1 )
+            pause( 0.2 )
             obj.Patches(clickedPatch).FaceColor = currentFaceColor;
 
             % Toggle the visibility of the corresponding text box.
