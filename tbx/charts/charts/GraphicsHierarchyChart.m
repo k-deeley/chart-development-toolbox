@@ -69,6 +69,12 @@ classdef GraphicsHierarchyChart < Chart
 
         end % set.ShowHiddenObjects
 
+        function varargout = title( obj, varargin )
+
+            [varargout{1:nargout}] = title( obj.Axes, varargin{:} );
+
+        end % title
+
     end % methods
 
     methods ( Access = protected )
@@ -79,6 +85,7 @@ classdef GraphicsHierarchyChart < Chart
             % Create the axes.
             obj.Axes = axes( "Parent", obj.getLayout(), ...
                 "Visible", "off" );
+            obj.Axes.Title.Visible = "on";
 
         end % setup
 
