@@ -5,6 +5,13 @@ classdef EdgeworthBowleyChart < Chart
 
     % Copyright 2018-2025 The MathWorks, Inc.
 
+    properties
+        % Line width.
+        LineWidth(1, 1) double {mustBePositive, mustBeFinite} = 1.5
+        % Marker size.
+        MarkerSize(1, 1) double {mustBePositive, mustBeFinite} = 8
+    end % properties
+
     properties ( Dependent )
         % Chart A-data: this is a matrix defining the utility curves for
         % the individual A.
@@ -24,9 +31,9 @@ classdef EdgeworthBowleyChart < Chart
         % Internal storage for the BData property.
         BData_(:, :) double {mustBeReal} = double.empty( 0, 1 )
         % Internal storage for the Quantity1 property.
-        Quantity1_(1, 1) double {mustBeReal} = 0
+        Quantity1_(1, 1) double {mustBeReal} = 1
         % Internal storage for the Quantity2 property.
-        Quantity2_(1, 1) double {mustBeReal} = 0
+        Quantity2_(1, 1) double {mustBeReal} = 1
         % Fitted curve data for A.
         ACurveFit(:, :) double {mustBeReal} = double.empty( 0, 0 )
         % Fitted curve data for B.
@@ -60,6 +67,9 @@ classdef EdgeworthBowleyChart < Chart
         % Product dependencies.
         Dependencies(1, :) string = ["MATLAB", ...
             "Statistics and Machine Learning Toolbox"]
+        % Description.
+        ShortDescription(1, 1) string = "Plot the utility curves of" + ...
+            " two individuals and the Pareto-efficient contract curve"
     end % properties ( Constant, Hidden )
 
     methods
@@ -204,6 +214,12 @@ classdef EdgeworthBowleyChart < Chart
 
         end % grid
 
+        function varargout = axis( obj, varargin )
+            
+            [varargout{1:nargout}] = axis( obj.Axes, varargin{:} );
+
+        end % axis
+
     end % methods
 
     methods ( Access = protected )
@@ -265,6 +281,10 @@ classdef EdgeworthBowleyChart < Chart
                 0, obj.Quantity2_] )
             paretoSet( obj ) % Evaluate the Pareto set
             plotPareto( obj ) % Plot the Pareto Set
+            set( obj.AUtilityLines, "LineWidth", obj.LineWidth )
+            set( obj.BUtilityLines, "LineWidth", obj.LineWidth )
+            set( obj.ContractLine, "LineWidth", obj.LineWidth )
+            obj.ScatterPoints.MarkerSize = obj.MarkerSize;
 
         end % update
 

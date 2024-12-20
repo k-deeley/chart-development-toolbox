@@ -109,7 +109,7 @@ opts.ToolboxFiles(markdownFilesIdx) = [];
 matlab.addons.toolbox.packageToolbox( opts )
 fprintf( 1, "[+] %s\n", opts.OutputFile )
 
-% Add license.
+% Add the license.
 licenseText = fileread( fullfile( projectRoot, "LICENSE.txt" ) );
 mlAddonSetLicense( char( opts.OutputFile ), ...
     struct( "type", 'BSD', "text", licenseText ) );

@@ -27,8 +27,9 @@ column.Tag = "GettingStartedColumn";
 section.add( column )
 
 % Add the button for the Getting Started guide.
+toolboxLogo = imresize( imread( "toolboxLogo.png" ), [24, 24] );
 button = matlab.ui.internal.toolstrip.Button( ...
-    "Icon", "plotPredictedVsActual" );
+    "Icon", matlab.ui.internal.toolstrip.Icon( toolboxLogo ) );
 button.Text = "Getting Started";
 button.Description = "Open the Getting Started guide";
 button.ButtonPushedFcn = @onGettingStartedButtonPushed;
@@ -76,15 +77,19 @@ section.add( column )
 category = matlab.ui.internal.toolstrip.GalleryCategory( "Chart Examples" );
 
 % Create gallery items for the graphical views.
-tiles = load( "Tiles.mat" );
-chartNames = fieldnames( tiles.ChartTiles );
+imageFolder = fullfile( chartsRoot(), "app", "images" );
+
+chartNames = struct2table( dir( fullfile( imageFolder, "*Black.png" ) ) );
+chartNames = string( fullfile( chartNames.folder, chartNames.name ) );
+
 for k = 1 : numel( chartNames )
-    name = chartNames{k};
+    [~, name] = fileparts( chartNames(k) );
+    name = erase( name, "Black" );
     item = matlab.ui.internal.toolstrip.GalleryItem( name );
-    icon = tiles.ChartTiles.(name);
-    icon = imresize( icon, [24, 24] );
+    icon = imread( chartNames(k) );
+    icon = imresize( icon, [24, 24], "bicubic" );
     item.Icon = matlab.ui.internal.toolstrip.Icon( icon );
-    item.Description = name + " Chart";
+    item.Description = eval( name + ".ShortDescription" );
     category.add( item )
 end % for
 
@@ -95,7 +100,8 @@ popup.add( category )
 
 % Create the main gallery and add it to the view column.
 gallery = matlab.ui.internal.toolstrip.Gallery( popup, ...
-    'MinColumnCount', 3, 'MaxColumnCount', 5 );
+    'MinColumnCount', 1, 'MaxColumnCount', 6 );
+gallery.Description = "Example charts";
 column.add( gallery )
 
 % Make the app visible.

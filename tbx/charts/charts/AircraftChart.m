@@ -7,7 +7,7 @@ classdef AircraftChart < Chart
 
     properties
         % Aircraft triangulation coordinate data.
-        Triangulation(:, 3) triangulation = stlread( "avion31.stl" )
+        Triangulation(:, 3) triangulation = defaultAircraft()
     end % properties
 
     properties ( Access = private, Transient, NonCopyable )
@@ -19,6 +19,14 @@ classdef AircraftChart < Chart
         % Patch object for the aircraft.
         Patch(:, 1) matlab.graphics.primitive.Patch {mustBeScalarOrEmpty}
     end % properties ( Access = private, Transient, NonCopyable )
+
+    properties ( Constant, Hidden )
+        % Product dependencies.
+        Dependencies(1, :) string = "MATLAB"
+        % Description.
+        ShortDescription(1, 1) string = "Render an aircraft and " + ...
+            "update its attitude (roll, pitch, and yaw)"
+    end % properties ( Constant, Hidden )
 
     methods
 
@@ -60,6 +68,34 @@ classdef AircraftChart < Chart
             obj.Transform.Matrix = eye( 4 );
 
         end % reset
+
+        function varargout = title( obj, varargin )
+            %TITLE Add the specified title to the aircraft chart.
+
+            [varargout{1:nargout}] = title( obj.Axes, varargin{:} );
+
+        end % title
+
+        function box( obj, varargin )
+            %BOX Control chart axes box.
+
+            box( obj.Axes, varargin{:} )
+
+        end % box
+
+        function varargout = view( obj, varargin )
+            %VIEW Camera line of sight.
+
+            [varargout{1:nargout}] = view( obj.Axes, varargin{:} );
+
+        end % view
+
+        function varargout = axis( obj, varargin )
+            %AXIS Set axis limits and aspect ratios.
+
+            [varargout{1:nargout}] = axis( obj.Axes, varargin{:} );
+
+        end % axis
 
     end % methods
 
@@ -159,3 +195,20 @@ classdef AircraftChart < Chart
     end % methods ( Access = private )
 
 end % classdef
+
+function tr = defaultAircraft()
+%DEFAULTAIRCRAFT Import an aircraft triangulation.
+
+arguments ( Output )
+    tr(:, 3) triangulation
+end % arguments ( Output )
+
+% Import the triangulation. 
+% Reference:
+% Airplane by Yorchmur, https://www.printables.com/model/34767-airplane, 
+% accessed in December 2024, licensed under the Creative Commons 
+% Attribution 4.0 International License.
+stlFilePath = fullfile( chartsDocRoot(), "data", "avion31.stl" );
+tr = stlread( stlFilePath );
+
+end % defaultAircraft

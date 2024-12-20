@@ -14,7 +14,9 @@ classdef CircularNetFlowChart < Chart
     properties
         % Transparency of the link patches.
         FaceAlpha(1, 1) double {mustBeInRange( FaceAlpha, 0, 1 )} = 0.5
-    end % Public properties
+        % Visibility of the text labels.
+        ShowLabels(1, 1) matlab.lang.OnOffSwitchState = "on"
+    end % properties
     
     properties ( Dependent, SetAccess = private )
         % Derived net flow, presented as a table.
@@ -97,6 +99,9 @@ classdef CircularNetFlowChart < Chart
     properties ( Constant, Hidden )
         % Product dependencies.
         Dependencies(1, :) string = "MATLAB"
+        % Description.
+        ShortDescription(1, 1) string = "Show directed " + ...
+            "to/from relationships between pairs of categories"
     end % properties ( Constant, Hidden )
     
     methods
@@ -499,6 +504,8 @@ classdef CircularNetFlowChart < Chart
             
             % Refresh the chart's decorative properties.
             set( obj.LinkPatches, "FaceAlpha", obj.FaceAlpha )
+            set( [obj.NodeLabels; obj.PatchLabels; obj.OuterLabels ], ...
+                "Visible", obj.ShowLabels )
             
         end % update
         

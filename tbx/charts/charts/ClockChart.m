@@ -36,6 +36,9 @@ classdef ClockChart < Chart
     properties ( Constant, Hidden )
         % Product dependencies.
         Dependencies(1, :) string = "MATLAB"
+        % Description.
+        ShortDescription(1, 1) string = "Display an analog clock" + ...
+            " using a timer"
     end % properties ( Constant, Hidden )
 
     methods

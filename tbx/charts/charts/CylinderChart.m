@@ -46,6 +46,8 @@ classdef CylinderChart < Chart
     properties ( Constant, Hidden )
         % Product dependencies.
         Dependencies(1, :) string = "MATLAB"
+        % Description.
+        ShortDescription(1, 1) string = "Plot data using stacked cylinders"
     end % properties ( Constant, Hidden )
 
     methods
@@ -159,6 +161,12 @@ classdef CylinderChart < Chart
             [varargout{1:nargout}] = xtickangle( obj.Axes, varargin{:} );
 
         end % xtickangle
+
+        function varargout = axis( obj, varargin )
+
+            [varargout{1:nargout}] = axis( obj.Axes, varargin{:} );
+
+        end % axis
 
     end % methods
 

@@ -10,6 +10,12 @@ classdef InductionMotorChart < Chart
     properties
         % Operating point of the motor.
         OperatingPoint(1, 2) double {mustBeReal, mustBeFinite} = [0, 0]
+        % Width of the rated and reduced curves.
+        LineWidth(1, 1) double {mustBePositive, mustBeFinite} = 2
+        % Operating point marker size.
+        MarkerSize(1, 1) double {mustBePositive, mustBeFinite} = 20
+        % Visibility of the legend.
+        LegendVisible(1, 1) matlab.lang.OnOffSwitchState = "on"
     end % properties
 
     properties ( Dependent )
@@ -250,6 +256,12 @@ classdef InductionMotorChart < Chart
                 obj.FullUpdateRequired = false;
 
             end % if
+
+            % Update the decorative properties.
+            obj.Axes.Legend.Visible = obj.LegendVisible;
+            set( [obj.ReducedCurves, obj.RatedCurves], ...
+                "LineWidth", obj.LineWidth )
+            obj.OperatingPointPlot.MarkerSize = obj.MarkerSize;
 
         end % update
 

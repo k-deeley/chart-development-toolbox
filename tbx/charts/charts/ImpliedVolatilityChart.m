@@ -87,6 +87,10 @@ classdef ImpliedVolatilityChart < Component
             "Optimization Toolbox", ...
             "Financial Toolbox", ...
             "Financial Instruments Toolbox"]
+        % Description.
+        ShortDescription(1, 1) string = "Plot an implied " + ...
+            "volatility surface as a function of the option strike" + ...
+            " price and time to expiry"
     end % properties ( Constant, Hidden )
 
     methods
@@ -203,12 +207,12 @@ classdef ImpliedVolatilityChart < Component
     methods
 
         function obj = ImpliedVolatilityChart( namedArgs )
-            %IMPLIEDVOLATILITYCHART Construct an ImpliedVolatilityChart, 
+            %IMPLIEDVOLATILITYCHART Construct an ImpliedVolatilityChart,
             %given optional name-value arguments.
 
             arguments ( Input )
-                namedArgs.?ImpliedVolatilityChart 
-            end % arguments ( Input )            
+                namedArgs.?ImpliedVolatilityChart
+            end % arguments ( Input )
 
             % Set any user-defined properties.
             set( obj, namedArgs )
@@ -254,6 +258,18 @@ classdef ImpliedVolatilityChart < Component
             [varargout{1:nargout}] = colormap( obj.Axes, varargin{:} );
 
         end % colormap
+
+        function varargout = view( obj, varargin )
+
+            [varargout{1:nargout}] = view( obj.Axes, varargin{:} );
+
+        end % view
+
+        function varargout = axis( obj, varargin )
+
+            [varargout{1:nargout}] = axis( obj.Axes, varargin{:} );
+
+        end % axis
 
     end % methods
 
@@ -304,7 +320,7 @@ classdef ImpliedVolatilityChart < Component
             controlLayout = uigridlayout( p, [3, 2], ...
                 "ColumnWidth", ["fit", "fit"], ...
                 "RowHeight", ["fit", "fit", "fit"] );
-            
+
             % Interpolation methods dropdown menu.
             uilabel( "Parent", controlLayout, ...
                 "Text", "Interpolation method:" );
@@ -316,7 +332,7 @@ classdef ImpliedVolatilityChart < Component
                 "Select the implied volatility interpolation method", ...
                 "Value", obj.InterpolationMethod_, ...
                 "ValueChangedFcn", @obj.onInterpolationMethodSelected );
-            
+
             % Colorbar check box.
             obj.ColorbarCheckBox = uicheckbox( ...
                 "Parent", controlLayout, ...
@@ -337,7 +353,7 @@ classdef ImpliedVolatilityChart < Component
                 set( obj.Line, "XData", obj.OptionData_.(1), ...
                     "YData", obj.OptionData_.(2), ...
                     "ZData", obj.OptionData_.(3) )
-            
+
                 % Update the volatility surface.
                 set( obj.Surface, "XData", obj.UniqueExpiryTimes, ...
                     "YData", obj.FineStrike, ...
