@@ -13,17 +13,14 @@ classdef Blip < matlab.mixin.SetGetExactNames
         Visible(1, 1) matlab.lang.OnOffSwitchState
         % Text string associated with the point.
         String(1, 1) string
+        % Marker size.
+        MarkerSize(1, 1) double {mustBePositive, mustBeFinite}
     end % properties ( Dependent )
 
     properties ( Dependent, SetObservable )
         % Position of the blip's point in (theta, rho) polar coordinates.
         Position(1, 2) {mustBeReal, mustBeFinite}
-    end % properties ( Dependent, SetObservable )
-
-    properties ( Constant )
-        % Amber color.
-        Amber {validatecolor} = [1, 0.5, 0]
-    end % properties ( Constant )
+    end % properties ( Dependent, SetObservable )    
 
     properties ( Access = private )
         % Line object for the point.
@@ -145,6 +142,18 @@ classdef Blip < matlab.mixin.SetGetExactNames
             obj.Label.String = value;
 
         end % set.String
+
+        function value = get.MarkerSize( obj )
+
+            value = obj.Point.MarkerSize;
+            
+        end % get.MarkerSize
+
+        function set.MarkerSize( obj, value )
+
+            obj.Point.MarkerSize = value;
+
+        end % set.MarkerSize
 
     end % methods
 

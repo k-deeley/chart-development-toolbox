@@ -40,6 +40,9 @@ classdef LineGradientChart < Chart
     properties ( Constant, Hidden )
         % Product dependencies.
         Dependencies(1, :) string = "MATLAB"
+        % Description.
+        ShortDescription(1, 1) string = "Plot a variable-color " + ...
+            "curve against a date/time vector"
     end % properties ( Constant, Hidden )
     
     methods
@@ -157,6 +160,12 @@ classdef LineGradientChart < Chart
             [varargout{1:nargout}] = colorbar( obj.Axes, varargin{:} );
             
         end % colorbar
+
+        function varargout = axis( obj, varargin )
+
+            [varargout{1:nargout}] = axis( obj.Axes, varargin{:} );
+
+        end % axis
         
     end % methods
     

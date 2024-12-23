@@ -14,6 +14,8 @@ classdef InductionMotorChart < Chart
         LineWidth(1, 1) double {mustBePositive, mustBeFinite} = 2
         % Operating point marker size.
         MarkerSize(1, 1) double {mustBePositive, mustBeFinite} = 20
+        % Transparency of the patches.
+        FaceAlpha(1, 1) double {mustBeInRange( FaceAlpha, 0, 1 )} = 0.6
         % Visibility of the legend.
         LegendVisible(1, 1) matlab.lang.OnOffSwitchState = "on"
     end % properties
@@ -53,6 +55,14 @@ classdef InductionMotorChart < Chart
         % Logical flag indicating whether a full chart update is required.
         FullUpdateRequired(1, 1) logical = false
     end % properties ( Access = private )
+
+    properties ( Constant, Hidden )
+        % Product dependencies.
+        Dependencies(1, :) string = "MATLAB"
+        % Description.
+        ShortDescription(1, 1) string = "Display the operating point" + ...
+            " of an induction motor in speed-torque coordinates"
+    end % properties ( Constant, Hidden )
 
     events ( NotifyAccess = private, HasCallbackProperty )
         % The operating point has moved out of the normal running region.
@@ -116,6 +126,12 @@ classdef InductionMotorChart < Chart
             grid( obj.Axes, varargin{:} )
 
         end % grid
+
+        function varargout = axis( obj, varargin )
+
+            [varargout{1:nargout}] = axis( obj.Axes, varargin{:} );
+
+        end % axis
 
     end % methods
 
@@ -262,6 +278,8 @@ classdef InductionMotorChart < Chart
             set( [obj.ReducedCurves, obj.RatedCurves], ...
                 "LineWidth", obj.LineWidth )
             obj.OperatingPointPlot.MarkerSize = obj.MarkerSize;
+            set( [obj.NormalRegionPatch, obj.BufferRegionPatch, ...
+                obj.OverloadRegionPatch], "FaceAlpha", obj.FaceAlpha )
 
         end % update
 

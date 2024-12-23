@@ -68,7 +68,7 @@ axis( AC, "off" )
 view( AC, 2 )
 
 % Export.
-exportImages( "AircraftChart", AC )
+exportImage( "AircraftChart", AC )
 
 end % exportAircraftChart
 
@@ -95,7 +95,7 @@ view( AC, 2 )
 pause( 0.5 )
 
 % Export.
-exportImages( "AnnulusChart", t.Parent )
+exportImage( "AnnulusChart", t.Parent )
 
 end % exportAnnulusChart
 
@@ -116,7 +116,7 @@ drawnow()
 title( CNFC, "" )
 
 % Export.
-exportImages( "CircularNetFlowChart", CNFC )
+exportImage( "CircularNetFlowChart", CNFC )
 
 end % exportCircularNetFlowChart
 
@@ -126,10 +126,11 @@ function exportClockChart()
 % Create the chart.
 f = uifigure();
 figureCleanup = onCleanup( @() delete( f ) );
-CC = ClockChart( "Parent", f );
+CC = ClockChart( "Parent", f, ...
+    "ShowNumbers", "off" );
 
 % Export.
-exportImages( "ClockChart", CC )
+exportImage( "ClockChart", CC )
 
 end % exportClockChart
 
@@ -143,7 +144,7 @@ CC = CylinderChart( "Parent", f, "Data", magic( 2 ) );
 axis( CC, "off" )
 
 % Export.
-exportImages( "CylinderChart", CC )
+exportImage( "CylinderChart", CC, [40, 50] )
 
 end % exportCylinderChart
 
@@ -160,13 +161,14 @@ data.B = data.B(:, 1:2:end);
 EBC = EdgeworthBowleyChart( "Parent", f, ...
     "AData", data.A, ...
     "BData", data.B, ...
-    "LineWidth", 7, ...
+    "LineWidth", 10, ...
+    "LineColor", "y", ...
     "MarkerSize", 16 );
 axis( EBC, "off" )
 title( EBC, "" )
 
 % Export.
-exportImages( "EdgeworthBowleyChart", EBC )
+exportImage( "EdgeworthBowleyChart", EBC, [40, 50] )
 
 end % exportEdgeworthBowleyChart
 
@@ -191,7 +193,7 @@ GHC = GraphicsHierarchyChart( "Parent", f2, ...
     "ShowNodeLabels", "off" );
 
 % Export.
-exportImages( "GraphicsHierarchyChart", GHC )
+exportImage( "GraphicsHierarchyChart", GHC, [40, 50] )
 
 end % exportGraphicsHierarchyChart
 
@@ -214,25 +216,271 @@ pause( 0.5 )
 % Export.
 ax = t.Parent;
 ax.Color = "none";
-exportImages( "ImpliedVolatilityChart", ax )
+exportImage( "ImpliedVolatilityChart", ax, [40, 50] )
 
 end % exportImpliedVolatilityChart
 
-function exportImages( name, ax )
-%EXPORTIMAGES Export PNG images of the given chart.
+function exportInductionMotorChart()
+%EXPORTINDUCTIONMOTORCHART Export the InductionMotorChart.
+
+% Create the chart.
+f = uifigure();
+figureCleanup = onCleanup( @() delete( f ) );
+dataFolder = fullfile( chartsDocRoot(), "data", "MotorParameters" );
+IMP = InductionMotorParameters( dataFolder );
+IMC = InductionMotorChart( "Parent", f, ...
+    "MotorParameters", IMP, ...
+    "LegendVisible", "off", ...
+    "LineWidth", 2, ...
+    "MarkerSize", 50, ...
+    "OperatingPoint", [2000, 200], ...
+    "FaceAlpha", 1 );
+axis( IMC, "off" )
+title( IMC, "" )
+
+% Export.
+exportImage( "InductionMotorChart", IMC, [40, 50] )
+
+end % exportInductionMotorChart
+
+function exportLineGradientChart()
+%EXPORTLINEGRADIENTCHAT Export the LineGradientChart.
+
+% Set the seed.
+s = rng();
+seedCleanup = onCleanup( @() rng( s ) );
+rng( "default" )
+
+% Create the chart.
+f = uifigure();
+figureCleanup = onCleanup( @() delete( f ) );
+dates = datetime( 1990, 1, 1 ) : datetime( 2020, 1, 1 );
+steps = [0, randn( size( dates(1:end-1) ) )];
+walk = cumsum( steps );
+LGC = LineGradientChart( "Parent", f, ...
+    "XData", dates, ...
+    "YData", walk, ...
+    "LineWidth", 7 );
+colormap( LGC, "cool" )
+axis( LGC, "off" )
+pause( 0.5 )
+
+% Export.
+exportImage( "LineGradientChart", LGC, [40, 50] )
+
+end % exportLineGradientChart
+
+function exportLineSelectorChart()
+%EXPORTLINESELECTORCHART Export the LineSelectorChart.
+
+% Set the seed.
+s = rng();
+seedCleanup = onCleanup( @() rng( s ) );
+rng( "default" )
+
+% Create the chart.
+f = uifigure();
+figureCleanup = onCleanup( @() delete( f ) );
+x = 1 : 100;
+y = cumsum( randn( numel( x ), 2 ) );
+LSC = LineSelectorChart( "Parent", f, ...
+    "XData", x, ...
+    "YData", y, ...
+    "SelectedColor", [1, 0.5, 0], ...
+    "TraceColor", [1, 1, 1], ...
+    "TraceLineWidth", 5, ...
+    "SelectedLineWidth", 7 );
+pause( 0.5 )
+LSC.select( 2 )
+axis( LSC, "off" )
+
+% Export.
+exportImage( "LineSelectorChart", LSC, [40, 50] )
+
+end % exportLineSelectorChart
+
+function exportPolarChart()
+%EXPORTPOLARCHART Export the PolarChart.
+
+% Create the figure.
+f = uifigure();
+figureCleanup = onCleanup( @() delete( f ) );
+months = 1 : 12;
+meanMonthlyTemps = [4, 5, 6, 9, 12, 16, 17, 18, 15, 11, 7, 4;
+    3, 4, 6, 8, 11, 13, 15, 15, 13, 10, 6, 4].';
+PC = PolarChart( "Parent", f, ...
+    "AngularData", months, ...
+    "RadialData", meanMonthlyTemps, ...
+    "LineWidth", 8 );
+axis( PC, "off" )
+
+% Export.
+exportImage( "PolarChart", PC )
+
+end % exportPolarChart
+
+function exportRadarScope()
+%EXPORTRADARSCOPE Export the RadarScope.
+
+% Create the chart.
+f = figure();
+figureCleanup = onCleanup( @() delete( f ) );
+RS = RadarScope( "Parent", f, ...
+    "GridLineWidth", 5, ...
+    "GridAlpha", 1, ...
+    "ShowProximityLamp", "off" );
+t = title( RS, "" );
+rticks( RS, 0:20:100 )
+rlabel( RS, "" )
+thetalabel( RS, "" )
+rticklabels( RS, [] )
+thetaticklabels( RS, [] )
+for k = 1 : 6
+    B = Blip( "MarkerSize", 120, ...
+        "Position", [deg2rad( 60 * k ), 50] );
+    RS.addBlip( B )
+end % for
+pause( 0.5 )
+
+% Export.
+exportImage( "RadarScope", t.Parent )
+
+end % exportRadarScope
+
+function exportRangefinderChart()
+%EXPORTRANGEFINDERCHART Export the RangefinderChart.
+
+% Set the seed.
+s = rng();
+seedCleanup = onCleanup( @() rng( s ) );
+rng( "default" )
+
+% Create the chart.
+f = uifigure();
+figureCleanup = onCleanup( @() delete( f ) );
+numPoints = 50;
+x = 2 * randn( numPoints, 1 );
+y = 2 * x + 1 + 2 * randn( numPoints, 1 );
+RFC = RangefinderChart( "Parent", f, ...
+    "XData", x, ...
+    "YData", y, ...
+    "Marker", ".", ...
+    "SizeData", 1500, ...
+    "LineWidth", 10 );
+axis( RFC, "off" )
+
+% Export.
+exportImage( "RangefinderChart", RFC, [40, 50] )
+
+end % exportRangefinderChart
+
+function exportSankeyChart()
+%EXPORTSANKEYCHART Export the SankeyChart.
+
+% Create the chart.
+f = uifigure();
+figureCleanup = onCleanup( @() delete( f ) );
+data = load( fullfile( chartsDocRoot(), "data", "Graph.mat" ) );
+SC = SankeyChart( "Parent", f, ...
+    "GraphData", digraph( data.linkData ), ...
+    "LinkColor", "gradient", ...
+    "LinkType", "vtanh", ...
+    "NodeWidth", 0.2, ...
+    "NodePadRatio", 0.25, ...
+    "NodeLabelsVisible", "off" );
+SC.YNodeData(13:end) = SC.YNodeData(13:end) - 50;
+
+% Export.
+exportImage( "SankeyChart", SC, [40, 50] )
+
+end % exportSankeyChart
+
+function exportScatterBoxChart()
+%EXPORTSCATTERBOXCHART Export the ScatterBoxChart.
+
+% Set the seed.
+s = rng();
+seedCleanup = onCleanup( @() rng( s ) );
+rng( "default" )
+
+% Create the chart.
+f = uifigure();
+figureCleanup = onCleanup( @() delete( f ) );
+x = randn( 100, 1 );
+y = 2 * x + 1 + 3 * randn( size( x ) );
+SBC = ScatterBoxChart( "Parent", f, ...
+    "XData", x, ...
+    "YData", y, ...
+    "ScatterSizeData", 1200, ...
+    "BoxLineWidth", 8, ...
+    "BoxFaceColor", "m" );
+legend( SBC, "off" )
+title( SBC, "" );
+axis( SBC, "off" )
+d = hypot( x, y );
+n = numel( x );
+d = round( 1 + ( n - 1 ) * rescale( d ) );
+map = cool( n );
+colorGradient = map(d, :);
+SBC.ScatterCData = colorGradient;
+
+% Export.
+exportImage( "ScatterBoxChart", SBC, [40, 50] )
+
+end % exportScatterBoxChart
+
+function exportImage( name, gobj, resolution )
+%EXPORTIMAGE Export large and small PNG images of the given chart using a 
+%transparent background.
 
 arguments ( Input )
     name(1, 1) string    
-    ax(1, 1) matlab.graphics.Graphics
+    gobj(1, 1) matlab.graphics.Graphics
+    resolution(1, 2) double {mustBePositive, mustBeInteger} = [40, 40]
 end % arguments ( Input )
 
 % Export the axes using both black and white backgrounds.
 colors = ["Black", "White"];
 pngPath = fullfile( exportPath(), name + colors + ".png" );
 for k = 1 : numel( colors )
-    exportgraphics( ax, pngPath(k), ...
+    exportgraphics( gobj, pngPath(k), ...
         "Resolution", 300, ...
         "BackgroundColor", colors(k) )
 end % for
+
+% Merge the two images to create an image with a transparent background.
+black = imread( pngPath(1) );
+white = imread( pngPath(2) );
+white = imresize( white, size( black, 1:2 ), "bicubic" );
+black = double( black ) / 255;
+white = double( white ) / 255;
+alpha = mean( 1 - white + black, 3 );
+alpha = max( 0, min( alpha, 1 ) );
+nonZeroAlpha = alpha >= eps;
+pngrgb = zeros( size( black ) );
+
+for k = 1 : 3
+    currentSlice = black(:, :, k);
+    zeroSlice = pngrgb(:, :, k);
+    zeroSlice(nonZeroAlpha) = currentSlice(nonZeroAlpha) ./ ...
+        alpha(nonZeroAlpha);
+    pngrgb(:, :, k) = zeroSlice;
+end % for
+
+pngrgb = max( 0, min( pngrgb, 1 ) );
+pngrgb = uint8( 255 * pngrgb );
+
+% Export the image with transparent background and remove the black and
+% white background images.
+exportName = fullfile( exportPath(), name + ".png" );
+imwrite( pngrgb, exportName, "Alpha", alpha )
+delete( pngPath(1) )
+delete( pngPath(2) )
+
+% Export an icon-size version of the image.
+pngrgb24 = imresize( pngrgb, resolution, "bicubic" );
+alpha24 = imresize( alpha, resolution, "bicubic" );
+export24Name = fullfile( exportPath(), name + "40.png" );
+imwrite( pngrgb24, export24Name, "Alpha", alpha24 )
 
 end % exportImages

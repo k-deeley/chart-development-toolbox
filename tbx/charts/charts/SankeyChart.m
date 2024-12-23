@@ -1,5 +1,5 @@
 classdef SankeyChart < Chart
-    %SANKEYCHART Illustrates the flow between different states.
+    %SANKEYCHART Illustrate the flow between different states.
 
     % Copyright 2018-2025 The MathWorks, Inc.
 
@@ -106,6 +106,9 @@ classdef SankeyChart < Chart
     properties ( Constant, Hidden )
         % Product dependencies.
         Dependencies(1, :) string = "MATLAB"
+        % Description.
+        ShortDescription(1, 1) string = "Illustrate the flow between" + ...
+            " different states"
     end % properties ( Constant, Hidden )
 
     methods

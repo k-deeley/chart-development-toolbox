@@ -6,8 +6,10 @@ classdef EdgeworthBowleyChart < Chart
     % Copyright 2018-2025 The MathWorks, Inc.
 
     properties
-        % Line width.
+        % Contract line width.
         LineWidth(1, 1) double {mustBePositive, mustBeFinite} = 1.5
+        % Contract line color.
+        LineColor {validatecolor} = [0, 0.5, 0]
         % Marker size.
         MarkerSize(1, 1) double {mustBePositive, mustBeFinite} = 8
     end % properties
@@ -69,7 +71,8 @@ classdef EdgeworthBowleyChart < Chart
             "Statistics and Machine Learning Toolbox"]
         % Description.
         ShortDescription(1, 1) string = "Plot the utility curves of" + ...
-            " two individuals and the Pareto-efficient contract curve"
+            " two individuals and the derived Pareto-efficient " + ...
+            "contract curve"
     end % properties ( Constant, Hidden )
 
     methods
@@ -234,7 +237,7 @@ classdef EdgeworthBowleyChart < Chart
             obj.ContractLine = line( "Parent", obj.Axes, ...
                 "XData", NaN, ...
                 "YData", NaN, ...
-                "Color", [0 0.5 0], ...
+                "Color", [0, 0.5, 0], ...
                 "LineStyle", "-", ...
                 "Linewidth", 2, ...
                 "LineJoin", "round" );
@@ -273,7 +276,7 @@ classdef EdgeworthBowleyChart < Chart
         function update( obj )
             %UPDATE Refresh the chart graphics.
 
-            % Update the chart graphics.
+            % Refresh the chart graphics.
             plotScatter( obj ) % Plot the AData and BData
             fitCurves( obj ) % Obtain the fitted curves
             plotFittedCurves( obj ) % Plot the fitted lines
@@ -284,7 +287,10 @@ classdef EdgeworthBowleyChart < Chart
             set( obj.AUtilityLines, "LineWidth", obj.LineWidth )
             set( obj.BUtilityLines, "LineWidth", obj.LineWidth )
             set( obj.ContractLine, "LineWidth", obj.LineWidth )
+
+            % Update the chart's decorative properties.
             obj.ScatterPoints.MarkerSize = obj.MarkerSize;
+            obj.ContractLine.Color = obj.LineColor;
 
         end % update
 

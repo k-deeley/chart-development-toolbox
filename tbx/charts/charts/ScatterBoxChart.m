@@ -1,6 +1,5 @@
 classdef ScatterBoxChart < Component
-    %SCATTERBOXCHART Chart managing a bivariate scatter plot and its
-    %marginal boxplots.
+    %SCATTERBOXCHART Bivariate scatter plot with marginal boxplots.
     
     % Copyright 2018-2025 The MathWorks, Inc.
     
@@ -122,12 +121,15 @@ classdef ScatterBoxChart < Component
         % Color picker for selecting the boxcharts' marker color.
         BoxMarkerColorPicker(:, 1) matlab.ui.control.ColorPicker ...
             {mustBeScalarOrEmpty}
-    end % properties ( Access= private, Transient, NonCopyable )
+    end % properties ( Access = private, Transient, NonCopyable )
     
     properties ( Constant, Hidden )
         % Product dependencies.
         Dependencies(1, :) string = ["MATLAB", ...
             "Statistics and Machine Learning Toolbox"]
+        % Description.
+        ShortDescription(1, 1) string = "Bivariate scatter plot with" + ...
+            " marginal boxplots"
     end % properties ( Constant, Hidden )
     
     methods
@@ -544,6 +546,18 @@ classdef ScatterBoxChart < Component
             obj.YGrid = obj.ScatterAxes.YGrid;
             
         end % grid
+
+        function varargout = axis( obj, varargin )
+
+            [varargout{1:nargout}] = axis( obj.ScatterAxes, varargin{:} );
+
+        end % axis
+
+        function exportgraphics( obj, varargin )
+
+            exportgraphics( obj.TiledLayout, varargin{:} )
+
+        end % exportgraphics
         
     end % methods
     
@@ -559,14 +573,16 @@ classdef ScatterBoxChart < Component
             % Define a tiled layout for the chart's axes.
             p = uipanel( "Parent", obj.LayoutGrid, ...
                 "BorderType", "none" );
-            obj.TiledLayout = tiledlayout( p, 3, 3, ...
+            n = 7;
+            obj.TiledLayout = tiledlayout( p, n, n, ...
                 "TileSpacing", "compact", ...
                 "Padding", "compact" );
             
             % Create the three chart axes.
-            obj.YBoxPlotAxes = nexttile( obj.TiledLayout, 1, [2, 1] );
-            obj.ScatterAxes = nexttile( obj.TiledLayout, 2, [2, 2] );
-            obj.XBoxPlotAxes = nexttile ( obj.TiledLayout, 8 ,[1, 2] );
+            obj.YBoxPlotAxes = nexttile( obj.TiledLayout, 1, [n-1, 1] );
+            obj.ScatterAxes = nexttile( obj.TiledLayout, 2, [n-1, n-1] );
+            obj.XBoxPlotAxes = nexttile( obj.TiledLayout, ...
+                n^2-n+2, [1, n-1] );
             
             % Customize the chart axes.
             set( obj.XBoxPlotAxes, ...
@@ -857,7 +873,7 @@ classdef ScatterBoxChart < Component
             if ~isequal( filename, 0 )
                 try
                     exportName = fullfile( filepath, filename );
-                    exportgraphics( obj.TiledLayout , exportName )
+                    exportgraphics( obj.TiledLayout, exportName )
                 catch
                     uialert( f, "Unable to export graphics.", ...
                         "ScatterBoxplot: Export Error" )

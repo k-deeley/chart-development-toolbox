@@ -37,6 +37,10 @@ classdef PolarChart < Chart
     properties ( Constant, Hidden )
         % Product dependencies.
         Dependencies(1, :) string = "MATLAB"
+        % Description.
+        ShortDescription(1, 1) string = "Polar line graph of " + ...
+            "dependent numeric variables plotted against independent" + ...
+            " circular data"
     end % properties ( Constant, Hidden )
 
     methods
@@ -163,6 +167,12 @@ classdef PolarChart < Chart
                 thetatickformat( obj.Axes, varargin{:} );
 
         end % thetatickformat
+
+        function varargout = axis( obj, varargin )
+
+            [varargout{1:nargout}] = axis( obj.Axes, varargin{:} );
+
+        end % axis
 
     end % methods
 

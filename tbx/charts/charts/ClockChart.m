@@ -1,7 +1,12 @@
 classdef ClockChart < Chart
-    %CLOCKCHART Illustrates the use of timer objects within charts.
+    %CLOCKCHART Display an analog clock, using a timer to schedule regular
+    %updates.
 
     % Copyright 2024-2025 The MathWorks, Inc.
+
+    properties
+        ShowNumbers(1, 1) matlab.lang.OnOffSwitchState = "on"
+    end % properties
 
     properties ( Access = private, Transient, NonCopyable )
         % Chart axes.
@@ -37,8 +42,8 @@ classdef ClockChart < Chart
         % Product dependencies.
         Dependencies(1, :) string = "MATLAB"
         % Description.
-        ShortDescription(1, 1) string = "Display an analog clock" + ...
-            " using a timer"
+        ShortDescription(1, 1) string = "Display an analog clock," + ...
+            " using a timer to schedule regular updates"
     end % properties ( Constant, Hidden )
 
     methods
@@ -151,8 +156,12 @@ classdef ClockChart < Chart
         function update( obj )
             %UPDATE Refresh the chart graphics.
 
+            % Update the hands.
             set( [obj.HourHand, obj.MinuteHand], ...
                 "FaceColor", obj.ClockFaceEdge.Color )
+
+            % Update the numbers.
+            set( obj.ClockNumbers, "Visible", obj.ShowNumbers )
 
         end % update
 

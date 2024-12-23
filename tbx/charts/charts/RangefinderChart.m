@@ -25,6 +25,8 @@ classdef RangefinderChart < Chart
         XGrid(1, 1) matlab.lang.OnOffSwitchState = "on"
         % Axes y-grid.
         YGrid(1, 1) matlab.lang.OnOffSwitchState = "on"
+        % Width of the adjacent lines.
+        LineWidth(1, 1) double {mustBePositive, mustBeFinite} = 3
     end % properties
 
     properties ( Access = private )
@@ -52,6 +54,10 @@ classdef RangefinderChart < Chart
         % Product dependencies.
         Dependencies(1, :) string = ["MATLAB", ...
             "Statistics and Machine Learning Toolbox"]
+        % Description.
+        ShortDescription(1, 1) string = "Bivariate scatter plot " + ...
+            "showing the crossover point of the marginal medians" + ...
+            " and lines indicating the marginal adjacent values"
     end % properties ( Constant, Hidden )
 
     methods
@@ -167,6 +173,12 @@ classdef RangefinderChart < Chart
 
         end % title
 
+        function varargout = axis( obj, varargin )
+
+            [varargout{1:nargout}] = axis( obj.Axes, varargin{:} );
+
+        end % axis
+
     end % methods
 
     methods ( Access = protected )
@@ -185,6 +197,7 @@ classdef RangefinderChart < Chart
             % point.
             crossoverMarkers = ["none", "none", "o", "x"];
             crossoverMarkerSizes = [6, 6, 20, 20];
+            lineWidths = [obj.LineWidth, obj.LineWidth, 2, 2];
             for k = 1 : 4
                 obj.MedianCrossoverLines(k) = line( ...
                     "Parent", obj.Axes, ...
@@ -192,7 +205,7 @@ classdef RangefinderChart < Chart
                     "YData", NaN, ...
                     "Marker", crossoverMarkers(k), ...
                     "MarkerSize", crossoverMarkerSizes(k), ...
-                    "LineWidth", 2 );
+                    "LineWidth", lineWidths(k) );
             end % for
             
             hold( obj.Axes, "on" )
@@ -201,7 +214,7 @@ classdef RangefinderChart < Chart
                 
                 % Create the line segments for the adjacent values.                        
                 obj.AdjacentLines(k) = plot( obj.Axes, NaN, NaN, ...                    
-                    "LineWidth", 3 );                
+                    "LineWidth", obj.LineWidth );                
 
                 % Define the labels for the custom datatips.
                 if k <= 2
@@ -321,6 +334,8 @@ classdef RangefinderChart < Chart
             set( obj.Axes, "XGrid", obj.XGrid, "YGrid", obj.YGrid )
             set( obj.AdjacentLines, ...
                 "Color", obj.MedianCrossoverLines(1).Color )
+            set( [obj.AdjacentLines; obj.MedianCrossoverLines(1:2)], ...
+                "LineWidth", obj.LineWidth )
 
         end % update
 

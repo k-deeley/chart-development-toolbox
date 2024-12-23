@@ -1,5 +1,5 @@
 classdef RadarScope < Component
-    %RADARSCOPE Component managing a radar scope and a collection of blips
+    %RADARSCOPE Component managing a radar scope and a set of blips
     %representing objects detected on the scope.
 
     % Copyright 2021-2025 The MathWorks, Inc.
@@ -7,6 +7,14 @@ classdef RadarScope < Component
     properties
         % Backdrop color.
         BackdropColor {validatecolor} = [0.6, 1, 0]
+        % Blip color.
+        BlipColor {validatecolor} = [1, 1, 1]
+        % Grid line width.
+        GridLineWidth(1, 1) double {mustBePositive, mustBeFinite} = 1.5
+        % Grid line transparency.
+        GridAlpha(1, 1) double {mustBeInRange( GridAlpha, 0, 1 )} = 0.25
+        % Specify whether the lamp is shown.
+        ShowProximityLamp(1, 1) matlab.lang.OnOffSwitchState = "on"
     end % properties
 
     properties ( SetAccess = private )
@@ -15,6 +23,9 @@ classdef RadarScope < Component
     end % properties ( SetAccess = private )
 
     properties ( Access = private )
+        % Grid layout.
+        GridLayout(:, 1) matlab.ui.container.GridLayout ...
+            {mustBeScalarOrEmpty}
         % Chart's polar axes.
         Axes(:, 1) matlab.graphics.axis.PolarAxes {mustBeScalarOrEmpty}
         % Text label.
@@ -24,6 +35,14 @@ classdef RadarScope < Component
         % Blip position listener.
         BlipPositionListeners(:, 1) event.proplistener
     end % properties ( Access = private )
+
+    properties ( Constant, Hidden )
+        % Product dependencies.
+        Dependencies(1, :) string = "MATLAB"
+        % Description.
+        ShortDescription(1, 1) string = "Plot a set of blips on a " + ...
+            "radar scope and issue proximity alerts"
+    end % properties ( Constant, Hidden )
 
     events ( NotifyAccess = private, HasCallbackProperty )
         % Blips have been detected in close proximity.
@@ -117,6 +136,77 @@ classdef RadarScope < Component
 
         end % removeBlip
 
+        function varargout = thetaticks( obj, varargin )
+
+            [varargout{1:nargout}] = thetaticks( obj.Axes, varargin{:} );
+
+        end % thetaticks
+
+        function varargout = thetaticklabels( obj, varargin )
+
+            [varargout{1:nargout}] = thetaticklabels( ...
+                obj.Axes, varargin{:} );
+
+        end % thetaticklabels
+
+        function varargout = rticks( obj, varargin )
+
+            [varargout{1:nargout}] = rticks( obj.Axes, varargin{:} );
+
+        end % rticks
+
+        function varargout = rticklabels( obj, varargin )
+
+            [varargout{1:nargout}] = rticklabels( obj.Axes, varargin{:} );
+
+        end % rticklabels
+
+        function varargout = rlabel( obj, labelText, namedArgs )
+
+            arguments ( Input )
+                obj(1, 1) RadarScope
+                labelText(1, 1) string
+                namedArgs.?matlab.graphics.primitive.Text
+            end % arguments ( Input )
+
+            % Check the number of outputs.
+            nargoutchk( 0, 1 )
+
+            % Set the label text and any name-value pairs.
+            label = obj.Axes.ThetaAxis.Label;
+            label.String = labelText;
+            set( label, namedArgs )
+
+            % Return the label if requested.
+            if nargout == 1
+                varargout{1} = label;
+            end % if
+
+        end % rlabel
+
+        function varargout = thetalabel( obj, labelText, namedArgs )
+
+            arguments ( Input )
+                obj(1, 1) RadarScope
+                labelText(1, 1) string
+                namedArgs.?matlab.graphics.primitive.Text
+            end % arguments ( Input )
+
+            % Check the number of outputs.
+            nargoutchk( 0, 1 )
+
+            % Set the label text and any name-value pairs.
+            label = obj.Axes.RAxis.Label;
+            label.String = labelText;
+            set( label, namedArgs )
+
+            % Return the label if requested.
+            if nargout == 1
+                varargout{1} = label;
+            end % if
+
+        end % thetalabel
+
     end % methods
 
     methods ( Access = protected )
@@ -125,13 +215,13 @@ classdef RadarScope < Component
             %SETUP Initialize the component's graphics.
 
             % Create a grid for the chart components.
-            mainGrid = uigridlayout( "Parent", obj, ...
+            obj.GridLayout = uigridlayout( "Parent", obj, ...
                 "ColumnWidth", "1x", ...
                 "RowHeight", ["1x", "fit", "fit"], ...
                 "BackgroundColor", "k" );
 
             % Create the polar axes.
-            obj.Axes = polaraxes( "Parent", mainGrid, ...
+            obj.Axes = polaraxes( "Parent", obj.GridLayout, ...
                 "Color", "k", ...
                 "Interactions", [], ...
                 "Toolbar", [], ...
@@ -150,11 +240,12 @@ classdef RadarScope < Component
             title( obj.Axes, "Radar Scope" )
 
             % Add a static label, and the status lamp.
-            obj.Label = uilabel( "Parent", mainGrid, ...
+            obj.Label = uilabel( "Parent", obj.GridLayout, ...
                 "Text", "Proximity Status", ...
                 "FontWeight", "bold", ...
                 "HorizontalAlignment", "center" );
-            obj.Lamp = uilamp( "Parent", mainGrid, "Color", "g" );
+            obj.Lamp = uilamp( "Parent", obj.GridLayout, ...
+                "Color", "g" );
 
         end % setup
 
@@ -163,9 +254,17 @@ classdef RadarScope < Component
 
             % Update the scope colors.
             set( obj.Axes, "RColor", obj.BackdropColor, ...
-                "ThetaColor", obj.BackdropColor )
+                "ThetaColor", obj.BackdropColor, ...
+                "LineWidth", obj.GridLineWidth, ...
+                "GridAlpha", obj.GridAlpha )
             obj.Axes.Title.Color = obj.BackdropColor;
             obj.Label.FontColor = obj.BackdropColor;
+
+            if obj.ShowProximityLamp
+                obj.GridLayout.RowHeight = ["1x", "fit", "fit"];
+            else
+                obj.GridLayout.RowHeight = ["1x", "0x", "0x"];
+            end % if
 
         end % update
 
@@ -191,7 +290,7 @@ classdef RadarScope < Component
 
             % Update the blips and the lamp.
             set( obj.Blips(nearbyBlipIdx), "Color", "r" )
-            set( obj.Blips(distantBlipIdx), "Color", Blip.Amber )
+            set( obj.Blips(distantBlipIdx), "Color", obj.BlipColor )
             if any( linIdx )
                 obj.notify( "NearbyBlipsDetected" )
                 obj.Lamp.Color = "r";

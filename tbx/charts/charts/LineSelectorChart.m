@@ -9,8 +9,6 @@ classdef LineSelectorChart < Chart
         XData(:, 1) double {mustBeReal}
         % Chart y-data.
         YData(:, :) double {mustBeReal}
-        % Index of the selected line.
-        SelectedLineIndex(1, 1) double {mustBeInteger, mustBeNonnegative}
     end % properties ( Dependent )
 
     properties
@@ -18,11 +16,15 @@ classdef LineSelectorChart < Chart
         XGrid(1, 1) matlab.lang.OnOffSwitchState = "on"
         % Axes y-grid.
         YGrid(1, 1) matlab.lang.OnOffSwitchState = "on"
+        % Color of the selected line.
+        SelectedColor {validatecolor} = [0, 0.447, 0.741]
+        % Width of the selected line.
+        SelectedLineWidth(1, 1) double {mustBePositive, mustBeFinite} = 3
+        % Width of the unselected lines.
+        TraceLineWidth(1, 1) double {mustBePositive, mustBeFinite} = 1.5
     end % properties
 
     properties ( Dependent )
-        % Color of the selected line.
-        SelectedColor
         % Color of the unselected line or lines.
         TraceColor
     end % properties ( Dependent )
@@ -32,17 +34,14 @@ classdef LineSelectorChart < Chart
         XData_(:, 1) double {mustBeReal} = double.empty( 0, 1 )
         % Internal storage for the YData property.
         YData_(:, :) double {mustBeReal} = double.empty( 0, 1 )
-        % Internal storage for the SelectedLineIndex property.
-        SelectedLineIndex_(1, 1) double ...
-            {mustBeInteger, mustBeNonnegative} = 0
-        % Logical scalar specifying whether a computation is required.
-        ComputationRequired(1, 1) logical = false
-        % Internal storage for the SelectedColor property.
-        SelectedColor_(1, 3) double ...
-            {mustBeInRange( SelectedColor_, 0, 1 )} = [0, 0.447, 0.741]
+        % Index of the selected line.
+        SelectedLineIndex(1, 1) double ...
+            {mustBeNonnegative, mustBeInteger} = 0
         % Internal storage for the TraceColor property.
         TraceColor_(1, 3) double ...
             {mustBeInRange( TraceColor_, 0, 1 )} = [0.5, 0.5, 0.5]
+        % Logical scalar specifying whether a computation is required.
+        ComputationRequired(1, 1) logical = false
     end % properties ( Access = private )
 
     properties ( Dependent, Access = private )
@@ -67,6 +66,9 @@ classdef LineSelectorChart < Chart
     properties ( Constant, Hidden )
         % Product dependencies.
         Dependencies(1, :) string = "MATLAB"
+        % Description.
+        ShortDescription(1, 1) string = "Display a collection of " + ...
+            "line plots and select one to highlight"
     end % properties ( Constant, Hidden )
 
     methods
@@ -149,26 +151,6 @@ classdef LineSelectorChart < Chart
 
         end % get.YDataMin
 
-        function value = get.SelectedColor( obj )
-
-            value = obj.SelectedColor_;
-
-        end % get.SelectedColor
-
-        function set.SelectedColor( obj, value )
-
-            % Set the property value.
-            obj.SelectedColor_ = validatecolor( value );
-
-            % Update the selected line if necessary.
-            selectedLineIdx = obj.SelectedLineIndex_;
-            if selectedLineIdx > 0
-                obj.Lines(selectedLineIdx).Color = value;
-                obj.Axes.YColor = value;
-            end % if
-
-        end % set.SelectedColor
-
         function value = get.TraceColor( obj )
 
             value = obj.TraceColor_;
@@ -182,39 +164,10 @@ classdef LineSelectorChart < Chart
 
             % Update the unselected line(s) if necessary.
             unselectedLineIdx = setdiff( 1:numel( obj.Lines ), ...
-                obj.SelectedLineIndex_ );
+                obj.SelectedLineIndex );
             set( obj.Lines(unselectedLineIdx), "Color", value )
 
         end % set.TraceColor
-
-        function value = get.SelectedLineIndex( obj )
-
-            value = obj.SelectedLineIndex_;
-
-        end % get.SelectedLineIndex
-
-        function set.SelectedLineIndex( obj, value )
-
-            % Reset the chart if the user specifies a zero value.
-            if value == 0
-                obj.SelectedLineIndex_ = 0;
-                deselect( obj )
-            else
-                % Otherwise, select the specified line.
-                numLines = numel( obj.Lines );
-                assert( value <= numLines, ...
-                    "LineSelectorChart:InvalidLineIndex", ...
-                    "The SelectedLineIndex property must be a " + ...
-                    "nonnegative scalar integer not exceeding the " + ...
-                    "number of lines, %d.", ...
-                    numLines )
-                % Set the internal value.
-                obj.SelectedLineIndex_ = value;
-                % Trigger the line selected callback.
-                onLineClicked( obj, obj.Lines(value) );
-            end % if
-
-        end % set.SelectedLineIndex
 
     end % methods
 
@@ -226,7 +179,7 @@ classdef LineSelectorChart < Chart
 
             arguments ( Input )
                 namedArgs.?LineSelectorChart
-            end % arguments ( Input )            
+            end % arguments ( Input )
 
             % Set any user-defined properties.
             set( obj, namedArgs )
@@ -265,7 +218,7 @@ classdef LineSelectorChart < Chart
 
             % Invoke legend on the axes.
             [varargout{1:nargout}] = legend( obj.Axes, varargin{:} );
-            
+
             % Reconnect the ItemHitFcn, if necessary.
             if ~isempty( obj.Axes.Legend )
                 obj.Axes.Legend.ItemHitFcn = @obj.onLegendClicked;
@@ -284,6 +237,65 @@ classdef LineSelectorChart < Chart
             [varargout{1:nargout}] = ylim( obj.Axes, varargin{:} );
 
         end % ylim
+
+        function varargout = axis( obj, varargin )
+
+            [varargout{1:nargout}] = axis( obj.Axes, varargin{:} );
+
+        end % axis
+
+        function select( obj, lineIndex )
+            %SELECT Select a line.
+
+            arguments ( Input )
+                obj(1, 1) LineSelectorChart
+                lineIndex(1, 1) double {mustBeNonnegative, mustBeInteger}
+            end % arguments ( Input )
+
+            if lineIndex == 0
+
+                % Reset the chart if no selection is made.
+                obj.deselect()
+
+            else
+
+                % Otherwise, check the proposed value.
+                numLines = numel( obj.Lines );
+                assert( lineIndex <= numLines, ...
+                    "LineSelectorChart:InvalidLineIndex", ...
+                    "The line index must be a nonnegative scalar" + ...
+                    " integer not exceeding the number of lines, %d.", ...
+                    numLines )
+
+                % Set the internal value.
+                obj.SelectedLineIndex = lineIndex;
+
+                % Update the line color.
+                obj.Lines(obj.SelectedLineIndex).Color = obj.SelectedColor;
+                obj.Axes.YColor = obj.SelectedColor;
+
+                % Trigger the line selected callback.
+                onLineClicked( obj, obj.Lines(obj.SelectedLineIndex) )
+
+            end % if
+
+        end % select
+
+        function deselect( obj )
+            %DESELECT Deselect the selected line if one is selected.
+
+            % Enable interactivity and gray out all lines.
+            set( obj.Lines, "ButtonDownFcn", @obj.onLineClicked, ...
+                "LineWidth", obj.TraceLineWidth, ...
+                "Color", obj.TraceColor )
+
+            % Restore the original y-axis color.
+            obj.Axes.YColor = obj.Axes.XColor;
+
+            % Record no selection.
+            obj.SelectedLineIndex = 0;
+
+        end % deselect
 
     end % methods
 
@@ -349,6 +361,11 @@ classdef LineSelectorChart < Chart
             % Refresh the chart's decorative properties.
             set( obj.Axes, "XGrid", obj.XGrid, ...
                 "YGrid", obj.YGrid )
+            set( obj.Lines, "LineWidth", obj.TraceLineWidth )
+            if obj.SelectedLineIndex > 0
+                obj.Lines(obj.SelectedLineIndex).LineWidth = ...
+                    obj.SelectedLineWidth;
+            end % if
 
         end % update
 
@@ -370,14 +387,15 @@ classdef LineSelectorChart < Chart
             selectedIdx = find( obj.Lines == s );
 
             % Record this value in the object.
-            obj.SelectedLineIndex_ = selectedIdx;
+            obj.SelectedLineIndex = selectedIdx;
 
             % Gray out all lines.
-            set( obj.Lines, "LineWidth", 0.5, ...
+            set( obj.Lines, "LineWidth", obj.TraceLineWidth, ...
                 "Color", obj.TraceColor )
 
             % Highlight the selected line.
-            set( obj.Lines(selectedIdx), "LineWidth", 3, ...
+            set( obj.Lines(selectedIdx), ...
+                "LineWidth", obj.TraceLineWidth, ...
                 "Color", obj.SelectedColor, ...
                 "YData", obj.YData_(:, selectedIdx) )
             set( obj.Axes, "YColor", obj.SelectedColor )
@@ -398,21 +416,6 @@ classdef LineSelectorChart < Chart
             onLineClicked( obj, e.Peer )
 
         end % onLegendClicked
-
-        function deselect( obj )
-
-            % Enable interactivity and gray out all lines.
-            set( obj.Lines, "ButtonDownFcn", @obj.onLineClicked, ...
-                "LineWidth", 0.5, ...
-                "Color", obj.TraceColor )
-
-            % Restore the original y-axis color.
-            obj.Axes.YColor = obj.Axes.XColor;
-
-            % Record no selection.
-            obj.SelectedLineIndex_ = 0;
-
-        end % deselect
 
     end % methods ( Access = private )
 

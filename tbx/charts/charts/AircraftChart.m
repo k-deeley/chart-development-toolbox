@@ -24,8 +24,8 @@ classdef AircraftChart < Chart
         % Product dependencies.
         Dependencies(1, :) string = "MATLAB"
         % Description.
-        ShortDescription(1, 1) string = "Render an aircraft and " + ...
-            "update its attitude (roll, pitch, and yaw)"
+        ShortDescription(1, 1) string = "Visualize an aircraft and " + ...
+            "modify its roll, pitch, and yaw"
     end % properties ( Constant, Hidden )
 
     methods

@@ -77,30 +77,33 @@ section.add( column )
 category = matlab.ui.internal.toolstrip.GalleryCategory( "Chart Examples" );
 
 % Create gallery items for the graphical views.
-imageFolder = fullfile( chartsRoot(), "app", "images" );
+imageSpec = fullfile( chartsRoot(), "app", "images", "*40.png" );
+iconDatastore = imageDatastore( imageSpec, "ReadFcn", @importImageIcon );
 
-chartNames = struct2table( dir( fullfile( imageFolder, "*Black.png" ) ) );
-chartNames = string( fullfile( chartNames.folder, chartNames.name ) );
-
-for k = 1 : numel( chartNames )
-    [~, name] = fileparts( chartNames(k) );
-    name = erase( name, "Black" );
+while hasdata( iconDatastore )    
+    [icon, info] = read( iconDatastore );
+    [~, name] = fileparts( info.Filename );
+    name = erase( name, "40" );
     item = matlab.ui.internal.toolstrip.GalleryItem( name );
-    icon = imread( chartNames(k) );
-    icon = imresize( icon, [24, 24], "bicubic" );
     item.Icon = matlab.ui.internal.toolstrip.Icon( icon );
     item.Description = eval( name + ".ShortDescription" );
     category.add( item )
-end % for
+end % while
 
 % Create a gallery popup and add the gallery categories to it.
 popup = matlab.ui.internal.toolstrip.GalleryPopup( ...
-    "ShowSelection", true );
+    'ShowSelection', true, ...        
+    'FavoritesEnabled', true, ...
+    'GalleryItemWidth', 100, ...
+    'GalleryItemTextLineCount', 1, ...
+    'IconSize', 40 );
 popup.add( category )
 
 % Create the main gallery and add it to the view column.
 gallery = matlab.ui.internal.toolstrip.Gallery( popup, ...
-    'MinColumnCount', 1, 'MaxColumnCount', 6 );
+    'MinColumnCount', 1, ...
+    'MaxColumnCount', 6 );
+    
 gallery.Description = "Example charts";
 column.add( gallery )
 
@@ -113,3 +116,19 @@ if nargout == 1
 end % if
 
 end % chartBrowser
+
+function icon = importImageIcon( file )
+%IMPORTIMAGEICON Create a javax.swing.ImageIcon from the given
+%file.
+
+arguments ( Input )
+    file(1, 1) string {mustBeFile}
+end % arguments ( Input )
+
+% Create a Java string from the filename.
+file = java.lang.String( file );
+
+% Create a javax.swing.ImageIcon from the image file.
+icon = javax.swing.ImageIcon( file );
+
+end % importImageIcon
