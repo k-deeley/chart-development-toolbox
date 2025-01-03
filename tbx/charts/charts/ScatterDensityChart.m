@@ -1,7 +1,6 @@
 classdef ScatterDensityChart < Chart
-    %SCATTERDENSITYCHART Chart managing 2D scattered data (x and y), using 
-    %a color scheme applied to the data points indicating the relative
-    %data density.
+    %SCATTERDENSITYCHART Bivariate scatter plot using color to indicate
+    %relative density of the data points.
     
     % Copyright 2019-2025 The MathWorks, Inc.
     
@@ -62,6 +61,9 @@ classdef ScatterDensityChart < Chart
         % Product dependencies.
         Dependencies(1, :) string = ["MATLAB", ...
             "Statistics and Machine Learning Toolbox"]
+        % Description.
+        ShortDescription(1, 1) string = "Bivariate scatter plot " + ...
+            "using color to indicate relative density of the data points"
     end % properties ( Constant, Hidden )
     
     methods
@@ -241,6 +243,12 @@ classdef ScatterDensityChart < Chart
             [varargout{1:nargout}] = colormap( obj.Axes, varargin{:} );
             
         end % colormap
+
+        function varargout = axis( obj, varargin )
+
+            [varargout{1:nargout}] = axis( obj.Axes, varargin{:} );
+
+        end % axis
         
     end % methods
     

@@ -91,6 +91,9 @@ classdef ScatterFitChart < Component
         % Product dependencies.
         Dependencies(1, :) string = ["MATLAB", ...
             "Statistics and Machine Learning Toolbox"]
+        % Description.
+        ShortDescription(1, 1) string = "Manage bivariate scattered" + ...
+            " data together with the line of best fit"
     end % properties ( Constant, Hidden )
 
     properties ( Constant, GetAccess = private )
@@ -360,6 +363,18 @@ classdef ScatterFitChart < Component
             [varargout{1:nargout}] = legend( obj.Axes, varargin{:} );
 
         end % legend
+
+        function varargout = axis( obj, varargin )
+
+            [varargout{1:nargout}] = axis( obj.Axes, varargin{:} );
+
+        end % axis
+
+        function exportgraphics( obj, varargin )
+
+            exportgraphics( obj.Axes, varargin{:} )
+
+        end % exportgraphics
 
     end % methods
 

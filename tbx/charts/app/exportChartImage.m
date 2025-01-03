@@ -31,18 +31,6 @@ mustBeMember( str, allChartNames() )
 
 end % mustBeChartName
 
-function names = allChartNames()
-%ALLCHARTNAMES Return a string array of all available chart names.
-
-arguments ( Output )
-    names(1, :) string
-end % arguments ( Output )
-
-names = string( ls( fullfile( chartsRoot(), "charts", "*.m" ) ) );
-names = extractBefore( names, ".m" );
-
-end % allChartNames
-
 function p = exportPath()
 %EXPORTPATH Return the export folder.
 
@@ -428,6 +416,129 @@ SBC.ScatterCData = colorGradient;
 exportImage( "ScatterBoxChart", SBC, [40, 50] )
 
 end % exportScatterBoxChart
+
+function exportScatterDensityChart()
+%EXPORTSCATTERDENSITYCHART Export the ScatterDensityChart.
+
+% Set the seed.
+s = rng();
+seedCleanup = onCleanup( @() rng( s ) );
+rng( "default" )
+
+% Generate the data.
+numSamples = 2000;
+rng( "default" )
+V = 0.2 * eye( 2 );
+C1 = mvnrnd( [1, 1], V, numSamples);
+C2 = mvnrnd( [-1, 1], V,  numSamples );
+C3 = mvnrnd( [1, -1], V, numSamples );
+C4 = mvnrnd( [-1, -1], V, numSamples );
+x = [C1(:, 1); C2(:, 1); C3(:, 1); C4(:, 1)];
+y = [C1(:, 2); C2(:, 2); C3(:, 2); C4(:, 2)];
+
+% Create the chart.
+f = uifigure();
+figureCleanup = onCleanup( @() delete( f ) );
+SDC = ScatterDensityChart( "Parent", f, ...
+    "XData", x, ...
+    "YData", y ); 
+colorbar( SDC, "off" )
+axis( SDC, "off" )
+
+% Export.
+exportImage( "ScatterDensityChart", SDC, [40, 50] )
+
+end % exportScatterDensityChart
+
+function exportScatterFitChart()
+%EXPORTSCATTERFITCHART Export the ScatterFitChart.
+
+% Set the seed.
+s = rng();
+seedCleanup = onCleanup( @() rng( s ) );
+rng( "default" )
+
+% Generate data.
+x = randn( 1000, 1 );
+y = 2 * x + 1 + 2 * randn( size( x ) );
+
+% Create the chart.
+f = uifigure();
+figureCleanup = onCleanup( @() delete( f ) );
+SFC = ScatterFitChart( "Parent", f, ...
+    "XData", x, ...
+    "YData", y, ...
+    "LineWidth", 10, ...
+    "SizeData", 300 );
+legend( SFC, "off" )
+axis( SFC, "off" )
+title( SFC, "" )
+
+% Export.
+exportImage( "ScatterFitChart", SFC, [40, 50] )
+
+end % exportScatterFitChart
+
+function exportSettlementChart()
+%EXPORTSETTLEMENTCHART Export the SettlementChart.
+
+% Create the chart data.
+Strike = (85:0.1:115).';
+Price = 100;
+Rate = 0.04;
+Time = 0.25;
+Volatility = 0.45;
+Yield = 0.01;
+
+% Create the chart.
+f = uifigure();
+figureCleanup = onCleanup( @() delete( f ) );
+SC = SettlementChart( "Parent", f, ...
+    "Strike", Strike, ...
+    "Price", Price, ...
+    "Rate", Rate, ...
+    "Time", Time, ...
+    "Volatility", Volatility, ...
+    "Yield", Yield, ...
+    "CallLineWidth", 10, ...
+    "PutLineWidth", 10, ...
+    "AtTheMoneyLineWidth", 10 );
+axis( SC, "off" )
+title( SC, "" )
+legend( SC, "off" )
+pause( 0.5 )
+
+% Export.
+exportImage( "SettlementChart", SC, [40, 50] )
+
+end % exportSettlementChart
+
+function exportSignalTraceChart()
+%EXPORTSIGNALTRACECHART Export the SignalTraceChart.
+
+% Create the chart data.
+t = linspace( 0, 6 * pi, 5000 ).';
+y1 = [zeros( 1000, 1 ); ones( 500, 1 );
+    zeros( 500, 1 ); (-1) * ones( 500, 1 );
+    ones( 1000, 1 ); zeros( 1000, 1 );
+    ones( 500, 1 )];
+y2 = sin( t );
+y3 = 2 * sin( 2 * t ) .* cos( 3 * t );
+signals = [y1, y2, y3];
+
+% Create the chart.
+f = uifigure();
+figureCleanup = onCleanup( @() delete( f ) );
+STC = SignalTraceChart( "Parent", f, ...
+    "Time", t, ...
+    "SignalData", signals, ...
+    "LineWidth", 8 );
+xticks( STC, [] )
+
+% Export.
+exportImage( "SignalTraceChart", STC, [40, 50] )
+
+end % exportSignalTraceChart
 
 function exportImage( name, gobj, resolution )
 %EXPORTIMAGE Export large and small PNG images of the given chart using a 

@@ -24,8 +24,9 @@ plan.DefaultTasks = "package";
 % Define the task dependencies and inputs.
 %plan("test").Dependencies = "check";
 %plan("doc").Dependencies = "test";
-plan("doc").Inputs = fullfile( projectRoot, ...
-    "tbx", "chartsdoc", "examples" );
+plan("doc").Inputs = [...
+    fullfile( projectRoot, "tbx", "chartsdoc", "examples" );
+    fullfile( projectRoot, "tbx", "charts", "charts" )];
 plan("package").Dependencies = "doc";
 
 end % buildfile
@@ -67,8 +68,30 @@ assert( all( passed ), "buildfile:ProjectIssue", ...
 
 end % checkTask
 
-function docTask( ~ )
+function docTask( context )
 % Build the documentation and examples.
+
+% Publish the chart classes as HTML documents.
+chartNames = allChartNames();
+htmlOutputFolder = fullfile( context.Plan.RootFolder, "tbx", ...
+    "charts", "app", "html", "charts" );
+for chartIdx = 1 : numel( chartNames )
+    % Export the chart classdef file to an HTML document.
+    currentChartName = chartNames(chartIdx);
+    publish( currentChartName, "format", "html", ...
+        "outputDir", htmlOutputFolder, ...
+        "evalCode", false );
+    % Erase the footer.
+    publishedFile = fullfile( htmlOutputFolder, ...
+        currentChartName + ".html" );
+    rawHTML = splitlines( fileread( publishedFile ) );
+    footerStartIdx = find( startsWith( rawHTML, "<p class=""footer"">" ) );
+    footerEndIdx = find( startsWith( rawHTML, "</p>" ) );
+    footerEndIdx = footerEndIdx( find( footerEndIdx > footerStartIdx, ...
+        1, "first" ) );
+    rawHTML(footerStartIdx:footerEndIdx) = [];
+    writelines( rawHTML, publishedFile )
+end % for
 
 end % docTask
 

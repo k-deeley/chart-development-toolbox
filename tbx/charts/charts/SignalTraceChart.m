@@ -43,6 +43,9 @@ classdef SignalTraceChart < Chart
     properties ( Constant, Hidden )
         % Product dependencies.
         Dependencies(1, :) string = "MATLAB"
+        % Description.
+        ShortDescription(1, 1) string = "Plot non-overlapping signal" + ...
+            " traces against a numeric time vector"
     end % properties ( Constant, Hidden )
 
     methods
@@ -166,6 +169,24 @@ classdef SignalTraceChart < Chart
             [varargout{1:nargout}] = title( obj.Axes, varargin{:} );
 
         end % title
+
+        function varargout = axis( obj, varargin )
+
+            [varargout{1:nargout}] = axis( obj.Axes, varargin{:} );
+
+        end % axis
+
+        function varargout = xticks( obj, varargin )
+
+            [varargout{1:nargout}] = xticks( obj.Axes, varargin{:} );
+
+        end % xticks
+
+        function varargout = xticklabels( obj, varargin )
+
+            [varargout{1:nargout}] = xticklabels( obj.Axes, varargin{:} );
+
+        end % xticklabels
 
     end % methods
 

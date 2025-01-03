@@ -55,11 +55,13 @@ classdef SettlementChart < Component
         % Put curve marker size.
         PutMarkerSize(1, 1) double {mustBePositive, mustBeFinite} = 12
         % Call-put parity line color.
-        AtTheMoneyColor {validatecolor} = "k"
+        AtTheMoneyColor {validatecolor} = [0.5, 0.5, 0.5]
         % Call-put parity line line style.
         AtTheMoneyLineStyle(1, 1) string {mustBeLineStyle} = "-"
         % Call-put parity line line width.
         AtTheMoneyLineWidth(1, 1) double {mustBePositive, mustBeFinite} = 2
+        % Call-put parity line label.
+        AtTheMoneyLabel(1, 1) string = ""
     end % properties
 
     properties ( Dependent )
@@ -123,6 +125,9 @@ classdef SettlementChart < Component
         Dependencies(1, :) = ["MATLAB", ...
             "Statistics and Machine Learning Toolbox", ...
             "Financial Toolbox" ]
+        % Description.
+        ShortDescription(1, 1) string = "Plot in the money option" + ...
+            " prices against strike prices"
     end % properties ( Constant, Hidden )
 
     methods
@@ -334,6 +339,18 @@ classdef SettlementChart < Component
 
         end % legend
 
+        function varargout = axis( obj, varargin )
+
+            [varargout{1:nargout}] = axis( obj.Axes, varargin{:} );
+
+        end % axis
+
+        function exportgraphics( obj, varargin )
+
+            exportgraphics( obj.Axes, varargin{:} )
+
+        end % exportgraphics
+
         function reset( obj )
             %RESET Set the default chart data.
 
@@ -526,9 +543,7 @@ classdef SettlementChart < Component
                 set( obj.PutLine, "XData", obj.Strike(putIdx), ...
                     "YData", obj.OptionPrices(putIdx, 2) )
                 % Update the at-the-money line.
-                set( obj.AtTheMoneyLine, "Value", obj.AtTheMoneyPrice, ...
-                    "Label", "At the money price: " + ...
-                    num2str( obj.AtTheMoneyPrice, "%.2f" ) )
+                obj.AtTheMoneyLine.Value = obj.AtTheMoneyPrice;
                 % Mark the chart clean.
                 obj.ComputationRequired = false;
             end % if
@@ -545,6 +560,7 @@ classdef SettlementChart < Component
                 "Marker", obj.PutMarker, ...
                 "MarkerSize", obj.PutMarkerSize )
             set( obj.AtTheMoneyLine, ...
+                "Label", obj.AtTheMoneyLabel, ...
                 "LineStyle", obj.AtTheMoneyLineStyle, ...
                 "Color", obj.AtTheMoneyColor, ...
                 "LineWidth", obj.AtTheMoneyLineWidth )
