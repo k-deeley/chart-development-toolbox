@@ -5,6 +5,11 @@ classdef SpiderChart < Chart
 
     % Copyright 2019-2025 The MathWorks, Inc.
 
+    properties
+        % Web line width.
+        WebLineWidth(1, 1) double {mustBePositive, mustBeFinite} = 1.5
+    end % properties
+
     properties ( Dependent )
         %DATA Matrix of chart data: each row represents a distinct property
         %and corresponds to a node in the web. Each column contains the
@@ -79,6 +84,9 @@ classdef SpiderChart < Chart
     properties ( Constant, Hidden )
         % Product dependencies.
         Dependencies(1, :) string = "MATLAB"
+        % Description.
+        ShortDescription(1, 1) string = "Plot and compare values " + ...
+            "from distinct measurements on a web"
     end % properties ( Constant, Hidden )
 
     methods
@@ -400,6 +408,7 @@ classdef SpiderChart < Chart
             end % if
 
             % Refresh the chart's decorative properties.
+            set( obj.WebPolygons, "LineWidth", obj.WebLineWidth )
             set( obj.Lines, "LineWidth", obj.LineWidth )
             set( obj.TargetLine, "Visible", obj.TargetVisible, ...
                 "Color", obj.TargetColor, ...

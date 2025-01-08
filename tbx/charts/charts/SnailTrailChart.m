@@ -5,6 +5,15 @@ classdef SnailTrailChart < Component
 
     % Copyright 2018-2025 The MathWorks, Inc.
 
+    properties
+        % Marker size.
+        MarkerSize(1, 1) double {mustBePositive, mustBeFinite} = 8
+        % Cross hair line width.
+        CrossHairLineWidth(1, 1) double {mustBePositive, mustBeFinite} = 3
+        % Snail trail line width.
+        TrailLineWidth(1, 1) double {mustBePositive, mustBeFinite} = 2
+    end % properties
+
     properties ( Dependent )
         % Chart data, comprising a timetable with two return series.
         Returns(:, 2) timetable {mustBeAssetAndBenchmarkReturns}
@@ -22,6 +31,8 @@ classdef SnailTrailChart < Component
     properties ( Dependent )
         % Visibility of the chart controls.
         Controls(1, 1) matlab.lang.OnOffSwitchState
+        % Visibility of the current point information.
+        ShowCurrentPointDetails(1, 1) matlab.lang.OnOffSwitchState
     end % properties ( Dependent )
 
     properties ( Dependent, SetAccess = private )
@@ -69,6 +80,9 @@ classdef SnailTrailChart < Component
         % Colorbar check box.
         ColorbarCheckBox(:, 1) matlab.ui.control.CheckBox ...
             {mustBeScalarOrEmpty}
+        % Current point information check box.
+        CurrentPointCheckBox(:, 1) matlab.ui.control.CheckBox ...
+            {mustBeScalarOrEmpty}
         % Spinner for the number of steps.
         NumStepsSpinner(:, 1) matlab.ui.control.Spinner ...
             {mustBeScalarOrEmpty}
@@ -83,6 +97,9 @@ classdef SnailTrailChart < Component
     properties ( Constant, Hidden )
         % Product dependencies.
         Dependencies(1, :) string = "MATLAB"
+        % Description.
+        ShortDescription(1, 1) string = "Plot excess returns against" + ...
+            " tracking errors for an asset relative to a benchmark"
     end % properties ( Constant, Hidden )
 
     methods
@@ -211,6 +228,22 @@ classdef SnailTrailChart < Component
             obj.onToggleButtonPressed()
 
         end % set.Controls
+
+        function value = get.ShowCurrentPointDetails( obj )
+
+            value = obj.CurrentPointCheckBox.Value;
+
+        end % get.ShowCurrentPointDetails
+
+        function set.ShowCurrentPointDetails( obj, value )
+
+            % Update the check box.
+            obj.CurrentPointCheckBox.Value = value;
+
+            % Invoke the check box callback.
+            obj.onCurrentPointDetailsSelected()
+
+        end % set.ShowCurrentPointDetails
 
         function value = get.PerformanceStatistics( obj )
 
@@ -346,6 +379,18 @@ classdef SnailTrailChart < Component
 
         end % colormap
 
+        function varargout = axis( obj, varargin )
+
+            [varargout{1:nargout}] = axis( obj.Axes, varargin{:} );
+
+        end % axis
+
+        function exportgraphics( obj, varargin )
+
+            exportgraphics( obj.Axes, varargin{:} )
+
+        end % exportgraphics
+
     end % methods
 
     methods ( Access = protected )
@@ -360,8 +405,7 @@ classdef SnailTrailChart < Component
             % Create the chart's axes.
             obj.Axes = axes( "Parent", obj.LayoutGrid, ...
                 "XGrid", "on", ...
-                "YGrid", "on", ...
-                "Color", [0.95, 0.95, 0.95] );
+                "YGrid", "on" );
 
             % Add a state button to show/hide the chart's controls.
             tb = axtoolbar( obj.Axes, "default" );
@@ -406,12 +450,12 @@ classdef SnailTrailChart < Component
             obj.CrossHair(1) = line( "Parent", obj.Axes, ...
                 "XData", [NaN, NaN], ...
                 "YData", [0, 0], ...
-                "Color", "k", ...
+                "Color", 1 - obj.Axes.Color, ...
                 "LineWidth", 2.5 );
             obj.CrossHair(2) = line( "Parent", obj.Axes, ...
                 "XData", [0, 0], ...
                 "YData", [NaN, NaN], ...
-                "Color", "k", ...
+                "Color", 1 - obj.Axes.Color, ...
                 "LineWidth", 2.5 );
 
             % Add the colorbar.
@@ -439,7 +483,16 @@ classdef SnailTrailChart < Component
                 "Tooltip", "Show/hide the colorbar", ...
                 "Value", true, ...
                 "ValueChangedFcn", @obj.onColorbarSelected );
-            obj.ColorbarCheckBox.Layout.Column = [1, 2];
+            
+            % Current point details check box.
+            obj.CurrentPointCheckBox = uicheckbox( ...
+                "Parent", controlLayout, ...
+                "Interruptible", "off", ...
+                "BusyAction", "cancel", ...
+                "Text", "Current point details", ...
+                "Tooltip", "Show/hide the current point details", ...
+                "Value", true, ...
+                "ValueChangedFcn", @obj.onCurrentPointDetailsSelected );
 
             % Spinner for the number of steps.
             uilabel( "Parent", controlLayout, ...
@@ -542,6 +595,13 @@ classdef SnailTrailChart < Component
 
             end % if
 
+            % Update the stylistic properties.
+            set( obj.CrossHair, "Color", 1 - obj.Axes.Color, ...
+                "LineWidth", obj.CrossHairLineWidth )
+            obj.ScatterSeries.SizeData = obj.MarkerSize^2;
+            set( [obj.Head, obj.Trail], "MarkerSize", obj.MarkerSize )
+            obj.Trail.LineWidth = obj.TrailLineWidth;
+
         end % update
 
     end % methods ( Access = protected )
@@ -576,6 +636,14 @@ classdef SnailTrailChart < Component
             end % if
 
         end % onColorbarSelected
+
+        function onCurrentPointDetailsSelected( obj, ~, ~ )
+            %ONCURRENTPOINTDETAILSSELECTED Show/hide the current point
+            %details.
+
+            obj.TextBox.Visible = obj.CurrentPointCheckBox.Value;
+
+        end % onCurrentPointDetailsSelected
 
         function onStepButtonPushed( obj, ~, ~ )
             %ONSTEPBUTTONPUSHED Call the step() method.

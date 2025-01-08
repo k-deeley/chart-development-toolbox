@@ -540,6 +540,136 @@ exportImage( "SignalTraceChart", STC, [40, 50] )
 
 end % exportSignalTraceChart
 
+function exportSnailTrailChart()
+%EXPORTSNAILTRAILCHART Export the SnailTrailChart.
+
+% Load the chart data.
+data = load( fullfile( chartsDocRoot(), "data", "Returns.mat" ), "rets" );
+
+% Create the chart.
+f = uifigure();
+figureCleanup = onCleanup( @() delete( f ) );
+STC = SnailTrailChart( "Parent", f, ...
+    "Returns", data.rets, ...
+    "ShowCurrentPointDetails", "off", ...
+    "CrossHairLineWidth", 10, ...
+    "TrailLineWidth", 10, ...
+    "MarkerSize", 12 );
+xlabel( STC, "" )
+ylabel( STC, "" )
+title( STC, "" )
+colorbar( STC, "off" )
+axis( STC, "off" )
+STC.step( 34 )
+
+% Export.
+exportImage( "SnailTrailChart", STC, [40, 50] )
+
+end % exportSnailTrailChart
+
+function exportSpiderChart()
+%EXPORTSPIDERCHART Export the SpiderChart.
+
+% Set the seed.
+s = rng();
+seedCleanup = onCleanup( @() rng( s ) );
+rng( "default" )
+
+% Define the chart data.
+data = rand( 5, 2 );
+
+% Create the chart.
+f = uifigure();
+figureCleanup = onCleanup( @() delete( f ) );
+SC = SpiderChart( "Parent", f, ...
+    "Data", data, ...
+    "WebLineWidth", 3.5, ...
+    "LineWidth", 10 );
+
+% Export.
+exportImage( "SpiderChart", SC )
+
+end % exportSpiderChart
+
+function exportTernaryChart()
+%EXPORTTERNARYCHART Export the TernaryChart.
+
+% Load the chart data.
+data = load( fullfile( chartsDocRoot(), "data", "Chemicals.mat" ) );
+
+% Create the chart.
+f = uifigure();
+figureCleanup = onCleanup( @() delete( f ) );
+TC = TernaryChart( "Parent", f, ...
+    "Data", data.T, ...
+    "EdgeColor", "none", ...
+    "FaceColor", "interp", ...
+    "ShowTicks", false );
+xlabel( TC, "" )
+ylabel( TC, "left", "" )
+ylabel( TC, "right", "" )
+zlabel( TC, "" )
+colormap( TC, spring() )
+
+% Export.
+exportImage( "TernaryChart", TC )
+
+end % exportTernaryChart
+
+function exportValueAtRiskChart()
+%EXPORTVALUEATRISKCHART Export the ValueAtRiskChart.
+
+% Set the seed.
+s = rng();
+seedCleanup = onCleanup( @() rng( s ) );
+rng( "default" )
+
+% Create data for the chart.
+d = 0.02 * trnd(10, 2000, 1 );
+
+% Create the chart.
+f = uifigure();
+figureCleanup = onCleanup( @() delete( f ) );
+VARC = ValueAtRiskChart( "Parent", f, ...
+    "Data", d, ...
+    "FaceAlpha", 1, ...
+    "LineWidth", 10, ...
+    "VaRLabelVisible", "off", ...
+    "CVaRLabelVisible", "off" );
+VARC.EdgeColor = VARC.FaceColor;
+xlabel( VARC, "" )
+ylabel( VARC, "" )
+title( VARC, "" )
+legend( VARC, "off" )
+axis( VARC, "off" )
+
+% Export.
+exportImage( "ValueAtRiskChart", VARC, [40, 50] )
+
+end % exportValueAtRiskChart
+
+function exportWindRoseChart()
+%EXPORTWINDROSECHART Export the WindRoseChart.
+
+% Load the chart data.
+data = load( fullfile( chartsDocRoot(), "data", "Wind.mat" ) );
+
+% Create the chart.
+f = uifigure();
+figureCleanup = onCleanup( @() delete( f ) );
+WRC = WindRoseChart( "Parent", f, ...
+    "WindData", data.W, ...
+    "LegendVisible", "off", ...
+    "RadialLabelVisible", "off", ...
+    "BackdropLineWidth", 3.5, ...
+    "EdgeColor", "none", ...
+    "DirectionLabelVisible", "off" );
+
+% Export.
+exportImage( "WindRoseChart", WRC )
+
+end % exportWindRoseChart
+
 function exportImage( name, gobj, resolution )
 %EXPORTIMAGE Export large and small PNG images of the given chart using a 
 %transparent background.
@@ -589,9 +719,17 @@ delete( pngPath(1) )
 delete( pngPath(2) )
 
 % Export an icon-size version of the image.
-pngrgb24 = imresize( pngrgb, resolution, "bicubic" );
-alpha24 = imresize( alpha, resolution, "bicubic" );
-export24Name = fullfile( exportPath(), name + "40.png" );
-imwrite( pngrgb24, export24Name, "Alpha", alpha24 )
+pngrgb40 = imresize( pngrgb, resolution, "bicubic" );
+alpha40 = imresize( alpha, resolution, "bicubic" );
+export40Name = fullfile( exportPath(), name + "40.png" );
+imwrite( pngrgb40, export40Name, "Alpha", alpha40 )
+
+% Create the toolbox logo.
+if name == "ScatterFitChart"
+    pngrgb24 = imresize( pngrgb, [24, 24], "bicubic" );
+    alpha24 = imresize( alpha, [24, 24], "bicubic" );
+    export24Name = fullfile( exportPath(), "toolboxLogo.png" );
+    imwrite( pngrgb24, export24Name, "Alpha", alpha24 )
+end % if
 
 end % exportImages

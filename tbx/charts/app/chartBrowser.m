@@ -27,9 +27,10 @@ column.Tag = "GettingStartedColumn";
 section.add( column )
 
 % Add the button for the Getting Started guide.
-toolboxLogo = imresize( imread( "toolboxLogo.png" ), [24, 24] );
+logoPath = fullfile( chartsRoot(), "app", "images", "toolboxLogo.png" );
+icon = importImageIcon( logoPath );
 button = matlab.ui.internal.toolstrip.Button( ...
-    "Icon", matlab.ui.internal.toolstrip.Icon( toolboxLogo ) );
+    "Icon", matlab.ui.internal.toolstrip.Icon( icon ) );
 button.Text = "Getting Started";
 button.Description = "Open the Getting Started guide";
 button.ButtonPushedFcn = @onGettingStartedButtonPushed;
@@ -92,7 +93,7 @@ end % while
 
 % Create a gallery popup and add the gallery categories to it.
 popup = matlab.ui.internal.toolstrip.GalleryPopup( ...
-    "DisplayState", "list_view", ...
+    "DisplayState", "icon_view", ...
     'ShowSelection', true, ...        
     'FavoritesEnabled', true, ...
     'GalleryItemWidth', 100, ...
@@ -103,7 +104,7 @@ popup.add( category )
 % Create the main gallery and add it to the view column.
 gallery = matlab.ui.internal.toolstrip.Gallery( popup, ...
     'MinColumnCount', 1, ...
-    'MaxColumnCount', 6 );
+    'MaxColumnCount', 5 );
     
 gallery.Description = "Example charts";
 column.add( gallery )

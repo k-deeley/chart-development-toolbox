@@ -160,6 +160,9 @@ classdef WindRoseChart < Chart
     properties ( Constant, Hidden )
         % Product dependencies.
         Dependencies(1, :) string = "MATLAB"
+        % Description.
+        ShortDescription(1, 1) string = "Display wind speed and " + ...
+            "direction data on a polar histogram"
     end % properties ( Constant, Hidden )
 
     methods

@@ -4,7 +4,7 @@ classdef ValueAtRiskChart < Component
 
     % Copyright 2018-2025 The MathWorks, Inc.
 
-    properties ( Dependent )
+   properties ( Dependent )
         % Underlying data for the chart, typically a series of returns.
         Data(:, 1) double {mustBeReal, mustBeNonempty, mustBeFinite}
     end % properties ( Dependent )
@@ -33,6 +33,12 @@ classdef ValueAtRiskChart < Component
         VaRLineVisible(1, 1) matlab.lang.OnOffSwitchState
         % Visibility of the CVaR line.
         CVaRLineVisible(1, 1) matlab.lang.OnOffSwitchState
+        % Visibility of the VaR label.
+        VaRLabelVisible(1, 1) matlab.lang.OnOffSwitchState
+        % Visibility of the CVaR label.
+        CVaRLabelVisible(1, 1) matlab.lang.OnOffSwitchState
+        % Width of distribution fit curve and risk lines.
+        LineWidth(1, 1) double {mustBePositive, mustBeFinite} = 2
         % Histogram edge transparency.
         EdgeAlpha(1, 1) double {mustBeInRange( EdgeAlpha, 0, 1 )}
         % Histogram edge color.
@@ -44,6 +50,11 @@ classdef ValueAtRiskChart < Component
         % Visibility of the chart controls.
         Controls(1, 1) matlab.lang.OnOffSwitchState
     end % properties ( Dependent )
+
+    properties ( SetAccess = private )
+        % VaR and CVaR risk metrics.
+        RiskMetrics(1, 2) double {mustBeReal, mustBeFinite}
+    end % properties ( SetAccess = private )
 
     properties ( Access = private )
         % Internal storage for the chart's data.
@@ -92,6 +103,15 @@ classdef ValueAtRiskChart < Component
         % Check box for the CVaR line.
         CVaRLineCheckBox(:, 1) matlab.ui.control.CheckBox ...
             {mustBeScalarOrEmpty}
+        % Check box for the VaR label visibility.
+        VaRLabelCheckBox(:, 1) matlab.ui.control.CheckBox ...
+            {mustBeScalarOrEmpty}
+        % Check box for the CVaR label visibility.
+        CVaRLabelCheckBox(:, 1) matlab.ui.control.CheckBox ...
+            {mustBeScalarOrEmpty}
+        % Edit field for the line width.
+        LineWidthEditField(:, 1) matlab.ui.control.NumericEditField ...
+            {mustBeScalarOrEmpty}
         % Spinner to control the histogram's EdgeAlpha property.
         EdgeAlphaSpinner(:, 1) matlab.ui.control.Spinner ...
             {mustBeScalarOrEmpty}
@@ -110,6 +130,10 @@ classdef ValueAtRiskChart < Component
         % Product dependencies.
         Dependencies(1, :) string = ["MATLAB", ...
             "Statistics and Machine Learning Toolbox"]
+        % Description.
+        ShortDescription(1, 1) string = "Plot the distribution" + ...
+            " of a return series together with its value at risk" + ...
+            " metrics and a distribution fit"
     end % properties ( Constant, Hidden )
 
     methods
@@ -205,6 +229,45 @@ classdef ValueAtRiskChart < Component
 
         end % set.CVaRLineVisible
 
+        function value = get.VaRLabelVisible( obj )
+
+            value = obj.VaRLabelCheckBox.Value;
+
+        end % get.VaRLabelVisible
+        
+        function set.VaRLabelVisible( obj, value )
+
+            obj.VaRLabelCheckBox.Value = value;
+            obj.onVaRLabelToggled()
+
+        end % set.VaRLabelVisible
+
+        function value = get.CVaRLabelVisible( obj )
+
+            value = obj.CVaRLabelCheckBox.Value;
+
+        end % get.CVaRLabelVisible
+
+        function set.CVaRLabelVisible( obj, value )
+
+            obj.CVaRLabelCheckBox.Value = value;
+            obj.onCVaRLabelToggled()
+
+        end % set.CVaRLabelVisible
+
+        function value = get.LineWidth( obj )
+
+            value = obj.LineWidthEditField.Value;
+
+        end % get.LineWidth
+
+        function set.LineWidth( obj, value )
+
+            obj.LineWidthEditField.Value = value;
+            obj.onLineWidthEdited()
+
+        end % set.LineWidth
+
         function value = get.EdgeAlpha( obj )
 
             value = obj.Histogram.EdgeAlpha;
@@ -230,7 +293,7 @@ classdef ValueAtRiskChart < Component
         function set.EdgeColor( obj, value )
 
             % Update the histogram.
-            value = validatecolor( value );
+            value = validatecolor( value );            
             obj.Histogram.EdgeColor = value;
 
             % Update the color picker.
@@ -339,6 +402,18 @@ classdef ValueAtRiskChart < Component
 
         end % legend
 
+        function varargout = axis( obj, varargin )
+
+            [varargout{1:nargout}] = axis( obj.Axes, varargin{:} );
+
+        end % axis
+
+        function exportgraphics( obj, varargin )
+
+            exportgraphics( obj.Axes, varargin{:} )
+
+        end % exportgraphics
+
     end % methods
 
     methods ( Access = protected )
@@ -374,14 +449,16 @@ classdef ValueAtRiskChart < Component
             obj.FittedPDF = line( "Parent", obj.Axes, ...
                 "XData", NaN, ...
                 "YData", NaN, ...
-                "LineWidth", 2.5, ...
+                "LineWidth", 2, ...
                 "Color", c(2, :) );
 
             % Overlay the VaR lines.
             obj.VaRLine = xline( obj.Axes, 0, "Color", c(3, :), ...
+                "Alpha", 1, ...
                 "LineWidth", 2, ...
                 "LabelHorizontalAlignment", "left" );
             obj.CVaRLine = xline( obj.Axes, 0, "Color", c(4, :), ...
+                "Alpha", 1, ...
                 "LineWidth", 2, ...
                 "LabelHorizontalAlignment", "left" );
 
@@ -398,8 +475,8 @@ classdef ValueAtRiskChart < Component
                 "Title", "Chart Controls", ...
                 "FontWeight", "bold" );
             p.Layout.Column = 2;
-            g = uigridlayout( p, [5, 2], ...
-                "RowHeight", repmat( "fit", 5, 1 ), ...
+            g = uigridlayout( p, [8, 2], ...
+                "RowHeight", repelem( "fit", 8 ), ...
                 "ColumnWidth", ["fit", "1x"] );
             
             % Add the distribution selection dropdown.
@@ -435,7 +512,32 @@ classdef ValueAtRiskChart < Component
                 "Tooltip", "Hide or show the CVaR line", ...
                 "ValueChangedFcn", @obj.toggleCVaRLineVisibility );
             obj.CVaRLineCheckBox.Layout.Column = [1, 2];
-            
+
+            % Add checkboxes to control visibility of the risk line labels.
+            obj.VaRLabelCheckBox = uicheckbox( g, ...
+                "Text", "Show VaR label", ...
+                "Value", true, ...
+                "Tooltip", "Hide or show the VaR label", ...
+                "ValueChangedFcn", @obj.onVaRLabelToggled );
+            obj.VaRLabelCheckBox.Layout.Column = [1, 2];
+            obj.CVaRLabelCheckBox = uicheckbox( g, ...
+                "Text", "Show CVaR label", ...
+                "Value", true, ...
+                "Value", true, ...
+                "Tooltip", "Hide or show the CVaR label", ...
+                "ValueChangedFcn", @obj.onCVaRLabelToggled );
+            obj.CVaRLabelCheckBox.Layout.Column = [1, 2];
+
+            % Add an edit field for the line width.
+            uilabel( g, "Text", "Line width:", ...
+                "HorizontalAlignment", "right" );
+            obj.LineWidthEditField = uieditfield( g, "numeric", ...
+                "Limits", [0, Inf], ...
+                "LowerLimitInclusive", "off", ...
+                "UpperLimitInclusive", "off", ...
+                "Value", 2, ...
+                "ValueChangedFcn", @obj.onLineWidthEdited );
+                        
             % Place the histogram controls in a separate panel.
             p = uipanel( g, "Title", "Histogram Appearance", ...
                 "FontWeight", "bold" );
@@ -514,6 +616,9 @@ classdef ValueAtRiskChart < Component
             end % if
 
             % Refresh the chart's decorative properties.
+            obj.FittedPDF.LineWidth = obj.LineWidth;
+            obj.VaRLine.LineWidth = obj.LineWidth;
+            obj.CVaRLine.LineWidth = obj.LineWidth;
             set( obj.Axes, "XGrid", obj.XGrid, "YGrid", obj.YGrid )
 
         end % update
@@ -525,11 +630,11 @@ classdef ValueAtRiskChart < Component
             % Compute the new VaR and CVaR.
             VaR = quantile( obj.Data, 1 - obj.VaRLevel );
             CVaR = mean( obj.Data(obj.Data < VaR) );
-            percentVaRLevel = 100 * obj.VaRLevel;
-            set( obj.VaRLine, "Value", VaR, ...
-                "Label", "VaR (" + percentVaRLevel + ") = " + VaR )
-            set( obj.CVaRLine, "Value", CVaR, ...
-                "Label", "CVaR (" + percentVaRLevel + ") = " + CVaR )
+            obj.RiskMetrics = [VaR, CVaR];
+            obj.VaRLine.Value = VaR;
+            obj.CVaRLine.Value = CVaR;
+            obj.onVaRLabelToggled()
+            obj.onCVaRLabelToggled()
 
         end % updateVaRLines
 
@@ -584,6 +689,42 @@ classdef ValueAtRiskChart < Component
             obj.CVaRLine.Visible = s.Value;
 
         end % toggleCVaRLineVisibility
+
+        function onVaRLabelToggled( obj, ~, ~ )
+            %ONVARLABELTOGGLED Toggle the visibility of the VaR label.
+
+            checked = obj.VaRLabelCheckBox.Value;
+            if checked
+                obj.VaRLine.Label = "VaR (" + 100 * obj.VaRLevel + ...
+                    ") = " + obj.RiskMetrics(1);
+            else
+                obj.VaRLine.Label = "";
+            end % if
+
+        end % onVaRLabelToggled
+
+        function onCVaRLabelToggled( obj, ~, ~ )
+            %ONCVARLABELTOGGLED Toggle the visibility of the CVaR label.
+
+            checked = obj.CVaRLabelCheckBox.Value;
+            if checked
+                obj.CVaRLine.Label = "CVaR (" + 100 * obj.VaRLevel + ...
+                    ") = " + obj.RiskMetrics(2);
+            else
+                obj.CVaRLine.Label = "";
+            end % if
+
+        end % onCVaRLabelToggled
+
+        function onLineWidthEdited( obj, ~, ~ )
+            %ONLINEWIDTHEDITED Update the line width of the distribution
+            %fit and risk lines.
+
+            lw = obj.LineWidthEditField.Value;
+            set( [obj.FittedPDF, obj.VaRLine, obj.CVaRLine], ...
+                "LineWidth", lw )
+
+        end % onLineWidthEdited
 
         function onEdgeAlphaSelected( obj, s, ~ )
             %ONEDGEALPHASELECTED Update the histogram's EdgeAlpha when the

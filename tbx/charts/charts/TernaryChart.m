@@ -41,6 +41,8 @@ classdef TernaryChart < Component
         FaceLighting(1, 1) string {mustBeLighting} = "flat"
         % Surface edge lighting.
         EdgeLighting(1, 1) string {mustBeLighting} = "none"
+        % Tick visibility.
+        ShowTicks(1, 1) matlab.lang.OnOffSwitchState = "on"
     end % properties ( Dependent )
 
     properties ( Dependent )
@@ -123,11 +125,14 @@ classdef TernaryChart < Component
         % Pushbutton for rotating the axes conterclockwise.
         RotateCounterclockwiseButton(:, 1) matlab.ui.control.Button ...
             {mustBeScalarOrEmpty}
-        % Check box for the axes' grid visibility.
-        GridCheckBox(:, 1) matlab.ui.control.CheckBox {mustBeScalarOrEmpty}
         % Check box for the axes' colorbar.
         ColorbarCheckBox(:, 1) matlab.ui.control.CheckBox ...
             {mustBeScalarOrEmpty}
+        % Check box for the axes' grid visibility.
+        GridCheckBox(:, 1) matlab.ui.control.CheckBox {mustBeScalarOrEmpty}
+        % Check box for the tick visibility.
+        TicksCheckBox(:, 1) matlab.ui.control.CheckBox ...
+            {mustBeScalarOrEmpty}        
         % Dropdown menu for selecting the surface type.
         SurfaceTypeDropDown(:, 1) matlab.ui.control.DropDown ...
             {mustBeScalarOrEmpty}
@@ -151,6 +156,9 @@ classdef TernaryChart < Component
     properties ( Constant, Hidden )
         % Product dependencies.
         Dependencies(1, :) string = "MATLAB"
+        % Description.
+        ShortDescription(1, 1) string = "Barycentric plot of three" + ...
+            " variables summing to a constant"
     end % properties ( Constant, Hidden )
 
     methods
@@ -207,6 +215,19 @@ classdef TernaryChart < Component
             obj.TickRate_ = value;
 
         end % set.TickRate
+
+        function value = get.ShowTicks( obj )
+
+            value = obj.TicksCheckBox.Value;
+
+        end % get.ShowTicks
+
+        function set.ShowTicks( obj, value )
+
+            obj.TicksCheckBox.Value = value;
+            obj.onTicksCheckBoxSelected()
+
+        end % set.ShowTicks
 
         function value = get.SurfaceType( obj )
 
@@ -721,6 +742,12 @@ classdef TernaryChart < Component
 
         end % resetLabels
 
+        function exportgraphics( obj, varargin )
+
+            exportgraphics( obj.Axes, varargin{:} )
+
+        end % exportgraphics
+
     end % methods
 
     methods ( Access = protected )
@@ -831,8 +858,8 @@ classdef TernaryChart < Component
             p = uipanel( "Parent", vLayout, ...
                 "Title", "Axis", ...
                 "FontWeight", "bold" );
-            controlLayout = uigridlayout( p, [2, 2], ...
-                "RowHeight", ["fit", "fit"], ...
+            controlLayout = uigridlayout( p, [3, 2], ...
+                "RowHeight", ["fit", "fit", "fit"], ...
                 "ColumnWidth", ["1x", "1x"] );
 
             % Axis rotation controls.
@@ -857,12 +884,20 @@ classdef TernaryChart < Component
                 "Text", "Colorbar", ...
                 "Tooltip", "Hide/show colorbar", ...
                 "ValueChangedFcn", @obj.onColorbarSelected );
+            obj.ColorbarCheckBox.Layout.Column = [1, 2];
             obj.GridCheckBox = uicheckbox( ...
                 "Parent", controlLayout, ...
                 "Value", true, ...
                 "Text", "Grid", ...
                 "Tooltip", "Hide/show grid", ...
                 "ValueChangedFcn", @obj.onGridSelected );
+            obj.GridCheckBox.Layout.Column = [1, 2];
+            obj.TicksCheckBox = uicheckbox( ...
+                "Parent", controlLayout, ...
+                "Value", true, ...
+                "Text", "Show ticks", ...
+                "Tooltip", "Hide/show ticks", ...
+                "ValueChangedFcn", @obj.onTicksCheckBoxSelected );
 
             % Add controls for the surface.
             p = uipanel( "Parent", vLayout, ...
@@ -1092,6 +1127,13 @@ classdef TernaryChart < Component
 
         end % onColorbarSelected
 
+        function onTicksCheckBoxSelected( obj, ~, ~ )
+            %ONTICKSCHECKBOXSELECTED Show/hide the ticks.
+
+            set( obj.Ticks, "Visible", obj.TicksCheckBox.Value )
+
+        end % onTicksCheckBoxSelected
+
         function onSufaceTypeSelected( obj, s, ~ )
             %ONSURFACETYPESELECTED Update the surface type.
 
@@ -1227,7 +1269,7 @@ classdef TernaryChart < Component
                         -0.03 * ones( 1, numel( tickPos ) ), ...
                         num2str( round( (tickPos-1) ./ ...
                         obj.GridResolution_, 2 ).' ), ...
-                        "HorizontalAlignment", "center" );
+                        "HorizontalAlignment", "center" );                        
                     ticks(:, 2) = text( obj.Axes, ...
                         -1/2 + 1/2 * (tickPos-1) ./ ...
                         obj.GridResolution_ - 0.03, ...
@@ -1235,7 +1277,7 @@ classdef TernaryChart < Component
                         / obj.GridResolution_, ...
                         num2str( round( (tickPos-1) ./ ...
                         obj.GridResolution_, 2 ).' ), ...
-                        "HorizontalAlignment", "center", ...
+                        "HorizontalAlignment", "center", ...                        
                         "Rotation", 60 );
                     ticks(:, 3) = text( obj.Axes, ...
                         1/2 * (tickPos-1) ./ ...
@@ -1244,7 +1286,7 @@ classdef TernaryChart < Component
                         (1 - (tickPos-1) ./ obj.GridResolution_ ), ...
                         num2str( round( (tickPos-1) ./ ...
                         obj.GridResolution_, 2 ).' ), ...
-                        "HorizontalAlignment", "center", ...
+                        "HorizontalAlignment", "center", ...                        
                         "Rotation", -60 );
                 
                 case "counterclockwise"
@@ -1275,6 +1317,8 @@ classdef TernaryChart < Component
                         "Rotation", -60 );
 
             end % switch/case
+
+            set( ticks, "Visible", obj.ShowTicks )
 
         end % createTicks
 
