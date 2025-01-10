@@ -109,6 +109,20 @@ gallery = matlab.ui.internal.toolstrip.Gallery( popup, ...
 gallery.Description = "Example charts";
 column.add( gallery )
 
+% Add a figure document group.
+figDocGroup = matlab.ui.internal.FigureDocumentGroup();
+figDocGroup.Tag = "FigureDocumentGroup";
+figDocGroup.Title = "Documentation";
+app.add( figDocGroup )
+
+% Add a figure document.
+figOpts.Title = "Getting Started";
+figOpts.DocumentGroupTag = figDocGroup.Tag;
+figDoc = matlab.ui.internal.FigureDocument( figOpts );
+app.add( figDoc )
+g = uigridlayout( figDoc.Figure, [1, 1] );
+h = uihtml( g, "HTMLSource", fullfile( chartsRoot(), "app", "html", "doc", "GettingStarted.html" ) );
+
 % Make the app visible.
 app.Visible = true;
 

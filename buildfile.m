@@ -24,9 +24,11 @@ plan.DefaultTasks = "package";
 % Define the task dependencies and inputs.
 %plan("test").Dependencies = "check";
 %plan("doc").Dependencies = "test";
-plan("doc").Inputs = [...
-    fullfile( projectRoot, "tbx", "chartsdoc", "examples" );
-    fullfile( projectRoot, "tbx", "charts", "charts" )];
+plan("doc").Inputs = [
+    fullfile( chartsRoot(), "charts" );
+    fullfile( chartsDocRoot(), "examples" );    
+    fullfile( chartsDocRoot(), "GettingStarted.mlx" );
+    fullfile( chartsDocRoot(), "CreatingSpecializedCharts.mlx" )];
 plan("package").Dependencies = "doc";
 
 end % buildfile
@@ -72,18 +74,20 @@ function docTask( context )
 % Build the documentation and examples.
 
 % Publish the chart classes as HTML documents.
-chartNames = allChartNames();
-htmlOutputFolder = fullfile( context.Plan.RootFolder, "tbx", ...
-    "charts", "app", "html", "charts" );
+chartsFolder = context.Task.Inputs(1).Path;
+chartNames = deblank( string( ls( fullfile( chartsFolder, "*.m" ) ) ) );
+chartFullPaths = fullfile( chartsFolder, chartNames );
+chartNames = erase( chartNames, ".m" );
+htmlOutputFolder = fullfile( chartsRoot(), "app", "html", "charts" );
 for chartIdx = 1 : numel( chartNames )
     % Export the chart classdef file to an HTML document.
-    currentChartName = chartNames(chartIdx);
-    publish( currentChartName, "format", "html", ...
+    publish( chartFullPaths(chartIdx), ...
+        "format", "html", ...
         "outputDir", htmlOutputFolder, ...
         "evalCode", false );
     % Erase the footer.
     publishedFile = fullfile( htmlOutputFolder, ...
-        currentChartName + ".html" );
+        chartNames(chartIdx) + ".html" );
     rawHTML = splitlines( fileread( publishedFile ) );
     footerStartIdx = find( startsWith( rawHTML, "<p class=""footer"">" ) );
     footerEndIdx = find( startsWith( rawHTML, "</p>" ) );
@@ -92,6 +96,37 @@ for chartIdx = 1 : numel( chartNames )
     rawHTML(footerStartIdx:footerEndIdx) = [];
     writelines( rawHTML, publishedFile )
 end % for
+
+% Publish the Live Script examples as HTML documents.
+examplesFolder = context.Task.Inputs(2).Path;
+exampleNames = deblank( string( ls( ...
+    fullfile( examplesFolder, "*Examples.mlx" ) ) ) );
+exampleFullPaths = fullfile( examplesFolder, exampleNames );
+exampleNames = erase( exampleNames, ".mlx" );
+htmlOutputFolder = fullfile( chartsRoot(), "app", "html", "examples" );
+for exampleIdx = 1 : numel( exampleNames )    
+    exportName = fullfile( htmlOutputFolder, ...
+        exampleNames(exampleIdx) + ".html" );
+    export( exampleFullPaths(exampleIdx), exportName, ...
+        "Format", "html", ...
+        "Run", false );
+end % for
+
+% Publish the getting started guide.
+gettingStartedGuide = context.Task.Inputs(3).Path;
+htmlOutputFolder = fullfile( chartsRoot(), "app", "html", "doc" );
+exportName = fullfile( htmlOutputFolder, "GettingStarted.html" );
+export( gettingStartedGuide, exportName, ...
+    "Format", "html", ...
+    "Run", false );
+
+% Publish the chart development guide.
+creatingCharts = context.Task.Inputs(4).Path;
+exportName = fullfile( htmlOutputFolder, ...
+    "CreatingSpecializedCharts.html" );
+export( creatingCharts, exportName, ...
+    "Format", "html", ...
+    "Run", false );
 
 end % docTask
 
@@ -123,10 +158,6 @@ toolboxID = meta.Identifier;
 meta = rmfield( meta, ["Identifier", "ToolboxFolder"] );
 opts = matlab.addons.toolbox.ToolboxOptions( ...
     toolboxFolder, toolboxID, meta );
-
-% Remove the markdown (.md) files.
-markdownFilesIdx = endsWith( opts.ToolboxFiles, ".md" );
-opts.ToolboxFiles(markdownFilesIdx) = [];
 
 % Package the toolbox.
 matlab.addons.toolbox.packageToolbox( opts )
