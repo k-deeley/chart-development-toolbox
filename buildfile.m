@@ -6,9 +6,12 @@ function plan = buildfile()
 % Define the build plan.
 plan = buildplan( localfunctions() );
 
+% Set the package task to run by default.
+plan.DefaultTasks = "package";
+
 % Add a test task to run the unit tests for the project. Generate and save
 % a coverage report. This build task is optional.
-projectRoot = plan.RootFolder;
+%projectRoot = plan.RootFolder;
 %testFolder = fullfile( projectRoot, "charts", "tests" );
 %codeFolder = fullfile( projectRoot, "tbx", "charts"  );
 % plan("test") = matlab.buildtool.tasks.TestTask( testFolder, ...
@@ -18,18 +21,30 @@ projectRoot = plan.RootFolder;
 %     "CodeCoverageResults", "reports/Coverage.html", ...
 %     "OutputDetail", "none" );
 
-% Set the package toolbox task to run by default.
-plan.DefaultTasks = "package";
-
-% Define the task dependencies and inputs.
+% The test task depends on the check task.
 %plan("test").Dependencies = "check";
-%plan("doc").Dependencies = "test";
+
+% The doc task depends on the check task.
+plan("doc").Dependencies = "check";
+
+% Skip the doc task if the charts, examples, and doc files are up to date.
 plan("doc").Inputs = [
     fullfile( chartsRoot(), "charts" );
     fullfile( chartsDocRoot(), "examples" );    
     fullfile( chartsDocRoot(), "GettingStarted.mlx" );
+    fullfile( chartsDocRoot(), "GettingStartedApp.mlx" );
     fullfile( chartsDocRoot(), "CreatingSpecializedCharts.mlx" )];
-plan("package").Dependencies = "doc";
+
+% Obfuscate the required file.
+appFolder = fullfile( chartsRoot(), "app" );
+sourceFile = fullfile( appFolder, "chartBrowserLauncher.m" );
+plan("pcode") = matlab.buildtool.tasks.PcodeTask( ...
+    sourceFile, appFolder, ...
+    "Description", "Obfuscate the required code file.", ...
+    "Dependencies", "doc" ); 
+
+% The package task depends on the p-code task.
+plan("package").Dependencies = "pcode";
 
 end % buildfile
 
@@ -120,8 +135,15 @@ export( gettingStartedGuide, exportName, ...
     "Format", "html", ...
     "Run", false );
 
+% Do the same for the app version of the guide.
+gettingStartedGuideApp = context.Task.Inputs(4).Path;
+exportName = fullfile( htmlOutputFolder, "GettingStartedApp.html" );
+export( gettingStartedGuideApp, exportName, ...
+    "Format", "html", ...
+    "Run", false );
+
 % Publish the chart development guide.
-creatingCharts = context.Task.Inputs(4).Path;
+creatingCharts = context.Task.Inputs(5).Path;
 exportName = fullfile( htmlOutputFolder, ...
     "CreatingSpecializedCharts.html" );
 export( creatingCharts, exportName, ...
@@ -132,6 +154,11 @@ end % docTask
 
 function packageTask( context )
 % Package the Chart Development Toolbox.
+
+% Package the Chart Browser app.
+projectRoot = context.Plan.RootFolder;
+appPackagingProject = fullfile( projectRoot, "Chart Browser.prj" );
+matlab.apputil.package( appPackagingProject )
 
 % Toolbox short name.
 toolboxShortName = "charts";
@@ -148,6 +175,8 @@ meta.ToolboxImageFile = fullfile( projectRoot, meta.ToolboxImageFile );
 versionString = feval( @(s) s(1).Version, ...
     ver( toolboxShortName ) ); %#ok<FVAL>
 meta.ToolboxVersion = versionString;
+meta.ToolboxGettingStartedGuide = fullfile( projectRoot, ...
+    meta.ToolboxGettingStartedGuide );
 mltbx = fullfile( projectRoot, ...
     meta.ToolboxName + " " + versionString + ".mltbx" );
 meta.OutputFile = mltbx; 
@@ -158,6 +187,12 @@ toolboxID = meta.Identifier;
 meta = rmfield( meta, ["Identifier", "ToolboxFolder"] );
 opts = matlab.addons.toolbox.ToolboxOptions( ...
     toolboxFolder, toolboxID, meta );
+
+% Remove unnecessary files.
+tf = endsWith( opts.ToolboxFiles, "chartBrowserLauncher.m" ) | ...
+    endsWith( opts.ToolboxFiles, ...
+    "app\images\" + alphanumericsPattern() + ".png" );
+opts.ToolboxFiles(tf) = [];
 
 % Package the toolbox.
 matlab.addons.toolbox.packageToolbox( opts )

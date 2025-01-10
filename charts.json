@@ -9,6 +9,7 @@
     "ToolboxFolder":"./tbx",
     "ToolboxMatlabPath": ["./tbx/charts", "./tbx/charts/app", "./tbx/charts/charts", "./tbx/charts/validators", "./tbx/chartsdoc", "./tbx/chartsdoc/examples"],
     "ToolboxImageFile":"./tbx/charts/app/images/toolboxLogo.png",
+    "ToolboxGettingStartedGuide":"./tbx/chartsdoc/GettingStarted.mlx",
     "MinimumMatlabRelease":"R2024b"
 }
  

@@ -15,6 +15,9 @@ I = imtile( im, "GridSize", [NaN, 5], ...
     "BackgroundColor", "black", ...
     "BorderSize", [20, 20] );
 
+% Reduce the resolution.
+I = imresize( I, 0.2 );
+
 % Export the tiled image.
 imageFolder = fileparts( mfilename( "fullpath" ) );
 exportName = fullfile( imageFolder, "chartMontage.png" );

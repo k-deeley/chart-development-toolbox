@@ -3,7 +3,7 @@
 [![View Chart Examples on File Exchange](images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/65857-chart-development-toolbox)
 [![Open in MATLAB Online](images/open-in-matlab-online.svg)](https://matlab.mathworks.com/open/github/v1?repo=mathworks/chart-examples&project=Charts.prj)
 
-This toolbox contains the MATLAB® code for the technical article [_Creating Specialized Charts with MATLAB Object-Oriented Programming_](https://www.mathworks.com/company/newsletters/articles/creating-specialized-charts-with-matlab-object-oriented-programming.html).
+This toolbox contains the MATLAB® code and examples for the technical article [_Creating Specialized Charts with MATLAB Object-Oriented Programming_](https://www.mathworks.com/company/newsletters/articles/creating-specialized-charts-with-matlab-object-oriented-programming.html).
 
 A chart provides a task-specific application programming interface (API) for creating custom visualizations. Designing and implementing a chart not only provides a convenient API for end users, but simultaneously removes the need for the user to manipulate low-level graphics objects.
 
@@ -23,11 +23,10 @@ This submission is a MATLAB toolbox.
 
 This toolbox requires MATLAB release R2024b or later.
 - [MATLAB](https://www.mathworks.com/products/matlab.html)
-- [Statistics and Machine Learning Toolbox](https://www.mathworks.com/products/statistics.html)
 
 Some example charts in the toolbox rely on additional toolboxes.
 
 ## License
 The license is available in the [LICENSE.txt](LICENSE.txt) file in this GitHub repository.
 
-Copyright 2018-2025 The MathWorks, Inc.
+_Copyright 2018-2025 The MathWorks, Inc._

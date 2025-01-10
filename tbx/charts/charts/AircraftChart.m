@@ -206,9 +206,11 @@ end % arguments ( Output )
 % Import the triangulation. 
 % Reference:
 % Airplane by Yorchmur, https://www.printables.com/model/34767-airplane, 
-% accessed in December 2024, licensed under the Creative Commons 
-% Attribution 4.0 International License.
-stlFilePath = fullfile( chartsDocRoot(), "data", "avion31.stl" );
-tr = stlread( stlFilePath );
+% licensed under the Creative Commons Attribution 4.0 International 
+% License.
+url = "https://files.printables.com/media/prints/34767/stls/" + ...
+    "343468_b085a064-c28f-4861-b1a0-6a559929a7e2/avion31.stl";
+opts = weboptions( "ContentReader", @stlread );
+tr = webread(url, opts);
 
 end % defaultAircraft
