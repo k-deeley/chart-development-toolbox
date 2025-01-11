@@ -30,18 +30,16 @@ plan("doc").Dependencies = "check";
 % Skip the doc task if the charts, examples, and doc files are up to date.
 plan("doc").Inputs = [
     fullfile( chartsRoot(), "charts" );
-    fullfile( chartsDocRoot(), "examples" );    
-    fullfile( chartsDocRoot(), "GettingStarted.mlx" );
-    fullfile( chartsDocRoot(), "GettingStartedApp.mlx" );
-    fullfile( chartsDocRoot(), "CreatingSpecializedCharts.mlx" )];
+    fullfile( chartsRoot(), "examples" );
+    fullfile( chartsRoot(), "doc" )];
 
-% Obfuscate the required file.
+% Obfuscate the required files.
 appFolder = fullfile( chartsRoot(), "app" );
 sourceFile = fullfile( appFolder, "chartBrowserLauncher.m" );
 plan("pcode") = matlab.buildtool.tasks.PcodeTask( ...
     sourceFile, appFolder, ...
-    "Description", "Obfuscate the required code file.", ...
-    "Dependencies", "doc" ); 
+    "Description", "Obfuscate the required code files.", ...
+    "Dependencies", "doc" );
 
 % The package task depends on the p-code task.
 plan("package").Dependencies = "pcode";
@@ -55,11 +53,11 @@ function checkTask( context )
 % issues.
 projectRoot = context.Plan.RootFolder;
 codeIssuesTask = matlab.buildtool.tasks.CodeIssuesTask( projectRoot, ...
-     "IncludeSubfolders", true, ...
-     "Configuration", "factory", ...
-     "Description", ...
-     "Assert that there are no code issues in the project.", ...
-     "WarningThreshold", 0 );
+    "IncludeSubfolders", true, ...
+    "Configuration", "factory", ...
+    "Description", ...
+    "Assert that there are no code issues in the project.", ...
+    "WarningThreshold", 0 );
 codeIssuesTask.analyze( context )
 
 % Update the project dependencies.
@@ -75,7 +73,7 @@ notPassed = ~passed;
 if any( notPassed )
     disp( checkResults(notPassed, :) )
 else
-    fprintf( "** All project checks passed.\n\n" )    
+    fprintf( "** All project checks passed.\n\n" )
 end % if
 
 % Check that all checks have passed.
@@ -94,12 +92,15 @@ chartNames = deblank( string( ls( fullfile( chartsFolder, "*.m" ) ) ) );
 chartFullPaths = fullfile( chartsFolder, chartNames );
 chartNames = erase( chartNames, ".m" );
 htmlOutputFolder = fullfile( chartsRoot(), "app", "html", "charts" );
+
 for chartIdx = 1 : numel( chartNames )
+
     % Export the chart classdef file to an HTML document.
     publish( chartFullPaths(chartIdx), ...
         "format", "html", ...
         "outputDir", htmlOutputFolder, ...
         "evalCode", false );
+
     % Erase the footer.
     publishedFile = fullfile( htmlOutputFolder, ...
         chartNames(chartIdx) + ".html" );
@@ -110,6 +111,10 @@ for chartIdx = 1 : numel( chartNames )
         1, "first" ) );
     rawHTML(footerStartIdx:footerEndIdx) = [];
     writelines( rawHTML, publishedFile )
+
+    % Report progress.
+    fprintf( 1, "[+] %s\n", publishedFile )
+
 end % for
 
 % Publish the Live Script examples as HTML documents.
@@ -119,36 +124,52 @@ exampleNames = deblank( string( ls( ...
 exampleFullPaths = fullfile( examplesFolder, exampleNames );
 exampleNames = erase( exampleNames, ".mlx" );
 htmlOutputFolder = fullfile( chartsRoot(), "app", "html", "examples" );
-for exampleIdx = 1 : numel( exampleNames )    
+
+for exampleIdx = 1 : numel( exampleNames )
+
+    % Export the script to HTML.
     exportName = fullfile( htmlOutputFolder, ...
         exampleNames(exampleIdx) + ".html" );
     export( exampleFullPaths(exampleIdx), exportName, ...
         "Format", "html", ...
         "Run", false );
+
+    % Activate the hyperlinks.
+    activateLinks( exportName )
+
+    % Report progress.
+    fprintf( 1, "[+] %s\n", publishedFile )
+
 end % for
 
-% Publish the getting started guide.
-gettingStartedGuide = context.Task.Inputs(3).Path;
+% Write down the doc source and output folders.
+docFolder = context.Task.Inputs(3).Path;
 htmlOutputFolder = fullfile( chartsRoot(), "app", "html", "doc" );
-exportName = fullfile( htmlOutputFolder, "GettingStarted.html" );
-export( gettingStartedGuide, exportName, ...
-    "Format", "html", ...
-    "Run", false );
+
+% Publish the getting started guide.
+exportToHTML( "GettingStarted.mlx" )
 
 % Do the same for the app version of the guide.
-gettingStartedGuideApp = context.Task.Inputs(4).Path;
-exportName = fullfile( htmlOutputFolder, "GettingStartedApp.html" );
-export( gettingStartedGuideApp, exportName, ...
-    "Format", "html", ...
-    "Run", false );
+exportToHTML( "GettingStartedApp.mlx" )
 
 % Publish the chart development guide.
-creatingCharts = context.Task.Inputs(5).Path;
-exportName = fullfile( htmlOutputFolder, ...
-    "CreatingSpecializedCharts.html" );
-export( creatingCharts, exportName, ...
-    "Format", "html", ...
-    "Run", false );
+exportToHTML( "CreatingSpecializedCharts.mlx" )
+
+% Publish the motivational example.
+%exportToHTML( "WhatIsAChart.mlx" )
+
+    function exportToHTML( scriptName )
+        %EXPORTTOHTML Export the given script to HTML format.
+
+        scriptFullPath = fullfile( docFolder, scriptName );
+        [~, scriptNameNoExt] = fileparts( scriptName );
+        exportName = fullfile( htmlOutputFolder, ...
+            scriptNameNoExt + ".html" );
+        export( scriptFullPath, exportName, ...
+            "Format", "html", ...
+            "Run", false );
+
+    end % exportToHTML
 
 end % docTask
 
@@ -159,6 +180,7 @@ function packageTask( context )
 projectRoot = context.Plan.RootFolder;
 appPackagingProject = fullfile( projectRoot, "Chart Browser.prj" );
 matlab.apputil.package( appPackagingProject )
+fprintf( 1, "** Updated Chart Browser app.\n" )
 
 % Toolbox short name.
 toolboxShortName = "charts";
@@ -179,7 +201,7 @@ meta.ToolboxGettingStartedGuide = fullfile( projectRoot, ...
     meta.ToolboxGettingStartedGuide );
 mltbx = fullfile( projectRoot, ...
     meta.ToolboxName + " " + versionString + ".mltbx" );
-meta.OutputFile = mltbx; 
+meta.OutputFile = mltbx;
 
 % Define the toolbox packaging options.
 toolboxFolder = meta.ToolboxFolder;
@@ -191,7 +213,7 @@ opts = matlab.addons.toolbox.ToolboxOptions( ...
 % Remove unnecessary files.
 tf = endsWith( opts.ToolboxFiles, "chartBrowserLauncher.m" ) | ...
     endsWith( opts.ToolboxFiles, ...
-    "app\images\" + alphanumericsPattern() + ".png" );
+    "app\images\" + lettersPattern() + "Chart.png" );
 opts.ToolboxFiles(tf) = [];
 
 % Package the toolbox.
@@ -205,86 +227,45 @@ mlAddonSetLicense( char( opts.OutputFile ), ...
 
 end % packageTask
 
-% Ensure the Apps Packaging Project is up-to-date. This should only
-%    include the entry-point function (the app launcher), so create/update
-%    the Apps Packaging Project whilst the rest of the toolbox code is off
-%    the path (e.g., close the project first).
+function activateLinks( file )
+%ACTIVATELINKS Convert the Live Script hyperlinks to JavaScript-enabled
+%links within the specified HTML file.
 
-% Convert live scripts to HTML.
-% If no input filenames are provided, then for the Chart Catalog's +example folder, run all of the live scripts and export them to HTML files in the same folder.
-% Copyright 2019-2022 The MathWorks, Inc.
-% function refreshHTML( filesToConvert )
-% 
-% arguments
-%     filesToConvert(:, 1) string = ""
-% end % arguments
-% 
-% % Find the default list of files to convert.
-% fileSpec = fullfile( catalogRoot(), "+example", "*.mlx" );
-% defaultFilesToConvert = deblank( string( ls( fileSpec ) ) );
-% 
-% % Check the input files.
-% if nargin == 0
-%     filesToConvert = defaultFilesToConvert;
-% else
-%     assert( all( ismember( filesToConvert, defaultFilesToConvert ) ), ...
-%        "chart:internal:refreshHTML:InvalidFiles", ...
-%       "All of the specified files must exist in the +example folder." )
-% end % if
-% 
-% % Run and save each file, then export to HTML.
-% for k = 1 : numel( filesToConvert )
-%     currentFile = fullfile( ...
-%         catalogRoot(), "+example", filesToConvert(k) );
-%     % Run and save the current file.
-%     matlab.internal.liveeditor.executeAndSave( char( currentFile ) );
-%     % Export it to HTML.
-%     targetFile = fullfile( catalogRoot(), "+example", ...
-%         filesToConvert{k}(1:end-4) + ".html" );
-%     matlab.internal.liveeditor.openAndConvert( ...
-%         char( currentFile ), char( targetFile ) );
-%     % Activate the hyperlinks.
-%     activateLinks( targetFile )
-%     % Display progress.
-%     disp( "Exported " + targetFile )
-% end % for
-% 
-% end % refreshHTML
-% 
-% function activateLinks( file )
-% %ACTIVATELINKS Convert the Live Script hyperlinks to JavaScript-enabled
-% %links within the specified HTML file.
-% 
-% % Read the file contents.
-% htmlFileContents = string( fileread( file ) );
-% 
-% % Replace the commands within the anchors.
-% 
-% % Extract the anchors.
-% anchors = extractBetween( htmlFileContents, "<a href = ""matlab:", ">", ...
-%     "Boundaries", "inclusive" );
-% % Extract the commands.
-% commands = extractBetween( anchors, """", """" );
-% % Format the JavaScript-enabled anchors.
-% replacementAnchors = "<a href = ""#"" onclick=""handleClick(" + ...
-%     "'" + commands + "'" + "); return false;"">";
-% % Replace the original anchors with the new anchors.
-% for k = 1:length( anchors )
-%     htmlFileContents = replace( htmlFileContents, ...
-%         anchors(k), replacementAnchors(k) );
-% end % for
-% 
-% % Insert the JavaScript block.
-% htmlFileContents = insertBefore( htmlFileContents, "</body>", ...
-%     "<script type = ""text/javascript"">" + ...
-%     "function setup(h) { window.uihtml = h; };" + ...
-%     "function handleClick(command) {" + newline() + ...
-%     "window.uihtml.Data = {" + newline() + ...
-%     "id: Math.random(), Link: command, }; }; </script>" );
-% 
-% % Replace the file contents.
-% fileID = fopen( file, "w" );
-% fprintf( fileID, "%s", htmlFileContents );
-% fclose( fileID );
-% 
-% end % activateLinks
+arguments ( Input )
+    file(1, 1) string {mustBeFile}
+end % arguments ( Input )
+
+% Read the file contents.
+htmlFileContents = string( fileread( file ) );
+
+% Replace the commands within the anchors.
+
+% Extract the anchors.
+anchors = extractBetween( htmlFileContents, "<a href = ""matlab:", ">", ...
+    "Boundaries", "inclusive" );
+% Extract the commands.
+commands = extractBetween( anchors, """", """" );
+% Format the JavaScript-enabled anchors.
+replacementAnchors = "<a href = ""#"" onclick=""handleClick(" + ...
+    "'" + commands + "'" + "); return false;"">";
+% Replace the original anchors with the new anchors.
+for k = 1:length( anchors )
+    htmlFileContents = replace( htmlFileContents, ...
+        anchors(k), replacementAnchors(k) );
+end % for
+
+% Insert the JavaScript block.
+htmlFileContents = insertBefore( htmlFileContents, "</body>", ...
+    "<script type = ""text/javascript"">" + ...
+    "function setup( htmlComponent ) " + ...
+    "{ window.htmlComponent = htmlComponent };" + ...
+    "function handleClick(command) {" + newline() + ...
+    "window.htmlComponent.sendEventToMATLAB( ""LinkClicked"", " + ...
+    "command ) } </script>" );
+
+% Replace the file contents.
+fileID = fopen( file, "w" );
+fprintf( fileID, "%s", htmlFileContents );
+fclose( fileID );
+
+end % activateLinks
