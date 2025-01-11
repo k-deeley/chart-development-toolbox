@@ -1,0 +1,1037 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      -->
+<title>SpiderChart</title>
+<meta name="generator" content="MATLAB 25.1">
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+<meta name="DC.date" content="2025-01-11">
+<meta name="DC.source" content="SpiderChart.m">
+<style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style>
+</head>
+<body>
+<div class="content">
+<pre class="codeinput">
+<span class="keyword">classdef</span> SpiderChart &lt; Chart
+    <span class="comment">%SPIDERCHART Manages the display of values from distinct measurements</span>
+    <span class="comment">%plotted around a web. The number of nodes in the web is equal to the</span>
+    <span class="comment">%number of distinct measurements.</span>
+
+    <span class="comment">% Copyright 2019-2025 The MathWorks, Inc.</span>
+
+    <span class="keyword">properties</span>
+        <span class="comment">% Web line width.</span>
+        WebLineWidth<span class="typesection">(1, 1) double {mustBePositive, mustBeFinite}</span> = 1.5
+    <span class="keyword">end</span> <span class="comment">% properties</span>
+
+    <span class="keyword">properties</span> ( Dependent )
+        <span class="comment">%DATA Matrix of chart data: each row represents a distinct property</span>
+        <span class="comment">%and corresponds to a node in the web. Each column contains the</span>
+        <span class="comment">%measured property values and contains the data for each line.</span>
+        Data<span class="typesection">(:, :) double {mustBeInRange( Data, 0, 1 )}</span>
+        <span class="comment">%TARGETDATA Target data vector, containing the same number of</span>
+        <span class="comment">%elements as there are nodes in the web. Each element represents</span>
+        <span class="comment">%the target value for that particular property.</span>
+        TargetData<span class="typesection">(:, 1) double {mustBeInRange( TargetData, 0, 1 )}</span>
+        <span class="comment">% Node labels.</span>
+        LabelText<span class="typesection">(:, 1) string</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Dependent )</span>
+
+    <span class="keyword">properties</span>
+        <span class="comment">% Line width of the data lines.</span>
+        LineWidth<span class="typesection">(1, 1) double {mustBePositive, mustBeFinite}</span> = 1.5
+        <span class="comment">% Visibility of the target line.</span>
+        TargetVisible<span class="typesection">(1, 1) matlab.lang.OnOffSwitchState </span>= <span class="string">"off"</span>
+        <span class="comment">% Target line color.</span>
+        TargetColor <span class="typesection">{validatecolor}</span> = <span class="string">"k"</span>
+        <span class="comment">% Target line width.</span>
+        TargetLineWidth<span class="typesection">(1, 1) double {mustBePositive, mustBeFinite}</span> = 1.5
+        <span class="comment">% Target line style.</span>
+        TargetLineStyle<span class="typesection">(1, 1) string {mustBeLineStyle}</span> = <span class="string">":"</span>
+        <span class="comment">% Node label font size.</span>
+        LabelFontSize<span class="typesection">(1, 1) double {mustBePositive, mustBeFinite}</span> = 10
+        <span class="comment">% Node label font angle.</span>
+        LabelFontAngle<span class="typesection">(1, 1) string {mustBeFontAngle}</span> = <span class="string">"normal"</span>
+        <span class="comment">% Node label font weight.</span>
+        LabelFontWeight<span class="typesection">(1, 1) string {mustBeFontWeight}</span> = <span class="string">"normal"</span>
+    <span class="keyword">end</span> <span class="comment">% properties</span>
+
+    <span class="keyword">properties</span> ( Dependent )
+        <span class="comment">% Line colors.</span>
+        LineColors<span class="typesection">(:, 3) double {mustBeInRange( LineColors, 0, 1 )}</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Dependent )</span>
+
+    <span class="keyword">properties</span> ( Dependent, SetAccess = private )
+        <span class="comment">% Number of nodes.</span>
+        NumNodes<span class="typesection">(1, 1) double {mustBeInteger, mustBeNonnegative}</span>
+        <span class="comment">% Number of lines.</span>
+        NumLines<span class="typesection">(1, 1) double {mustBeInteger, mustBeNonnegative}</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Dependent, SetAccess = private )</span>
+
+    <span class="keyword">properties</span> ( Access = private )
+        <span class="comment">% Internal storage for the Data property.</span>
+        Data_<span class="typesection">(:, :) double {mustBeInRange( Data_, 0, 1 )}</span> = 0
+        <span class="comment">% Internal storage for the TargetData property.</span>
+        TargetData_<span class="typesection">(:, 1) double {mustBeInRange( TargetData_, 0, 1 )}</span> = 0
+        <span class="comment">% Internal storage for the Labels property.</span>
+        LabelText_<span class="typesection">(:, 1) string </span>= string.empty( 0, 1 )
+        <span class="comment">% Logical scalar specifying whether a computation is required.</span>
+        ComputationRequired<span class="typesection">(1, 1) logical </span>= false
+    <span class="keyword">end</span> <span class="comment">% properties ( Access = private )</span>
+
+    <span class="keyword">properties</span> ( Access = private, Transient, NonCopyable )
+        <span class="comment">% Chart axes.</span>
+        Axes<span class="typesection">(:, 1) matlab.graphics.axis.Axes {mustBeScalarOrEmpty}</span>
+        <span class="comment">% Array of graphical objects for the lines.</span>
+        Lines<span class="typesection">(:, 1) matlab.graphics.chart.primitive.Line</span>
+        <span class="comment">% Target line.</span>
+        TargetLine<span class="typesection">(:, 1) matlab.graphics.primitive.Line </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Concentric polygons forming the web.</span>
+        WebPolygons<span class="typesection">(10, 1) matlab.graphics.primitive.Line</span>
+        <span class="comment">% Angular rays forming the web.</span>
+        WebRays<span class="typesection">(:, 1) matlab.graphics.primitive.Line</span>
+        <span class="comment">% Text labels for the nodes.</span>
+        Labels<span class="typesection">(:, 1) matlab.graphics.primitive.Text</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Access = private, Transient, NonCopyable )</span>
+
+    <span class="keyword">properties</span> ( Constant, Hidden )
+        <span class="comment">% Product dependencies.</span>
+        Dependencies<span class="typesection">(1, :) string </span>= <span class="string">"MATLAB"</span>
+        <span class="comment">% Description.</span>
+        ShortDescription<span class="typesection">(1, 1) string </span>= <span class="string">"Plot and compare values "</span> + <span class="keyword">...</span>
+            <span class="string">"from distinct measurements on a web"</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Constant, Hidden )</span>
+
+    <span class="keyword">methods</span>
+
+        <span class="keyword">function</span> value = get.Data( obj )
+
+            value = obj.Data_;
+
+        <span class="keyword">end</span> <span class="comment">% get.Data</span>
+
+        <span class="keyword">function</span> set.Data( obj, value )
+
+            <span class="comment">% Validate that the new number of nodes (the number of</span>
+            <span class="comment">% rows in the data matrix) is in the required range.</span>
+            nD = size( value, 1 );
+            assert( nD &gt;= 3 &amp;&amp; nD &lt;= 20, <span class="keyword">...</span>
+                <span class="string">"SpiderChart:InvalidNumProperties"</span>, <span class="keyword">...</span>
+                <span class="string">"The number of properties must be at least 3 "</span> + <span class="keyword">...</span>
+                <span class="string">"and at most 20."</span> )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Decide how to modify the target data and node labels in</span>
+            <span class="comment">% response to a change in the chart data.</span>
+            nT = numel( obj.TargetData_ );
+            <span class="keyword">if</span> nD &gt; nT
+                <span class="comment">% Pad.</span>
+                obj.TargetData_(end+1:nD, 1) = 0;
+                obj.LabelText_(end+1:nD, 1) = <span class="string">""</span>;
+            <span class="keyword">elseif</span> nD &lt;= nT
+                <span class="comment">% Truncate.</span>
+                obj.TargetData_ = obj.TargetData_(1:nD, 1);
+                obj.LabelText_ = obj.LabelText_(1:nD, 1);
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+            <span class="comment">% Update the internal stored value.</span>
+            obj.Data_ = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.Data</span>
+
+        <span class="keyword">function</span> value = get.TargetData( obj )
+
+            value = obj.TargetData_;
+
+        <span class="keyword">end</span> <span class="comment">% get.TargetData</span>
+
+        <span class="keyword">function</span> set.TargetData( obj , value )
+
+            <span class="comment">% Verify that the length of the new target data is correct.</span>
+            assert( numel( value ) == obj.NumNodes, <span class="keyword">...</span>
+                <span class="string">"SpiderChart:InvalidTargetDataLength"</span>, <span class="keyword">...</span>
+                <span class="string">"The length of the target data must equal "</span> + <span class="keyword">...</span>
+                <span class="string">"the number of nodes."</span> )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Update the internal stored property.</span>
+            obj.TargetData_ = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.TargetData</span>
+
+        <span class="keyword">function</span> value = get.LabelText( obj )
+
+            value = obj.LabelText_;
+
+        <span class="keyword">end</span> <span class="comment">% get.LabelText</span>
+
+        <span class="keyword">function</span> set.LabelText( obj, value )
+
+            <span class="comment">% Verify that the length of the new label text is correct.</span>
+            assert( numel( value ) == obj.NumNodes, <span class="keyword">...</span>
+                <span class="string">"Spider:InvalidLabelTextLength"</span>, <span class="keyword">...</span>
+                <span class="string">"The number of text labels must equal "</span> + <span class="keyword">...</span>
+                <span class="string">"the number of nodes."</span> )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Update the internal stored property.</span>
+            obj.LabelText_ = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.LabelText</span>
+
+        <span class="keyword">function</span> value = get.LineColors( obj )
+
+            value = vertcat( obj.Lines.Color );
+
+        <span class="keyword">end</span> <span class="comment">% get.LineColors</span>
+
+        <span class="keyword">function</span> set.LineColors( obj, value )
+
+            <span class="comment">% Check that the number of colors is correct.</span>
+            nColors = size( value, 1 );
+            assert( nColors == obj.NumLines, <span class="keyword">...</span>
+                <span class="string">"Spider:ColorMatrixSizeMismatch"</span>, <span class="keyword">...</span>
+                <span class="string">"The number of colors must match the number of lines."</span> )
+
+            <span class="comment">% Set the new colors.</span>
+            <span class="keyword">for</span> k = 1:nColors
+                obj.Lines(k).Color = value(k, :);
+            <span class="keyword">end</span> <span class="comment">% for</span>
+
+        <span class="keyword">end</span> <span class="comment">% set.LineColors</span>
+
+        <span class="keyword">function</span> value = get.NumNodes( obj )
+
+            value = height( obj.Data_ );
+
+        <span class="keyword">end</span> <span class="comment">% get.NumNodes</span>
+
+        <span class="keyword">function</span> value = get.NumLines( obj )
+
+            value = width( obj.Data_ );
+
+        <span class="keyword">end</span> <span class="comment">% get.NumLines</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods</span>
+
+    <span class="keyword">methods</span>
+
+        <span class="keyword">function</span> obj = SpiderChart( namedArgs )
+            <span class="comment">%SPIDERCHART Construct a SpiderChart object, given optional</span>
+            <span class="comment">%name-value arguments.</span>
+
+            <span class="keyword">arguments</span> ( Input )
+                namedArgs.?SpiderChart
+            <span class="keyword">end</span> <span class="comment">% arguments ( Input )</span>
+
+            <span class="comment">% Set any user-defined properties.</span>
+            set( obj, namedArgs )
+
+        <span class="keyword">end</span> <span class="comment">% constructor</span>
+
+        <span class="keyword">function</span> varargout = title( obj, varargin )
+
+            [varargout{1:nargout}] = title( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% title</span>
+
+        <span class="keyword">function</span> varargout = legend( obj, varargin )
+
+            [varargout{1:nargout}] = legend( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% legend</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods</span>
+
+    <span class="keyword">methods</span> ( Access = protected )
+
+        <span class="keyword">function</span> setup( obj )
+            <span class="comment">%SETUP Initialize the chart graphics.</span>
+
+            <span class="comment">% Create the chart's axes.</span>
+            obj.Axes = axes( <span class="string">"Parent"</span>, obj.getLayout(), <span class="keyword">...</span>
+                <span class="string">"Visible"</span>, <span class="string">"off"</span>, <span class="keyword">...</span>
+                <span class="string">"DataAspectRatio"</span>, [1, 1, 1], <span class="keyword">...</span>
+                <span class="string">"XLim"</span>, [-1.25, 1.25], <span class="keyword">...</span>
+                <span class="string">"YLim"</span>, [-1.25, 1.25] );
+
+            <span class="comment">% Make the title visible.</span>
+            obj.Axes.Title.Visible = <span class="string">"on"</span>;
+
+            <span class="comment">% Initialize the line objects for the concentric polygons</span>
+            <span class="comment">% forming part of the web.</span>
+            lightGray = 0.875 * ones( 1, 3 );
+            <span class="keyword">for</span> k = 1 : numel( obj.WebPolygons )
+                obj.WebPolygons(k) = line( <span class="keyword">...</span>
+                    <span class="string">"Parent"</span>, obj.Axes, <span class="keyword">...</span>
+                    <span class="string">"XData"</span>, NaN, <span class="keyword">...</span>
+                    <span class="string">"YData"</span>, NaN, <span class="keyword">...</span>
+                    <span class="string">"Color"</span>, lightGray, <span class="keyword">...</span>
+                    <span class="string">"HandleVisibility"</span>, <span class="string">"off"</span> );
+            <span class="keyword">end</span> <span class="comment">% for</span>
+
+            <span class="comment">% Initialize the line object for the target data.</span>
+            obj.TargetLine = line( <span class="keyword">...</span>
+                <span class="string">"Parent"</span>, obj.Axes, <span class="keyword">...</span>
+                <span class="string">"XData"</span>, NaN, <span class="keyword">...</span>
+                <span class="string">"YData"</span>, NaN, <span class="keyword">...</span>
+                <span class="string">"HandleVisibility"</span>, <span class="string">"off"</span> );
+
+        <span class="keyword">end</span> <span class="comment">% setup</span>
+
+        <span class="keyword">function</span> update( obj )
+            <span class="comment">%UPDATE Refresh the chart graphics.</span>
+
+            <span class="keyword">if</span> obj.ComputationRequired
+
+                <span class="comment">% First, update the fixed graphics objects.</span>
+
+                <span class="comment">% Concentric polygons in the web.</span>
+                webRadii = 0.1 : 0.1 : 1;
+                t = pi / 2 + linspace( 2 * pi, 0, obj.NumNodes + 1 ).';
+                z = exp( 1i*t );
+                webZ = z * webRadii;
+                webX = real( webZ );
+                webY = imag( webZ );
+
+                <span class="comment">% Update the concentric polygons used in the backdrop.</span>
+                <span class="keyword">for</span> k = 1 : numel( obj.WebPolygons )
+                    set( obj.WebPolygons(k), <span class="keyword">...</span>
+                        <span class="string">"XData"</span>, webX(:, k), <span class="keyword">...</span>
+                        <span class="string">"YData"</span>, webY(:, k) )
+                <span class="keyword">end</span> <span class="comment">% for</span>
+
+                <span class="comment">% Target line.</span>
+                targetZ = z .* obj.TargetData_([1:end, 1]); <span class="comment">% Wrap around</span>
+                set( obj.TargetLine, <span class="string">"XData"</span>, real( targetZ ), <span class="keyword">...</span>
+                    <span class="string">"YData"</span>, imag( targetZ ) )
+
+                <span class="comment">% Next, create or delete graphics objects as appropriate</span>
+                <span class="comment">% before refreshing their properties.</span>
+
+                <span class="comment">% Deal with a change in the number of nodes. This affects</span>
+                <span class="comment">% the angular rays and the node labels.</span>
+                previousNumNodes = numel( obj.WebRays );
+                <span class="keyword">if</span> obj.NumNodes &lt;= previousNumNodes
+
+                    <span class="comment">% Remove the additional angular rays in the web.</span>
+                    <span class="keyword">for</span> k = obj.NumNodes+1 : previousNumNodes
+                        <span class="comment">% Tidy up the text boxes associated with the ray,</span>
+                        <span class="comment">% if necessary.</span>
+                        setappdata( obj.WebRays(k), <span class="string">"Selected"</span>, true )
+                        onWebRayClicked( obj, obj.WebRays(k) )
+                        delete( obj.WebRays(k) )
+                    <span class="keyword">end</span> <span class="comment">% for</span>
+
+                    <span class="comment">% Remove the references to the deleted web rays.</span>
+                    obj.WebRays(obj.NumNodes+1:end) = [];
+
+                    <span class="comment">% Remove the additional node labels.</span>
+                    delete( obj.Labels(obj.NumNodes+1:end) )
+                    obj.Labels(obj.NumNodes+1:end) = [];
+
+                <span class="keyword">elseif</span> obj.NumNodes &gt; previousNumNodes
+
+                    <span class="comment">% Add angular rays to the web, and node labels.</span>
+                    lightGray = 0.875 * ones( 1, 3 );
+                    <span class="keyword">for</span> k = previousNumNodes+1 : obj.NumNodes
+                        obj.WebRays(k) = line( <span class="keyword">...</span>
+                            <span class="string">"Parent"</span>, obj.Axes, <span class="keyword">...</span>
+                            <span class="string">"XData"</span>, NaN, <span class="keyword">...</span>
+                            <span class="string">"YData"</span>, NaN, <span class="keyword">...</span>
+                            <span class="string">"Color"</span>, lightGray, <span class="keyword">...</span>
+                            <span class="string">"HandleVisibility"</span>, <span class="string">"off"</span>, <span class="keyword">...</span>
+                            <span class="string">"ButtonDownFcn"</span>, @obj.onWebRayClicked );
+                        obj.Labels(k) = text( <span class="string">"Parent"</span>, obj.Axes, <span class="keyword">...</span>
+                            <span class="string">"HandleVisibility"</span>, <span class="string">"off"</span>, <span class="keyword">...</span>
+                            <span class="string">"Position"</span>, [NaN, NaN, 0], <span class="keyword">...</span>
+                            <span class="string">"HorizontalAlignment"</span>, <span class="string">"center"</span>, <span class="keyword">...</span>
+                            <span class="string">"VerticalAlignment"</span>, <span class="string">"middle"</span> );
+                    <span class="keyword">end</span> <span class="comment">% for</span>
+
+                <span class="keyword">end</span> <span class="comment">% if</span>
+
+                <span class="comment">% Update the angular rays. These begin at the inner circle</span>
+                <span class="comment">% and terminate at the outer border. Update the node</span>
+                <span class="comment">% labels. These are placed outside the axes limits.</span>
+                rayZ = [0; 1] * z.';
+                rayX = real( rayZ );
+                rayY = imag( rayZ );
+                textRadius = 1.225;
+                textZ = textRadius * z;
+                textX = real( textZ );
+                textY = imag( textZ );
+
+                <span class="keyword">for</span> k = 1 : obj.NumNodes
+                    set( obj.WebRays(k), <span class="string">"XData"</span>, rayX(:, k), <span class="keyword">...</span>
+                        <span class="string">"YData"</span>, rayY(:, k) )
+                    set( obj.Labels(k), <span class="keyword">...</span>
+                        <span class="string">"Position"</span>, [textX(k), textY(k), 0], <span class="keyword">...</span>
+                        <span class="string">"String"</span>, obj.LabelText_(k) )
+                <span class="keyword">end</span> <span class="comment">% for</span>
+
+                <span class="comment">% Deal with a change in the number of lines.</span>
+                previousNumLines = numel( obj.Lines );
+                <span class="keyword">if</span> obj.NumLines &lt;= previousNumLines
+
+                    <span class="comment">% Remove the additional lines.</span>
+                    delete( obj.Lines(obj.NumLines+1:end) )
+                    obj.Lines(obj.NumLines+1:end) = [];
+
+                <span class="keyword">elseif</span> obj.NumLines &gt; previousNumLines
+
+                    obj.Axes.ColorOrderIndex = previousNumLines + 1;
+
+                    <span class="comment">% Create new lines.</span>
+                    hold( obj.Axes, <span class="string">"on"</span> )
+                    <span class="keyword">for</span> k = previousNumLines+1 : obj.NumLines
+                        obj.Lines(k) = plot( obj.Axes, NaN, NaN, <span class="string">".-"</span>, <span class="keyword">...</span>
+                            <span class="string">"MarkerSize"</span>, 16 );
+                    <span class="keyword">end</span> <span class="comment">% for</span>
+                    hold( obj.Axes, <span class="string">"off"</span> )
+
+                <span class="keyword">end</span> <span class="comment">% if</span>
+
+                <span class="comment">% Update the lines.</span>
+                lineZ = z .* obj.Data_([1:end, 1], :); <span class="comment">% Wrap around</span>
+                lineX = real( lineZ );
+                lineY = imag( lineZ );
+                <span class="keyword">for</span> k = 1 : obj.NumLines
+                    set( obj.Lines(k), <span class="string">"XData"</span>, lineX(:, k), <span class="keyword">...</span>
+                        <span class="string">"YData"</span>, lineY(:, k) )
+                <span class="keyword">end</span> <span class="comment">% for</span>
+
+                <span class="comment">% For the existing web rays, remove any text boxes from</span>
+                <span class="comment">% prior user interactions.</span>
+                <span class="keyword">for</span> k = 1 : numel( obj.WebRays )
+                    setappdata( obj.WebRays(k), <span class="string">"Selected"</span>, true )
+                    onWebRayClicked( obj, obj.WebRays(k) )
+                <span class="keyword">end</span> <span class="comment">% for</span>
+
+                <span class="comment">% Ensure that the visual stacking order is correct.</span>
+                obj.Axes.Children = [flip( obj.Lines ); obj.TargetLine;
+                    obj.WebRays; obj.WebPolygons];
+
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+            <span class="comment">% Refresh the chart's decorative properties.</span>
+            set( obj.WebPolygons, <span class="string">"LineWidth"</span>, obj.WebLineWidth )
+            set( obj.Lines, <span class="string">"LineWidth"</span>, obj.LineWidth )
+            set( obj.TargetLine, <span class="string">"Visible"</span>, obj.TargetVisible, <span class="keyword">...</span>
+                <span class="string">"Color"</span>, obj.TargetColor, <span class="keyword">...</span>
+                <span class="string">"LineWidth"</span>, obj.TargetLineWidth, <span class="keyword">...</span>
+                <span class="string">"LineStyle"</span>, obj.TargetLineStyle )
+            set( obj.Labels, <span class="string">"FontSize"</span>, obj.LabelFontSize, <span class="keyword">...</span>
+                <span class="string">"FontAngle"</span>, obj.LabelFontAngle, <span class="keyword">...</span>
+                <span class="string">"FontWeight"</span>, obj.LabelFontWeight )
+
+        <span class="keyword">end</span> <span class="comment">% update</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods ( Access = protected )</span>
+
+    <span class="keyword">methods</span> ( Access = private )
+
+        <span class="keyword">function</span> onWebRayClicked( obj, s, ~ )
+            <span class="comment">%ONWEBRAYCLICKED Respond to user mouse clicks on the web rays.</span>
+
+            selected = getappdata( s, <span class="string">"Selected"</span> );
+
+            <span class="keyword">if</span> selected
+
+                <span class="comment">% Restore the default web ray appearance.</span>
+                s.LineWidth = 0.5;
+                setappdata( s, <span class="string">"Selected"</span>, false )
+
+                <span class="comment">% Delete the text boxes and remove their references.</span>
+                <span class="keyword">if</span> isappdata( s, <span class="string">"WebRayTextBoxes"</span> )
+                    delete( getappdata( s, <span class="string">"WebRayTextBoxes"</span> ) )
+                    rmappdata( s, <span class="string">"WebRayTextBoxes"</span> )
+                <span class="keyword">end</span> <span class="comment">% if</span>
+
+            <span class="keyword">else</span>
+
+                <span class="comment">% Highlight the selected web ray.</span>
+                s.LineWidth = 1.5;
+                setappdata( s, <span class="string">"Selected"</span>, true )
+
+                <span class="comment">% Display text boxes to show the observed values.</span>
+                selectedRayIdx = obj.WebRays == s;
+                selectedData = obj.Data_(selectedRayIdx, :);
+                <span class="keyword">for</span> k = numel( selectedData ):-1:1
+                    tx(k) = text( obj.Axes, <span class="keyword">...</span>
+                        obj.Lines(k).XData(selectedRayIdx), <span class="keyword">...</span>
+                        obj.Lines(k).YData(selectedRayIdx), <span class="keyword">...</span>
+                        num2str( selectedData(k) ), <span class="keyword">...</span>
+                        <span class="string">"HandleVisibility"</span>, <span class="string">"off"</span>, <span class="keyword">...</span>
+                        <span class="string">"Color"</span>, obj.Lines(k).Color, <span class="keyword">...</span>
+                        <span class="string">"HorizontalAlignment"</span>, <span class="string">"left"</span>, <span class="keyword">...</span>
+                        <span class="string">"VerticalAlignment"</span>, <span class="string">"bottom"</span>, <span class="keyword">...</span>
+                        <span class="string">"BackgroundColor"</span>, [1, 1, 1, 0.75], <span class="keyword">...</span>
+                        <span class="string">"FontWeight"</span>, <span class="string">"bold"</span> );
+                <span class="keyword">end</span> <span class="comment">% for</span>
+
+                <span class="comment">% Store references to the text boxes in the selected ray.</span>
+                setappdata( s, <span class="string">"WebRayTextBoxes"</span>, tx )
+
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+        <span class="keyword">end</span> <span class="comment">% onWebRayClicked</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods ( Access = private )</span>
+
+<span class="keyword">end</span> <span class="comment">% classdef</span>
+</pre>
+</div>
+<!--
+##### SOURCE BEGIN #####
+classdef SpiderChart < Chart
+    %SPIDERCHART Manages the display of values from distinct measurements
+    %plotted around a web. The number of nodes in the web is equal to the
+    %number of distinct measurements.
+
+    % Copyright 2019-2025 The MathWorks, Inc.
+
+    properties
+        % Web line width.
+        WebLineWidth(1, 1) double {mustBePositive, mustBeFinite} = 1.5
+    end % properties
+
+    properties ( Dependent )
+        %DATA Matrix of chart data: each row represents a distinct property
+        %and corresponds to a node in the web. Each column contains the
+        %measured property values and contains the data for each line.
+        Data(:, :) double {mustBeInRange( Data, 0, 1 )}
+        %TARGETDATA Target data vector, containing the same number of
+        %elements as there are nodes in the web. Each element represents
+        %the target value for that particular property.
+        TargetData(:, 1) double {mustBeInRange( TargetData, 0, 1 )}
+        % Node labels.
+        LabelText(:, 1) string
+    end % properties ( Dependent )
+
+    properties
+        % Line width of the data lines.
+        LineWidth(1, 1) double {mustBePositive, mustBeFinite} = 1.5
+        % Visibility of the target line.
+        TargetVisible(1, 1) matlab.lang.OnOffSwitchState = "off"
+        % Target line color.
+        TargetColor {validatecolor} = "k"
+        % Target line width.
+        TargetLineWidth(1, 1) double {mustBePositive, mustBeFinite} = 1.5
+        % Target line style.
+        TargetLineStyle(1, 1) string {mustBeLineStyle} = ":"
+        % Node label font size.
+        LabelFontSize(1, 1) double {mustBePositive, mustBeFinite} = 10
+        % Node label font angle.
+        LabelFontAngle(1, 1) string {mustBeFontAngle} = "normal"
+        % Node label font weight.
+        LabelFontWeight(1, 1) string {mustBeFontWeight} = "normal"
+    end % properties
+
+    properties ( Dependent )
+        % Line colors.
+        LineColors(:, 3) double {mustBeInRange( LineColors, 0, 1 )}
+    end % properties ( Dependent )
+
+    properties ( Dependent, SetAccess = private )
+        % Number of nodes.
+        NumNodes(1, 1) double {mustBeInteger, mustBeNonnegative}
+        % Number of lines.
+        NumLines(1, 1) double {mustBeInteger, mustBeNonnegative}
+    end % properties ( Dependent, SetAccess = private )
+
+    properties ( Access = private )
+        % Internal storage for the Data property.
+        Data_(:, :) double {mustBeInRange( Data_, 0, 1 )} = 0
+        % Internal storage for the TargetData property.
+        TargetData_(:, 1) double {mustBeInRange( TargetData_, 0, 1 )} = 0
+        % Internal storage for the Labels property.
+        LabelText_(:, 1) string = string.empty( 0, 1 )
+        % Logical scalar specifying whether a computation is required.
+        ComputationRequired(1, 1) logical = false
+    end % properties ( Access = private )
+
+    properties ( Access = private, Transient, NonCopyable )
+        % Chart axes.
+        Axes(:, 1) matlab.graphics.axis.Axes {mustBeScalarOrEmpty}
+        % Array of graphical objects for the lines.
+        Lines(:, 1) matlab.graphics.chart.primitive.Line
+        % Target line.
+        TargetLine(:, 1) matlab.graphics.primitive.Line ...
+            {mustBeScalarOrEmpty}
+        % Concentric polygons forming the web.
+        WebPolygons(10, 1) matlab.graphics.primitive.Line
+        % Angular rays forming the web.
+        WebRays(:, 1) matlab.graphics.primitive.Line
+        % Text labels for the nodes.
+        Labels(:, 1) matlab.graphics.primitive.Text
+    end % properties ( Access = private, Transient, NonCopyable )
+
+    properties ( Constant, Hidden )
+        % Product dependencies.
+        Dependencies(1, :) string = "MATLAB"
+        % Description.
+        ShortDescription(1, 1) string = "Plot and compare values " + ...
+            "from distinct measurements on a web"
+    end % properties ( Constant, Hidden )
+
+    methods
+
+        function value = get.Data( obj )
+
+            value = obj.Data_;
+
+        end % get.Data
+
+        function set.Data( obj, value )
+
+            % Validate that the new number of nodes (the number of
+            % rows in the data matrix) is in the required range.
+            nD = size( value, 1 );
+            assert( nD >= 3 && nD <= 20, ...
+                "SpiderChart:InvalidNumProperties", ...
+                "The number of properties must be at least 3 " + ...
+                "and at most 20." )
+
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+
+            % Decide how to modify the target data and node labels in
+            % response to a change in the chart data.
+            nT = numel( obj.TargetData_ );
+            if nD > nT
+                % Pad.
+                obj.TargetData_(end+1:nD, 1) = 0;
+                obj.LabelText_(end+1:nD, 1) = "";
+            elseif nD <= nT
+                % Truncate.
+                obj.TargetData_ = obj.TargetData_(1:nD, 1);
+                obj.LabelText_ = obj.LabelText_(1:nD, 1);
+            end % if
+
+            % Update the internal stored value.
+            obj.Data_ = value;
+
+        end % set.Data
+
+        function value = get.TargetData( obj )
+
+            value = obj.TargetData_;
+
+        end % get.TargetData
+
+        function set.TargetData( obj , value )
+
+            % Verify that the length of the new target data is correct.
+            assert( numel( value ) == obj.NumNodes, ...
+                "SpiderChart:InvalidTargetDataLength", ...
+                "The length of the target data must equal " + ...
+                "the number of nodes." )
+
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+
+            % Update the internal stored property.
+            obj.TargetData_ = value;
+
+        end % set.TargetData
+
+        function value = get.LabelText( obj )
+
+            value = obj.LabelText_;
+
+        end % get.LabelText
+
+        function set.LabelText( obj, value )
+
+            % Verify that the length of the new label text is correct.
+            assert( numel( value ) == obj.NumNodes, ...
+                "Spider:InvalidLabelTextLength", ...
+                "The number of text labels must equal " + ...
+                "the number of nodes." )
+
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+
+            % Update the internal stored property.
+            obj.LabelText_ = value;
+
+        end % set.LabelText
+
+        function value = get.LineColors( obj )
+
+            value = vertcat( obj.Lines.Color );
+
+        end % get.LineColors
+
+        function set.LineColors( obj, value )
+
+            % Check that the number of colors is correct.
+            nColors = size( value, 1 );
+            assert( nColors == obj.NumLines, ...
+                "Spider:ColorMatrixSizeMismatch", ...
+                "The number of colors must match the number of lines." )
+
+            % Set the new colors.
+            for k = 1:nColors
+                obj.Lines(k).Color = value(k, :);
+            end % for
+
+        end % set.LineColors
+
+        function value = get.NumNodes( obj )
+
+            value = height( obj.Data_ );
+
+        end % get.NumNodes
+
+        function value = get.NumLines( obj )
+
+            value = width( obj.Data_ );
+
+        end % get.NumLines
+
+    end % methods
+
+    methods
+
+        function obj = SpiderChart( namedArgs )
+            %SPIDERCHART Construct a SpiderChart object, given optional
+            %name-value arguments.
+
+            arguments ( Input )
+                namedArgs.?SpiderChart
+            end % arguments ( Input )            
+
+            % Set any user-defined properties.
+            set( obj, namedArgs )
+
+        end % constructor
+
+        function varargout = title( obj, varargin )
+
+            [varargout{1:nargout}] = title( obj.Axes, varargin{:} );
+
+        end % title
+
+        function varargout = legend( obj, varargin )
+
+            [varargout{1:nargout}] = legend( obj.Axes, varargin{:} );
+
+        end % legend
+
+    end % methods
+
+    methods ( Access = protected )
+
+        function setup( obj )
+            %SETUP Initialize the chart graphics.
+
+            % Create the chart's axes.
+            obj.Axes = axes( "Parent", obj.getLayout(), ...
+                "Visible", "off", ...
+                "DataAspectRatio", [1, 1, 1], ...
+                "XLim", [-1.25, 1.25], ...
+                "YLim", [-1.25, 1.25] );
+
+            % Make the title visible.
+            obj.Axes.Title.Visible = "on";
+
+            % Initialize the line objects for the concentric polygons
+            % forming part of the web.
+            lightGray = 0.875 * ones( 1, 3 );
+            for k = 1 : numel( obj.WebPolygons )
+                obj.WebPolygons(k) = line( ...
+                    "Parent", obj.Axes, ...
+                    "XData", NaN, ...
+                    "YData", NaN, ...
+                    "Color", lightGray, ...
+                    "HandleVisibility", "off" );
+            end % for
+
+            % Initialize the line object for the target data.
+            obj.TargetLine = line( ...
+                "Parent", obj.Axes, ...
+                "XData", NaN, ...
+                "YData", NaN, ...
+                "HandleVisibility", "off" );
+
+        end % setup
+
+        function update( obj )
+            %UPDATE Refresh the chart graphics.
+
+            if obj.ComputationRequired
+
+                % First, update the fixed graphics objects.
+
+                % Concentric polygons in the web.
+                webRadii = 0.1 : 0.1 : 1;
+                t = pi / 2 + linspace( 2 * pi, 0, obj.NumNodes + 1 ).';
+                z = exp( 1i*t );
+                webZ = z * webRadii;
+                webX = real( webZ );
+                webY = imag( webZ );
+
+                % Update the concentric polygons used in the backdrop.
+                for k = 1 : numel( obj.WebPolygons )
+                    set( obj.WebPolygons(k), ...
+                        "XData", webX(:, k), ...
+                        "YData", webY(:, k) )
+                end % for
+
+                % Target line.
+                targetZ = z .* obj.TargetData_([1:end, 1]); % Wrap around
+                set( obj.TargetLine, "XData", real( targetZ ), ...
+                    "YData", imag( targetZ ) )
+
+                % Next, create or delete graphics objects as appropriate
+                % before refreshing their properties.
+
+                % Deal with a change in the number of nodes. This affects
+                % the angular rays and the node labels.
+                previousNumNodes = numel( obj.WebRays );
+                if obj.NumNodes <= previousNumNodes
+
+                    % Remove the additional angular rays in the web.
+                    for k = obj.NumNodes+1 : previousNumNodes
+                        % Tidy up the text boxes associated with the ray,
+                        % if necessary.
+                        setappdata( obj.WebRays(k), "Selected", true )
+                        onWebRayClicked( obj, obj.WebRays(k) )
+                        delete( obj.WebRays(k) )
+                    end % for
+
+                    % Remove the references to the deleted web rays.
+                    obj.WebRays(obj.NumNodes+1:end) = [];
+
+                    % Remove the additional node labels.
+                    delete( obj.Labels(obj.NumNodes+1:end) )
+                    obj.Labels(obj.NumNodes+1:end) = [];
+
+                elseif obj.NumNodes > previousNumNodes
+
+                    % Add angular rays to the web, and node labels.
+                    lightGray = 0.875 * ones( 1, 3 );
+                    for k = previousNumNodes+1 : obj.NumNodes
+                        obj.WebRays(k) = line( ...
+                            "Parent", obj.Axes, ...
+                            "XData", NaN, ...
+                            "YData", NaN, ...
+                            "Color", lightGray, ...
+                            "HandleVisibility", "off", ...
+                            "ButtonDownFcn", @obj.onWebRayClicked );
+                        obj.Labels(k) = text( "Parent", obj.Axes, ...
+                            "HandleVisibility", "off", ...
+                            "Position", [NaN, NaN, 0], ...
+                            "HorizontalAlignment", "center", ...
+                            "VerticalAlignment", "middle" );
+                    end % for
+
+                end % if
+
+                % Update the angular rays. These begin at the inner circle
+                % and terminate at the outer border. Update the node
+                % labels. These are placed outside the axes limits.
+                rayZ = [0; 1] * z.';
+                rayX = real( rayZ );
+                rayY = imag( rayZ );
+                textRadius = 1.225;
+                textZ = textRadius * z;
+                textX = real( textZ );
+                textY = imag( textZ );
+
+                for k = 1 : obj.NumNodes
+                    set( obj.WebRays(k), "XData", rayX(:, k), ...
+                        "YData", rayY(:, k) )
+                    set( obj.Labels(k), ...
+                        "Position", [textX(k), textY(k), 0], ...
+                        "String", obj.LabelText_(k) )
+                end % for
+
+                % Deal with a change in the number of lines.
+                previousNumLines = numel( obj.Lines );
+                if obj.NumLines <= previousNumLines
+
+                    % Remove the additional lines.
+                    delete( obj.Lines(obj.NumLines+1:end) )
+                    obj.Lines(obj.NumLines+1:end) = [];
+
+                elseif obj.NumLines > previousNumLines
+
+                    obj.Axes.ColorOrderIndex = previousNumLines + 1;
+
+                    % Create new lines.
+                    hold( obj.Axes, "on" )
+                    for k = previousNumLines+1 : obj.NumLines
+                        obj.Lines(k) = plot( obj.Axes, NaN, NaN, ".-", ...
+                            "MarkerSize", 16 );
+                    end % for
+                    hold( obj.Axes, "off" )
+
+                end % if
+
+                % Update the lines.
+                lineZ = z .* obj.Data_([1:end, 1], :); % Wrap around
+                lineX = real( lineZ );
+                lineY = imag( lineZ );
+                for k = 1 : obj.NumLines
+                    set( obj.Lines(k), "XData", lineX(:, k), ...
+                        "YData", lineY(:, k) )
+                end % for
+
+                % For the existing web rays, remove any text boxes from
+                % prior user interactions.
+                for k = 1 : numel( obj.WebRays )
+                    setappdata( obj.WebRays(k), "Selected", true )
+                    onWebRayClicked( obj, obj.WebRays(k) )
+                end % for
+
+                % Ensure that the visual stacking order is correct.
+                obj.Axes.Children = [flip( obj.Lines ); obj.TargetLine;
+                    obj.WebRays; obj.WebPolygons];
+
+            end % if
+
+            % Refresh the chart's decorative properties.
+            set( obj.WebPolygons, "LineWidth", obj.WebLineWidth )
+            set( obj.Lines, "LineWidth", obj.LineWidth )
+            set( obj.TargetLine, "Visible", obj.TargetVisible, ...
+                "Color", obj.TargetColor, ...
+                "LineWidth", obj.TargetLineWidth, ...
+                "LineStyle", obj.TargetLineStyle )
+            set( obj.Labels, "FontSize", obj.LabelFontSize, ...
+                "FontAngle", obj.LabelFontAngle, ...
+                "FontWeight", obj.LabelFontWeight )
+
+        end % update
+
+    end % methods ( Access = protected )
+
+    methods ( Access = private )
+
+        function onWebRayClicked( obj, s, ~ )
+            %ONWEBRAYCLICKED Respond to user mouse clicks on the web rays.
+
+            selected = getappdata( s, "Selected" );
+
+            if selected
+
+                % Restore the default web ray appearance.
+                s.LineWidth = 0.5;
+                setappdata( s, "Selected", false )
+
+                % Delete the text boxes and remove their references.
+                if isappdata( s, "WebRayTextBoxes" )
+                    delete( getappdata( s, "WebRayTextBoxes" ) )
+                    rmappdata( s, "WebRayTextBoxes" )
+                end % if
+
+            else
+
+                % Highlight the selected web ray.
+                s.LineWidth = 1.5;
+                setappdata( s, "Selected", true )
+
+                % Display text boxes to show the observed values.
+                selectedRayIdx = obj.WebRays == s;
+                selectedData = obj.Data_(selectedRayIdx, :);
+                for k = numel( selectedData ):-1:1
+                    tx(k) = text( obj.Axes, ...
+                        obj.Lines(k).XData(selectedRayIdx), ...
+                        obj.Lines(k).YData(selectedRayIdx), ...
+                        num2str( selectedData(k) ), ...
+                        "HandleVisibility", "off", ...
+                        "Color", obj.Lines(k).Color, ...
+                        "HorizontalAlignment", "left", ...
+                        "VerticalAlignment", "bottom", ...
+                        "BackgroundColor", [1, 1, 1, 0.75], ...
+                        "FontWeight", "bold" );
+                end % for
+
+                % Store references to the text boxes in the selected ray.
+                setappdata( s, "WebRayTextBoxes", tx )
+
+            end % if
+
+        end % onWebRayClicked
+
+    end % methods ( Access = private )
+
+end % classdef
+##### SOURCE END #####
+-->
+</body>
+</html>

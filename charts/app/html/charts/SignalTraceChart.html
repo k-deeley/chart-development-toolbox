@@ -1,0 +1,619 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      -->
+<title>SignalTraceChart</title>
+<meta name="generator" content="MATLAB 25.1">
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+<meta name="DC.date" content="2025-01-11">
+<meta name="DC.source" content="SignalTraceChart.m">
+<style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style>
+</head>
+<body>
+<div class="content">
+<pre class="codeinput">
+<span class="keyword">classdef</span> SignalTraceChart &lt; Chart
+    <span class="comment">%SIGNALTRACECHART Chart for managing a collection of non-overlapping</span>
+    <span class="comment">%signal traces plotted against a numeric time vector.</span>
+
+    <span class="comment">% Copyright 2018-2025 The MathWorks, Inc.</span>
+
+    <span class="keyword">properties</span> ( Dependent )
+        <span class="comment">% Chart time data.</span>
+        Time<span class="typesection">(:, 1) double {mustBeReal, mustBeFinite, mustBeIncreasing}</span>
+        <span class="comment">% Chart signal data.</span>
+        SignalData<span class="typesection">(:, :) double {mustBeReal}</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Dependent )</span>
+
+    <span class="keyword">properties</span>
+        <span class="comment">% Width of the signal traces.</span>
+        LineWidth<span class="typesection">(1, 1) double {mustBePositive, mustBeFinite}</span> = 1.5
+        <span class="comment">% Font size used for the x-axis.</span>
+        XAxisFontSize<span class="typesection">(1, 1) double {mustBePositive, mustBeFinite}</span> = 10
+    <span class="keyword">end</span> <span class="comment">% properties</span>
+
+    <span class="keyword">properties</span> ( Access = private, Transient, NonCopyable )
+        <span class="comment">% Chart axes.</span>
+        Axes<span class="typesection">(:, 1) matlab.graphics.axis.Axes {mustBeScalarOrEmpty}</span>
+        <span class="comment">% Signal trace line objects.</span>
+        SignalLines<span class="typesection">(:, 1) matlab.graphics.primitive.Line</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Access = private, Transient, NonCopyable )</span>
+
+    <span class="keyword">properties</span> ( Access = private )
+        <span class="comment">% Internal storage for the Time property.</span>
+        Time_<span class="typesection">(:, 1) double {mustBeReal, mustBeFinite, </span><span class="keyword">...</span>
+            <span class="typesection">mustBeIncreasing}</span> = double.empty( 0, 1 )
+        <span class="comment">% Internal storage for the SignalData property.</span>
+        SignalData_<span class="typesection">(:, :) double {mustBeReal}</span> = double.empty( 0, 1 )
+        <span class="comment">% Logical scalar specifying whether a computation is required.</span>
+        ComputationRequired<span class="typesection">(1, 1) logical </span>= false
+    <span class="keyword">end</span> <span class="comment">% properties ( Access = private )</span>
+
+    <span class="keyword">properties</span> ( Dependent, Access = private )
+        <span class="comment">% Translated signal data, adapted for display on the chart.</span>
+        OffsetSignalData<span class="typesection">(:, :) double {mustBeReal, mustBeFinite}</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Dependent, Access = private )</span>
+
+    <span class="keyword">properties</span> ( Constant, Hidden )
+        <span class="comment">% Product dependencies.</span>
+        Dependencies<span class="typesection">(1, :) string </span>= <span class="string">"MATLAB"</span>
+        <span class="comment">% Description.</span>
+        ShortDescription<span class="typesection">(1, 1) string </span>= <span class="string">"Plot non-overlapping signal"</span> + <span class="keyword">...</span>
+            <span class="string">" traces against a numeric time vector"</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Constant, Hidden )</span>
+
+    <span class="keyword">methods</span>
+
+        <span class="keyword">function</span> value = get.Time( obj )
+
+            value = obj.Time_;
+
+        <span class="keyword">end</span> <span class="comment">% get.Time</span>
+
+        <span class="keyword">function</span> set.Time( obj, value )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Current data lengths.</span>
+            nT = numel( value );
+            nS = size( obj.SignalData_, 1 );
+
+            <span class="comment">% Decide how to proceed based on the data lengths.</span>
+            <span class="keyword">if</span> nT &gt; nS
+                <span class="comment">% Pad the existing signal data.</span>
+                obj.SignalData_(end+1:nT, :) = NaN;
+            <span class="keyword">else</span>
+                <span class="comment">% Truncate the existing signal data.</span>
+                obj.SignalData_ = obj.SignalData_(1:nT, :);
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+            <span class="comment">% Set the internal time.</span>
+            obj.Time_ = value(:);
+
+        <span class="keyword">end</span> <span class="comment">% set.Time</span>
+
+        <span class="keyword">function</span> value = get.SignalData( obj )
+
+            value = obj.SignalData_;
+
+        <span class="keyword">end</span> <span class="comment">% get.SignalData</span>
+
+        <span class="keyword">function</span> set.SignalData( obj, value )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Current data lengths.</span>
+            nT = numel( obj.Time_ );
+            nS = size( value, 1 );
+
+            <span class="comment">% Decide how to proceed based on the data lengths.</span>
+            <span class="keyword">if</span> nS &gt; nT
+                <span class="comment">% Pad the existing time data.</span>
+                obj.Time_(end+1:nS, :) = NaN;
+            <span class="keyword">else</span>
+                <span class="comment">% Truncate the existing time data.</span>
+                obj.Time_ = obj.Time_(1:nS, :);
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+            <span class="comment">% Set the internal signal data.</span>
+            obj.SignalData_ = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.SignalData</span>
+
+        <span class="keyword">function</span> value = get.OffsetSignalData( obj )
+
+            <span class="comment">% Rescale the data, and then for each signal, offset it from</span>
+            <span class="comment">% the previous one, leaving a small gap. Constant signals are</span>
+            <span class="comment">% not rescaled.</span>
+
+            <span class="comment">% Identify the constant signals.</span>
+            constSigIdx = all( diff( obj.SignalData_ ) == 0 )  | <span class="keyword">...</span>
+                all( isnan( obj.SignalData_ ) );
+            <span class="comment">% Apply the z-score transformation to the non-constant signals.</span>
+            value = obj.SignalData_;
+            nonConstantSignals = obj.SignalData_(:, ~constSigIdx);
+            value(:, ~constSigIdx) = <span class="keyword">...</span>
+                (nonConstantSignals - <span class="keyword">...</span>
+                mean( nonConstantSignals, <span class="string">"omitnan"</span> )) ./ <span class="keyword">...</span>
+                std( nonConstantSignals, <span class="string">"omitnan"</span> );
+
+            <span class="comment">% Cumulatively offset each signal from the previous one,</span>
+            <span class="comment">% leaving a gap of size 0.5 between each pair of consecutive</span>
+            <span class="comment">% signals.</span>
+            <span class="keyword">for</span> k = 2:size( value, 2 )
+                value(:, k) = value(:, k) + max( value(:, k-1) ) + <span class="keyword">...</span>
+                    abs( min( value(:, k) ) ) + 0.5;
+            <span class="keyword">end</span> <span class="comment">% for</span>
+
+        <span class="keyword">end</span> <span class="comment">% get.OffsetSignalData</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods</span>
+
+    <span class="keyword">methods</span>
+
+        <span class="keyword">function</span> obj = SignalTraceChart( namedArgs )
+            <span class="comment">%SIGNALTRACECHART Construct a SignalTraceChart object, given</span>
+            <span class="comment">%optional name-value arguments.</span>
+
+            <span class="keyword">arguments</span> ( Input )
+                namedArgs.?SignalTraceChart
+            <span class="keyword">end</span> <span class="comment">% arguments ( Inputs )</span>
+
+            <span class="comment">% Set any user-defined properties.</span>
+            set( obj, namedArgs )
+
+        <span class="keyword">end</span> <span class="comment">% constructor</span>
+
+        <span class="keyword">function</span> varargout = xlabel( obj, varargin )
+
+            [varargout{1:nargout}] = xlabel( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% xlabel</span>
+
+        <span class="keyword">function</span> varargout = ylabel( obj, varargin )
+
+            [varargout{1:nargout}] = ylabel( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% ylabel</span>
+
+        <span class="keyword">function</span> varargout = title( obj, varargin )
+
+            [varargout{1:nargout}] = title( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% title</span>
+
+        <span class="keyword">function</span> varargout = axis( obj, varargin )
+
+            [varargout{1:nargout}] = axis( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% axis</span>
+
+        <span class="keyword">function</span> varargout = xticks( obj, varargin )
+
+            [varargout{1:nargout}] = xticks( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% xticks</span>
+
+        <span class="keyword">function</span> varargout = xticklabels( obj, varargin )
+
+            [varargout{1:nargout}] = xticklabels( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% xticklabels</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods</span>
+
+    <span class="keyword">methods</span> ( Access = protected )
+
+        <span class="keyword">function</span> setup( obj )
+            <span class="comment">%SETUP Initialize the chart graphics.</span>
+
+            <span class="comment">% Create the chart graphics.</span>
+            obj.Axes = axes( <span class="string">"Parent"</span>, obj.getLayout(), <span class="keyword">...</span>
+                <span class="string">"Color"</span>, [0.0, 0.5, 0.5], <span class="keyword">...</span>
+                <span class="string">"XGrid"</span>, <span class="string">"on"</span>, <span class="keyword">...</span>
+                <span class="string">"YGrid"</span>, <span class="string">"on"</span>, <span class="keyword">...</span>
+                <span class="string">"YTickLabel"</span>, [], <span class="keyword">...</span>
+                <span class="string">"GridColor"</span>, <span class="string">"w"</span> );
+
+        <span class="keyword">end</span> <span class="comment">% setup</span>
+
+        <span class="keyword">function</span> update( obj )
+
+            <span class="keyword">if</span> obj.ComputationRequired
+
+                <span class="comment">% Update the signal trace lines with the new data.</span>
+                nTraces = size( obj.SignalData_, 2 );
+                nLines = numel( obj.SignalLines );
+                <span class="comment">% If we have more traces, then we need to create new line</span>
+                <span class="comment">% objects.</span>
+                <span class="keyword">if</span> nTraces &gt;= nLines
+                    nToAdd = nTraces - nLines;
+                    <span class="keyword">for</span> k = 1 : nToAdd
+                        obj.SignalLines(end+1, 1) = line( <span class="keyword">...</span>
+                            <span class="string">"Parent"</span>, obj.Axes, <span class="keyword">...</span>
+                            <span class="string">"XData"</span>, [], <span class="keyword">...</span>
+                            <span class="string">"YData"</span>, [], <span class="keyword">...</span>
+                            <span class="string">"Color"</span>, <span class="string">"y"</span>, <span class="keyword">...</span>
+                            <span class="string">"LineWidth"</span>, 1.5 );
+                    <span class="keyword">end</span> <span class="comment">% for</span>
+                    <span class="comment">% Otherwise, we need to delete the unneeded line</span>
+                    <span class="comment">% objects and remove their references from the chart.</span>
+                <span class="keyword">else</span>
+                    nToRemove = nLines - nTraces;
+                    delete( obj.SignalLines(end-nToRemove+1:end) );
+                    obj.SignalLines = obj.SignalLines(1:end-nToRemove);
+                <span class="keyword">end</span> <span class="comment">% if</span>
+
+                <span class="comment">% Refresh the line x and y data.</span>
+                <span class="keyword">for</span> k = 1:nTraces
+                    set( obj.SignalLines(k), <span class="string">"XData"</span>, obj.Time_, <span class="keyword">...</span>
+                        <span class="string">"YData"</span>, obj.OffsetSignalData(:, k) );
+                <span class="keyword">end</span> <span class="comment">% for</span>
+
+                <span class="comment">% Adjust the axes' y-limits.</span>
+                <span class="keyword">if</span> ~all( isnan( obj.OffsetSignalData(:) ) )
+                    [mn, mx] = bounds( obj.OffsetSignalData(:) );
+                    obj.Axes.YLim = [mn - 0.5, mx + 0.5];
+                <span class="keyword">end</span> <span class="comment">% if</span>
+
+                <span class="comment">% Adjust the axes' x-limits.</span>
+                <span class="keyword">if</span> ~all( isnan( obj.Time_ ) )
+                    [mn, mx] = bounds( obj.Time_ );
+                    obj.Axes.XLim = [mn, mx];
+                <span class="keyword">end</span> <span class="comment">% if</span>
+
+                <span class="comment">% Mark the chart clean.</span>
+                obj.ComputationRequired = false;
+
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+            <span class="comment">% Refresh the chart's decorative properties.</span>
+            set( obj.SignalLines, <span class="string">"LineWidth"</span>, obj.LineWidth )
+            obj.Axes.XAxis.FontSize = obj.XAxisFontSize;
+
+        <span class="keyword">end</span> <span class="comment">% update</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods ( Access = protected )</span>
+
+<span class="keyword">end</span> <span class="comment">% classdef</span>
+</pre>
+</div>
+<!--
+##### SOURCE BEGIN #####
+classdef SignalTraceChart < Chart
+    %SIGNALTRACECHART Chart for managing a collection of non-overlapping
+    %signal traces plotted against a numeric time vector.
+
+    % Copyright 2018-2025 The MathWorks, Inc.
+
+    properties ( Dependent )
+        % Chart time data.
+        Time(:, 1) double {mustBeReal, mustBeFinite, mustBeIncreasing}
+        % Chart signal data.
+        SignalData(:, :) double {mustBeReal}
+    end % properties ( Dependent )
+
+    properties
+        % Width of the signal traces.
+        LineWidth(1, 1) double {mustBePositive, mustBeFinite} = 1.5
+        % Font size used for the x-axis.
+        XAxisFontSize(1, 1) double {mustBePositive, mustBeFinite} = 10
+    end % properties
+
+    properties ( Access = private, Transient, NonCopyable )
+        % Chart axes.
+        Axes(:, 1) matlab.graphics.axis.Axes {mustBeScalarOrEmpty}
+        % Signal trace line objects.
+        SignalLines(:, 1) matlab.graphics.primitive.Line
+    end % properties ( Access = private, Transient, NonCopyable )
+
+    properties ( Access = private )
+        % Internal storage for the Time property.
+        Time_(:, 1) double {mustBeReal, mustBeFinite, ...
+            mustBeIncreasing} = double.empty( 0, 1 )
+        % Internal storage for the SignalData property.
+        SignalData_(:, :) double {mustBeReal} = double.empty( 0, 1 )
+        % Logical scalar specifying whether a computation is required.
+        ComputationRequired(1, 1) logical = false
+    end % properties ( Access = private )
+
+    properties ( Dependent, Access = private )
+        % Translated signal data, adapted for display on the chart.
+        OffsetSignalData(:, :) double {mustBeReal, mustBeFinite}
+    end % properties ( Dependent, Access = private )
+
+    properties ( Constant, Hidden )
+        % Product dependencies.
+        Dependencies(1, :) string = "MATLAB"
+        % Description.
+        ShortDescription(1, 1) string = "Plot non-overlapping signal" + ...
+            " traces against a numeric time vector"
+    end % properties ( Constant, Hidden )
+
+    methods
+
+        function value = get.Time( obj )
+
+            value = obj.Time_;
+
+        end % get.Time
+
+        function set.Time( obj, value )
+
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+
+            % Current data lengths.
+            nT = numel( value );
+            nS = size( obj.SignalData_, 1 );
+
+            % Decide how to proceed based on the data lengths.
+            if nT > nS
+                % Pad the existing signal data.
+                obj.SignalData_(end+1:nT, :) = NaN;
+            else
+                % Truncate the existing signal data.
+                obj.SignalData_ = obj.SignalData_(1:nT, :);
+            end % if
+
+            % Set the internal time.
+            obj.Time_ = value(:);
+
+        end % set.Time
+
+        function value = get.SignalData( obj )
+
+            value = obj.SignalData_;
+
+        end % get.SignalData
+
+        function set.SignalData( obj, value )
+
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+
+            % Current data lengths.
+            nT = numel( obj.Time_ );
+            nS = size( value, 1 );
+
+            % Decide how to proceed based on the data lengths.
+            if nS > nT
+                % Pad the existing time data.
+                obj.Time_(end+1:nS, :) = NaN;
+            else
+                % Truncate the existing time data.
+                obj.Time_ = obj.Time_(1:nS, :);
+            end % if
+
+            % Set the internal signal data.
+            obj.SignalData_ = value;
+
+        end % set.SignalData
+
+        function value = get.OffsetSignalData( obj )
+
+            % Rescale the data, and then for each signal, offset it from
+            % the previous one, leaving a small gap. Constant signals are
+            % not rescaled.
+
+            % Identify the constant signals.
+            constSigIdx = all( diff( obj.SignalData_ ) == 0 )  | ...
+                all( isnan( obj.SignalData_ ) );
+            % Apply the z-score transformation to the non-constant signals.
+            value = obj.SignalData_;
+            nonConstantSignals = obj.SignalData_(:, ~constSigIdx);
+            value(:, ~constSigIdx) = ...
+                (nonConstantSignals - ...
+                mean( nonConstantSignals, "omitnan" )) ./ ...
+                std( nonConstantSignals, "omitnan" );
+
+            % Cumulatively offset each signal from the previous one,
+            % leaving a gap of size 0.5 between each pair of consecutive
+            % signals.
+            for k = 2:size( value, 2 )
+                value(:, k) = value(:, k) + max( value(:, k-1) ) + ...
+                    abs( min( value(:, k) ) ) + 0.5;
+            end % for
+
+        end % get.OffsetSignalData
+
+    end % methods
+
+    methods
+
+        function obj = SignalTraceChart( namedArgs )
+            %SIGNALTRACECHART Construct a SignalTraceChart object, given
+            %optional name-value arguments.
+
+            arguments ( Input )
+                namedArgs.?SignalTraceChart
+            end % arguments ( Inputs )           
+
+            % Set any user-defined properties.
+            set( obj, namedArgs )
+
+        end % constructor
+
+        function varargout = xlabel( obj, varargin )
+
+            [varargout{1:nargout}] = xlabel( obj.Axes, varargin{:} );
+
+        end % xlabel
+
+        function varargout = ylabel( obj, varargin )
+
+            [varargout{1:nargout}] = ylabel( obj.Axes, varargin{:} );
+
+        end % ylabel
+
+        function varargout = title( obj, varargin )
+
+            [varargout{1:nargout}] = title( obj.Axes, varargin{:} );
+
+        end % title
+
+        function varargout = axis( obj, varargin )
+
+            [varargout{1:nargout}] = axis( obj.Axes, varargin{:} );
+
+        end % axis
+
+        function varargout = xticks( obj, varargin )
+
+            [varargout{1:nargout}] = xticks( obj.Axes, varargin{:} );
+
+        end % xticks
+
+        function varargout = xticklabels( obj, varargin )
+
+            [varargout{1:nargout}] = xticklabels( obj.Axes, varargin{:} );
+
+        end % xticklabels
+
+    end % methods
+
+    methods ( Access = protected )
+
+        function setup( obj )
+            %SETUP Initialize the chart graphics.
+
+            % Create the chart graphics.
+            obj.Axes = axes( "Parent", obj.getLayout(), ...
+                "Color", [0.0, 0.5, 0.5], ...
+                "XGrid", "on", ...
+                "YGrid", "on", ...
+                "YTickLabel", [], ...
+                "GridColor", "w" );
+
+        end % setup
+
+        function update( obj )
+
+            if obj.ComputationRequired
+
+                % Update the signal trace lines with the new data.
+                nTraces = size( obj.SignalData_, 2 );
+                nLines = numel( obj.SignalLines );
+                % If we have more traces, then we need to create new line
+                % objects.
+                if nTraces >= nLines
+                    nToAdd = nTraces - nLines;
+                    for k = 1 : nToAdd
+                        obj.SignalLines(end+1, 1) = line( ...
+                            "Parent", obj.Axes, ...
+                            "XData", [], ...
+                            "YData", [], ...
+                            "Color", "y", ...
+                            "LineWidth", 1.5 );
+                    end % for
+                    % Otherwise, we need to delete the unneeded line
+                    % objects and remove their references from the chart.
+                else
+                    nToRemove = nLines - nTraces;
+                    delete( obj.SignalLines(end-nToRemove+1:end) );
+                    obj.SignalLines = obj.SignalLines(1:end-nToRemove);
+                end % if
+
+                % Refresh the line x and y data.
+                for k = 1:nTraces
+                    set( obj.SignalLines(k), "XData", obj.Time_, ...
+                        "YData", obj.OffsetSignalData(:, k) );
+                end % for
+
+                % Adjust the axes' y-limits.
+                if ~all( isnan( obj.OffsetSignalData(:) ) )
+                    [mn, mx] = bounds( obj.OffsetSignalData(:) );
+                    obj.Axes.YLim = [mn - 0.5, mx + 0.5];
+                end % if
+
+                % Adjust the axes' x-limits.
+                if ~all( isnan( obj.Time_ ) )
+                    [mn, mx] = bounds( obj.Time_ );
+                    obj.Axes.XLim = [mn, mx];
+                end % if
+
+                % Mark the chart clean.
+                obj.ComputationRequired = false;
+
+            end % if
+
+            % Refresh the chart's decorative properties.
+            set( obj.SignalLines, "LineWidth", obj.LineWidth )
+            obj.Axes.XAxis.FontSize = obj.XAxisFontSize;
+
+        end % update
+
+    end % methods ( Access = protected )
+
+end % classdef
+##### SOURCE END #####
+-->
+</body>
+</html>

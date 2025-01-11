@@ -1,0 +1,2243 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      -->
+<title>AnnulusChart</title>
+<meta name="generator" content="MATLAB 25.1">
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+<meta name="DC.date" content="2025-01-11">
+<meta name="DC.source" content="AnnulusChart.m">
+<style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style>
+</head>
+<body>
+<div class="content">
+<pre class="codeinput">
+<span class="keyword">classdef</span> AnnulusChart &lt; Component
+    <span class="comment">%ANNULUSCHART Annulus (ring) chart, similar to a 3D pie chart.</span>
+
+    <span class="comment">% Copyright 2019-2025 The MathWorks, Inc.</span>
+
+    <span class="keyword">properties</span> ( Dependent )
+        <span class="comment">% Chart data, comprising a positive vector.</span>
+        Data<span class="typesection">(:, 1) double {mustBeNonempty, mustBePositive}</span>
+        <span class="comment">% Wedge face colors.</span>
+        FaceColor
+        <span class="comment">% Wedge label text.</span>
+        LabelText<span class="typesection">(:, 1) string</span>
+        <span class="comment">% Wedge label font size.</span>
+        LabelFontSize<span class="typesection">(1, 1) double {mustBePositive, mustBeFinite}</span>
+        <span class="comment">% Specifies whether percentages are shown on the labels.</span>
+        LabelPercentages<span class="typesection">(1, 1) matlab.lang.OnOffSwitchState</span>
+        <span class="comment">% Visibility of the wedge labels.</span>
+        LabelVisible<span class="typesection">(1, 1) matlab.lang.OnOffSwitchState</span>
+        <span class="comment">% Legend text.</span>
+        LegendText<span class="typesection">(:, 1) string</span>
+        <span class="comment">% Specifies whether percentages are shown in the legend.</span>
+        LegendPercentages<span class="typesection">(1, 1) matlab.lang.OnOffSwitchState</span>
+        <span class="comment">% Legend color.</span>
+        LegendColor
+        <span class="comment">% Legend location.</span>
+        LegendLocation<span class="typesection">(1, 1) string {mustBeLegendLocation}</span>
+        <span class="comment">% Number of columns in the legend.</span>
+        LegendNumColumns<span class="typesection">(1, 1) double {mustBeInteger, mustBePositive}</span>
+        <span class="comment">% Legend orientation.</span>
+        LegendOrientation<span class="typesection">(1, 1) string </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeMember( LegendOrientation, </span><span class="keyword">...</span>
+            <span class="typesection">["vertical", "horizontal"] )}</span>
+        <span class="comment">% Legend title.</span>
+        LegendTitle<span class="typesection">(1, 1) string</span>
+        <span class="comment">% Visibility of the chart legend.</span>
+        LegendVisible<span class="typesection">(1, 1) matlab.lang.OnOffSwitchState</span>
+        <span class="comment">% Font size used in the legend.</span>
+        LegendFontSize<span class="typesection">(1, 1) double {mustBePositive, mustBeFinite}</span>
+        <span class="comment">% Box property of the legend.</span>
+        LegendBox<span class="typesection">(1, 1) matlab.lang.OnOffSwitchState</span>
+        <span class="comment">% Chart controls.</span>
+        Controls<span class="typesection">(1, 1) matlab.lang.OnOffSwitchState</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Dependent )</span>
+
+    <span class="keyword">properties</span> ( Dependent, SetAccess = private )
+        <span class="comment">% Chart data, in percentage form.</span>
+        DataPercentages<span class="typesection">(:, 1) double {mustBeNonempty, </span><span class="keyword">...</span>
+            <span class="typesection">mustBeInRange( DataPercentages, 0, 100 )}</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Dependent, SetAccess = private )</span>
+
+    <span class="keyword">properties</span> ( Access = private )
+        <span class="comment">% Internal storage for the Data property.</span>
+        Data_<span class="typesection">(:, 1) double {mustBeNonempty, mustBePositive}</span> = 1
+        <span class="comment">% Internal storage for the FaceColor property.</span>
+        FaceColor_<span class="typesection">(:, 3) double {mustBeInRange( FaceColor_, 0, 1 )}</span> = <span class="keyword">...</span>
+            [0, 0, 0]
+        <span class="comment">% Internal storage for the Label property.</span>
+        LabelText_<span class="typesection">(:, 1) string </span>= string.empty( 0, 1 )
+        <span class="comment">% Internal storage for the LabelFontSize property.</span>
+        LabelFontSize_<span class="typesection">(1, 1) double {mustBePositive, mustBeFinite}</span> = 10
+        <span class="comment">% Internal storage for the LabelPercentages property.</span>
+        LabelPercentages_<span class="typesection">(1, 1) matlab.lang.OnOffSwitchState </span>= <span class="string">"on"</span>
+        <span class="comment">% Internal storage for the LabelVisible property.</span>
+        LabelVisible_<span class="typesection">(1, 1) matlab.lang.OnOffSwitchState </span>= <span class="string">"on"</span>
+        <span class="comment">% Internal storage for the LegendText property.</span>
+        LegendText_<span class="typesection">(:, 1) string </span>= string.empty( 0, 1 )
+        <span class="comment">% Internal storage for the LegendPercentages property.</span>
+        LegendPercentages_<span class="typesection">(1, 1) matlab.lang.OnOffSwitchState </span>= <span class="string">"off"</span>
+        <span class="comment">% Explosion logic for each wedge.</span>
+        WedgeExpanded<span class="typesection">(1, :) logical </span>= false
+        <span class="comment">% Logical scalar specifying whether an update is required.</span>
+        ComputationRequired<span class="typesection">(1, 1) logical </span>= true
+    <span class="keyword">end</span> <span class="comment">% properties ( Access = private )</span>
+
+    <span class="keyword">properties</span> ( Access = private, Transient, NonCopyable )
+        <span class="comment">% Chart layout.</span>
+        LayoutGrid<span class="typesection">(:, 1) matlab.ui.container.GridLayout </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Chart axes.</span>
+        Axes<span class="typesection">(:, 1) matlab.graphics.axis.Axes {mustBeScalarOrEmpty}</span>
+        <span class="comment">% Axes legend.</span>
+        Legend<span class="typesection">(:, 1) matlab.graphics.illustration.Legend </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Toggle button for the chart controls.</span>
+        ToggleButton<span class="typesection">(:, 1) matlab.ui.controls.ToolbarStateButton </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Graphics objects (patches and surfaces) used for the wedges.</span>
+        WedgeGraphics<span class="typesection">(:, 6) matlab.graphics.Graphics </span>= gobjects( 0, 6 )
+        <span class="comment">% Text objects used for the wedge labels.</span>
+        WedgeLabels<span class="typesection">(:, 1) matlab.graphics.primitive.Text</span>
+        <span class="comment">% Check box for the label visibility.</span>
+        VisibleLabelsCheckBox<span class="typesection">(:, 1) matlab.ui.control.CheckBox </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Check box for the label percentages.</span>
+        LabelPercentagesCheckBox<span class="typesection">(:, 1) matlab.ui.control.CheckBox </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Button to explode all wedges.</span>
+        ExplodeButton<span class="typesection">(:, 1) matlab.ui.control.Button {mustBeScalarOrEmpty}</span>
+        <span class="comment">% Button to retract all wedges.</span>
+        RetractButton<span class="typesection">(:, 1) matlab.ui.control.Button {mustBeScalarOrEmpty}</span>
+        <span class="comment">% Spinner for the label font size.</span>
+        LabelFontSizeSpinner<span class="typesection">(:, 1) matlab.ui.control.Spinner </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Check box for the legend visibility.</span>
+        LegendVisibleCheckBox<span class="typesection">(:, 1) matlab.ui.control.CheckBox </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Check box for the legend percentages.</span>
+        LegendPercentagesCheckBox<span class="typesection">(:, 1) matlab.ui.control.CheckBox </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Check box for the legend box.</span>
+        LegendBoxCheckBox<span class="typesection">(:, 1) matlab.ui.control.CheckBox </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Dropdown menu for the legend location.</span>
+        LegendLocationDropDown<span class="typesection">(:, 1) matlab.ui.control.DropDown </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Spinnder for the number of columns in the legend.</span>
+        LegendNumColumnsSpinner<span class="typesection">(:, 1) matlab.ui.control.Spinner </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Dropdown menu for the legend orientation.</span>
+        LegendOrientationDropDown<span class="typesection">(:, 1) matlab.ui.control.DropDown </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Edit field for the legend title.</span>
+        LegendTitleEditField<span class="typesection">(:, 1) matlab.ui.control.EditField </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Access = private, Transient, NonCopyable )</span>
+
+    <span class="keyword">properties</span> ( Constant, GetAccess = private )
+        <span class="comment">% Inner radius of the annulus.</span>
+        InnerRadius<span class="typesection">(1, 1) double {mustBeNonnegative, mustBeFinite}</span> = 4
+        <span class="comment">% Outer radius of the annulus.</span>
+        OuterRadius<span class="typesection">(1, 1) double {mustBeNonnegative, mustBeFinite}</span> = 9
+        <span class="comment">% Number of edges in each wedge.</span>
+        NumEdges<span class="typesection">(1, 1) double {mustBeInteger, mustBePositive}</span> = 100
+        <span class="comment">% Explosion range (radial distance).</span>
+        ExplosionRange<span class="typesection">(1, 1) double {mustBeNonnegative, mustBeFinite}</span> = 0.5
+        <span class="comment">% Explosion factor used for individual wedges.</span>
+        ExplosionFactor<span class="typesection">(1, 1) double {mustBeNonnegative, mustBeFinite}</span> = 2
+    <span class="keyword">end</span> <span class="comment">% properties ( Constant, GetAccess = private )</span>
+
+    <span class="keyword">properties</span> ( Constant, Hidden )
+        <span class="comment">% Product dependencies.</span>
+        Dependencies<span class="typesection">(1, :) string </span>= <span class="string">"MATLAB"</span>
+        <span class="comment">% Description.</span>
+        ShortDescription<span class="typesection">(1, 1) string </span>= <span class="string">"Visualize relative "</span> + <span class="keyword">...</span>
+            <span class="string">"proportions in a data vector using an annulus (ring)"</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Constant, Hidden )</span>
+
+    <span class="keyword">methods</span>
+
+        <span class="keyword">function</span> value = get.Data( obj )
+
+            value = obj.Data_;
+
+        <span class="keyword">end</span> <span class="comment">% get.Data</span>
+
+        <span class="keyword">function</span> set.Data( obj, value )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Store the internal value.</span>
+            obj.Data_ = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.Data</span>
+
+        <span class="keyword">function</span> value = get.LabelText( obj )
+
+            value = obj.LabelText_;
+
+        <span class="keyword">end</span> <span class="comment">% get.Label</span>
+
+        <span class="keyword">function</span> set.LabelText( obj, value )
+
+            <span class="comment">% Check that we have the right number of strings.</span>
+            assert( numel( value ) == numel( obj.Data_ ), <span class="keyword">...</span>
+                <span class="string">"AnnulusChart:LabelTextLengthMismatch"</span>, <span class="keyword">...</span>
+                <span class="string">"The number of labels must match the number "</span> + <span class="keyword">...</span>
+                <span class="string">"of data values."</span> )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Update the internal, stored property.</span>
+            obj.LabelText_ = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.LabelText</span>
+
+        <span class="keyword">function</span> value = get.LabelVisible( obj )
+
+            <span class="keyword">if</span> isempty( obj.WedgeLabels )
+                value = <span class="string">"on"</span>;
+            <span class="keyword">else</span>
+                value = obj.WedgeLabels(1).Visible;
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+            value = matlab.lang.OnOffSwitchState( value );
+
+        <span class="keyword">end</span> <span class="comment">% get.VisibleLabels</span>
+
+        <span class="keyword">function</span> set.LabelVisible( obj, value )
+
+            <span class="comment">% Update the flags.</span>
+            obj.ComputationRequired = true;
+            obj.LabelVisible_ = value;
+
+            <span class="comment">% Update the controls.</span>
+            obj.VisibleLabelsCheckBox.Value = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.VisibleLabels</span>
+
+        <span class="keyword">function</span> value = get.LabelFontSize( obj )
+
+            value = obj.LabelFontSize_;
+
+        <span class="keyword">end</span> <span class="comment">% get.LabelFontSize</span>
+
+        <span class="keyword">function</span> set.LabelFontSize( obj, value )
+
+            obj.ComputationRequired = true;
+            obj.LabelFontSize_ = value;
+            obj.LabelFontSizeSpinner.Value = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.LabelFontSize</span>
+
+        <span class="keyword">function</span> value = get.LabelPercentages( obj )
+
+            value = obj.LabelPercentages_;
+
+        <span class="keyword">end</span> <span class="comment">% get.LabelPercentages</span>
+
+        <span class="keyword">function</span> set.LabelPercentages( obj, value )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Update the internal stored value.</span>
+            obj.LabelPercentages_ = value;
+
+            <span class="comment">% Update the control.</span>
+            obj.LabelPercentagesCheckBox.Value = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.LabelPercentages</span>
+
+        <span class="keyword">function</span> value = get.FaceColor( obj )
+
+            value = cell2mat( <span class="keyword">...</span>
+                get( obj.WedgeGraphics(:, 1), <span class="string">"FaceColor"</span> ) );
+
+        <span class="keyword">end</span> <span class="comment">% get.FaceColor</span>
+
+        <span class="keyword">function</span> set.FaceColor( obj, value )
+
+            <span class="comment">% Check that we have the right number of colors.</span>
+            value = validatecolor( value, <span class="string">"multiple"</span> );
+            assert( height( value ) == numel( obj.Data_ ), <span class="keyword">...</span>
+                <span class="string">"AnnulusChart:FaceColorHeightMismatch"</span>, <span class="keyword">...</span>
+                <span class="string">"The number of face colors must match the number "</span> + <span class="keyword">...</span>
+                <span class="string">"of data values."</span> )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Store the internal value.</span>
+            obj.FaceColor_ = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.FaceColor</span>
+
+        <span class="keyword">function</span> value = get.LegendText( obj )
+
+            value = obj.LegendText_;
+
+        <span class="keyword">end</span> <span class="comment">% get.LegendText</span>
+
+        <span class="keyword">function</span> set.LegendText( obj, value )
+
+            <span class="comment">% Check that we have the right number of strings.</span>
+            assert( numel( value ) == numel( obj.Data_ ), <span class="keyword">...</span>
+                <span class="string">"AnnulusChart:LegendTextLengthMismatch"</span>, <span class="keyword">...</span>
+                <span class="string">"The number of legend entries must match the number "</span> + <span class="keyword">...</span>
+                <span class="string">"of data values."</span> )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Store the internal value.</span>
+            obj.LegendText_ = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.LegendText</span>
+
+        <span class="keyword">function</span> value = get.LegendColor( obj )
+
+            value = obj.Legend.Color;
+
+        <span class="keyword">end</span> <span class="comment">% get.LegendColor</span>
+
+        <span class="keyword">function</span> set.LegendColor( obj, value )
+
+            <span class="keyword">if</span> ~isequal( value, <span class="string">"none"</span> )
+                value = validatecolor( value, <span class="string">"one"</span> );
+            <span class="keyword">end</span> <span class="comment">% if</span>
+            obj.Legend.Color = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.LegendColor</span>
+
+        <span class="keyword">function</span> value = get.LegendLocation( obj )
+
+            value = obj.Legend.Location;
+
+        <span class="keyword">end</span> <span class="comment">% get.LegendLocation</span>
+
+        <span class="keyword">function</span> set.LegendLocation( obj, value )
+
+            <span class="comment">% Update the legend.</span>
+            obj.Legend.Location = value;
+
+            <span class="comment">% Update the control.</span>
+            obj.LegendLocationDropDown.Value = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.LegendLocation</span>
+
+        <span class="keyword">function</span> value = get.LegendNumColumns( obj )
+
+            value = obj.Legend.NumColumns;
+
+        <span class="keyword">end</span> <span class="comment">% get.LegendNumColumns</span>
+
+        <span class="keyword">function</span> set.LegendNumColumns( obj, value )
+
+            <span class="comment">% Update the legend.</span>
+            obj.Legend.NumColumns = value;
+
+            <span class="comment">% Update the control.</span>
+            obj.LegendNumColumnsSpinner.Value = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.LegendNumColumns</span>
+
+        <span class="keyword">function</span> value = get.LegendOrientation( obj )
+
+            value = obj.Legend.Orientation;
+
+        <span class="keyword">end</span> <span class="comment">% get.LegendOrientation</span>
+
+        <span class="keyword">function</span> set.LegendOrientation( obj, value )
+
+            <span class="comment">% Update the legend.</span>
+            obj.Legend.Orientation = value;
+
+            <span class="comment">% Update the control.</span>
+            obj.LegendOrientationDropDown.Value = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.LegendOrientation</span>
+
+        <span class="keyword">function</span> value = get.LegendTitle( obj )
+
+            value = obj.Legend.Title.String;
+
+        <span class="keyword">end</span> <span class="comment">% get.LegendTitle</span>
+
+        <span class="keyword">function</span> set.LegendTitle( obj, value )
+
+            obj.Legend.Title.String = value;
+            obj.LegendTitleEditField.Value = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.LegendTitle</span>
+
+        <span class="keyword">function</span> value = get.LegendPercentages( obj )
+
+            value = obj.LegendPercentages_;
+
+        <span class="keyword">end</span> <span class="comment">% get.LegendPercentages</span>
+
+        <span class="keyword">function</span> set.LegendPercentages( obj, value )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Store the internal value.</span>
+            obj.LegendPercentages_ = value;
+
+            <span class="comment">% Update the control.</span>
+            obj.LegendPercentagesCheckBox.Value = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.LegendPercentages</span>
+
+        <span class="keyword">function</span> value = get.LegendVisible( obj )
+
+            value = obj.Legend.Visible;
+
+        <span class="keyword">end</span> <span class="comment">% get.LegendVisible</span>
+
+        <span class="keyword">function</span> set.LegendVisible( obj, value )
+
+            <span class="comment">% Update the legend.</span>
+            obj.Legend.Visible = value;
+
+            <span class="comment">% Update the control.</span>
+            obj.LegendVisibleCheckBox.Value = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.LegendVisible</span>
+
+        <span class="keyword">function</span> value = get.LegendFontSize( obj )
+
+            value = obj.Legend.FontSize;
+
+        <span class="keyword">end</span> <span class="comment">% get.LegendFontSize</span>
+
+        <span class="keyword">function</span> set.LegendFontSize( obj, value )
+
+            obj.Legend.FontSize = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.LegendFontSize</span>
+
+        <span class="keyword">function</span> value = get.LegendBox( obj )
+
+            value = obj.Legend.Box;
+
+        <span class="keyword">end</span> <span class="comment">% get.LegendBox</span>
+
+        <span class="keyword">function</span> set.LegendBox( obj, value )
+
+            <span class="comment">% Update the legend.</span>
+            obj.Legend.Box = value;
+
+            <span class="comment">% Update the control.</span>
+            obj.LegendBoxCheckBox.Value = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.LegendBox</span>
+
+        <span class="keyword">function</span> value = get.Controls( obj )
+
+            value = obj.ToggleButton.Value;
+
+        <span class="keyword">end</span> <span class="comment">% get.Controls</span>
+
+        <span class="keyword">function</span> set.Controls( obj, value )
+
+            <span class="comment">% Update the toggle button.</span>
+            obj.ToggleButton.Value = value;
+
+            <span class="comment">% Invoke the toggle button callback.</span>
+            obj.onToggleButtonPressed()
+
+        <span class="keyword">end</span> <span class="comment">% set.Controls</span>
+
+        <span class="keyword">function</span> value = get.DataPercentages( obj )
+
+            value = 100 * obj.Data_ / sum( obj.Data_ );
+
+        <span class="keyword">end</span> <span class="comment">% get.DataPercentages</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods</span>
+
+    <span class="keyword">methods</span>
+
+        <span class="keyword">function</span> obj = AnnulusChart( namedArgs )
+            <span class="comment">%ANNULUSCHART Construct an AnnulusChart, given optional</span>
+            <span class="comment">%name-value arguments.</span>
+
+            <span class="keyword">arguments</span> ( Input )
+                namedArgs.?AnnulusChart
+            <span class="keyword">end</span> <span class="comment">% arguments ( Input )</span>
+
+            <span class="comment">% Set any user-defined properties.</span>
+            set( obj, namedArgs )
+
+        <span class="keyword">end</span> <span class="comment">% constructor</span>
+
+        <span class="keyword">function</span> varargout = title( obj, varargin )
+
+            [varargout{1:nargout}] = title( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% title</span>
+
+        <span class="keyword">function</span> varargout = view( obj, varargin )
+
+            <span class="comment">% Call the view function on the chart's axes.</span>
+            [varargout{1:nargout}] = view( obj.Axes, varargin{:} );
+
+            <span class="comment">% Update the wedge label positions.</span>
+            drawnow()
+            obj.updateLabelPositions( 1:numel( obj.Data_ ) )
+
+        <span class="keyword">end</span> <span class="comment">% view</span>
+
+        <span class="keyword">function</span> resetView( obj )
+            <span class="comment">%RESETVIEW Restore the default chart view.</span>
+
+            <span class="comment">% Reset the view.</span>
+            view( obj.Axes, [0, 50] )
+
+            <span class="comment">% Update the label positions.</span>
+            drawnow()
+            obj.updateLabelPositions( 1:numel( obj.Data_ ) )
+
+        <span class="keyword">end</span> <span class="comment">% resetView</span>
+
+        <span class="keyword">function</span> explode( obj, wedgeIdx )
+            <span class="comment">%EXPLODE Explode wedges.</span>
+
+            <span class="keyword">arguments</span> ( Input )
+                obj<span class="typesection">(1, 1) AnnulusChart</span>
+                wedgeIdx<span class="typesection">(1, :) double {mustBeInteger, mustBePositive}</span> = <span class="keyword">...</span>
+                    1 : numel( obj.Data_ )
+            <span class="keyword">end</span> <span class="comment">% arguments ( Input )</span>
+
+            <span class="comment">% Validate the wedge indices.</span>
+            assert( all( wedgeIdx &lt;= numel( obj.Data_ ) ), <span class="keyword">...</span>
+                <span class="string">"AnnulusChart:IndexOutOfBounds"</span>, <span class="keyword">...</span>
+                <span class="string">"The wedge indices must lie between 1 and the number"</span> + <span class="keyword">...</span>
+                <span class="string">" of data values."</span> )
+
+            <span class="comment">% Retract any previously exploded wedges.</span>
+            expandedWedgesIdx = intersect( find( obj.WedgeExpanded ), <span class="keyword">...</span>
+                wedgeIdx );
+            obj.WedgeExpanded(expandedWedgesIdx) = false;
+            obj.moveWedge( expandedWedgesIdx )
+
+            <span class="comment">% Mark the required wedges for explosion.</span>
+            obj.WedgeExpanded(wedgeIdx) = true;
+
+            <span class="comment">% Explode the wedges.</span>
+            obj.moveWedge( wedgeIdx )
+
+        <span class="keyword">end</span> <span class="comment">% explode</span>
+
+        <span class="keyword">function</span> retract( obj, wedgeIdx )
+            <span class="comment">%RETRACT Retract all wedges.</span>
+
+            <span class="keyword">arguments</span> ( Input )
+                obj<span class="typesection">(1, 1) AnnulusChart</span>
+                wedgeIdx<span class="typesection">(1, :) double {mustBeInteger, mustBePositive}</span> = <span class="keyword">...</span>
+                    1 : numel( obj.Data_ )
+            <span class="keyword">end</span> <span class="comment">% arguments ( Input )</span>
+
+            <span class="comment">% Expand any previously retracted wedges.</span>
+            retractedWedgesIdx = intersect( find( ~obj.WedgeExpanded ), <span class="keyword">...</span>
+                wedgeIdx );
+            obj.WedgeExpanded(retractedWedgesIdx) = true;
+            obj.moveWedge( retractedWedgesIdx )
+
+            <span class="comment">% Mark all wedges for retraction.</span>
+            obj.WedgeExpanded(wedgeIdx) = false;
+
+            <span class="comment">% Retract the wedges.</span>
+            obj.moveWedge( wedgeIdx )
+
+        <span class="keyword">end</span> <span class="comment">% retract</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods</span>
+
+    <span class="keyword">methods</span> ( Access = protected )
+
+        <span class="keyword">function</span> setup( obj )
+            <span class="comment">%SETUP Initialize the chart graphics.</span>
+
+            <span class="comment">% Define the layout grid.</span>
+            obj.LayoutGrid = uigridlayout( obj, [1, 2], <span class="keyword">...</span>
+                <span class="string">"ColumnWidth"</span>, [<span class="string">"1x"</span>, <span class="string">"0x"</span>] );
+
+            <span class="comment">% Create the chart's axes, legend and title.</span>
+            obj.Axes = axes( <span class="string">"Parent"</span>, obj.LayoutGrid, <span class="keyword">...</span>
+                <span class="string">"DataAspectRatio"</span>, [1, 1, 1], <span class="keyword">...</span>
+                <span class="string">"Visible"</span>, <span class="string">"off"</span>, <span class="keyword">...</span>
+                <span class="string">"View"</span>, [0, 50] );
+            obj.Legend = legend( obj.Axes, <span class="string">"ButtonDownFcn"</span>, [] );
+            title( obj.Axes, <span class="string">"Annulus Chart"</span>, <span class="string">"Visible"</span>, <span class="string">"on"</span> )
+
+            <span class="comment">% Create a light object within the axes.</span>
+            light( obj.Axes )
+
+            <span class="comment">% Add a state button to show/hide the chart's controls.</span>
+            tb = axtoolbar( obj.Axes, <span class="string">"rotate"</span> );
+            iconPath = fullfile( chartsRoot(), <span class="string">"charts"</span>, <span class="string">"images"</span>, <span class="keyword">...</span>
+                <span class="string">"Cog.png"</span> );
+            obj.ToggleButton = axtoolbarbtn( tb, <span class="string">"state"</span>, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, <span class="string">"off"</span>, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Show chart controls"</span>, <span class="keyword">...</span>
+                <span class="string">"Icon"</span>, iconPath, <span class="keyword">...</span>
+                <span class="string">"ValueChangedFcn"</span>, @obj.onToggleButtonPressed );
+
+            <span class="comment">% Create a panel for the chart controls.</span>
+            mainControlPanel = uipanel( <span class="string">"Parent"</span>, obj.LayoutGrid, <span class="keyword">...</span>
+                <span class="string">"Title"</span>, <span class="string">"Chart Controls"</span>, <span class="keyword">...</span>
+                <span class="string">"FontWeight"</span>, <span class="string">"bold"</span> );
+            mainControlPanel.Layout.Column = 2;
+
+            <span class="comment">% Define the control layout.</span>
+            controlLayout = uigridlayout( mainControlPanel, [2, 1], <span class="keyword">...</span>
+                <span class="string">"RowHeight"</span>, [<span class="string">"fit"</span>, <span class="string">"fit"</span>] );
+
+            <span class="comment">% Add a panel for the wedge-related controls.</span>
+            wedgePanel = uipanel( <span class="string">"Parent"</span>, controlLayout, <span class="keyword">...</span>
+                <span class="string">"Title"</span>, <span class="string">"Wedges"</span>, <span class="keyword">...</span>
+                <span class="string">"FontWeight"</span>, <span class="string">"bold"</span> );
+            wedgeLayout = uigridlayout( wedgePanel, [4, 2], <span class="keyword">...</span>
+                <span class="string">"RowHeight"</span>, repelem( <span class="string">"fit"</span>, 4 ) );
+            obj.VisibleLabelsCheckBox = uicheckbox( <span class="keyword">...</span>
+                <span class="string">"Parent"</span>, wedgeLayout, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, obj.LabelVisible, <span class="keyword">...</span>
+                <span class="string">"Text"</span>, <span class="string">"Show labels"</span>, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Show/hide the wedge labels"</span>, <span class="keyword">...</span>
+                <span class="string">"ValueChangedFcn"</span>, <span class="keyword">...</span>
+                @( s, ~ ) set( obj, <span class="string">"LabelVisible"</span>, s.Value ) );
+            obj.VisibleLabelsCheckBox.Layout.Column = [1, 2];
+            obj.LabelPercentagesCheckBox = uicheckbox( <span class="keyword">...</span>
+                <span class="string">"Parent"</span>, wedgeLayout, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, obj.LabelPercentages_, <span class="keyword">...</span>
+                <span class="string">"Text"</span>, <span class="string">"Show label percentages"</span>, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="keyword">...</span>
+                <span class="string">"Show/hide percentages in the wedge labels"</span>, <span class="keyword">...</span>
+                <span class="string">"ValueChangedFcn"</span>, <span class="keyword">...</span>
+                @( s, ~ ) set( obj, <span class="string">"LabelPercentages"</span>, s.Value ) );
+            obj.LabelPercentagesCheckBox.Layout.Column = [1, 2];
+            uilabel( <span class="string">"Parent"</span>, wedgeLayout, <span class="keyword">...</span>
+                <span class="string">"Text"</span>, <span class="string">"Label font size:"</span>, <span class="keyword">...</span>
+                <span class="string">"HorizontalAlignment"</span>, <span class="string">"right"</span> );
+            obj.LabelFontSizeSpinner = uispinner( <span class="keyword">...</span>
+                <span class="string">"Parent"</span>, wedgeLayout, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, obj.LabelFontSize_, <span class="keyword">...</span>
+                <span class="string">"Step"</span>, 1, <span class="keyword">...</span>
+                <span class="string">"Limits"</span>, [0, Inf], <span class="keyword">...</span>
+                <span class="string">"LowerLimitInclusive"</span>, <span class="string">"off"</span>, <span class="keyword">...</span>
+                <span class="string">"UpperLimitInclusive"</span>, <span class="string">"off"</span>, <span class="keyword">...</span>
+                <span class="string">"ValueChangedFcn"</span>, <span class="keyword">...</span>
+                @( s, ~ ) set( obj, <span class="string">"LabelFontSize"</span>, s.Value ) );
+            obj.ExplodeButton = uibutton( <span class="string">"Parent"</span>, wedgeLayout, <span class="keyword">...</span>
+                <span class="string">"Text"</span>, <span class="string">"Explode"</span>, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Explode all wedges"</span>, <span class="keyword">...</span>
+                <span class="string">"ButtonPushedFcn"</span>, @( ~, ~ ) obj.explode() );
+            obj.RetractButton = uibutton( <span class="string">"Parent"</span>, wedgeLayout, <span class="keyword">...</span>
+                <span class="string">"Text"</span>, <span class="string">"Retract"</span>, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Retract all wedges"</span>, <span class="keyword">...</span>
+                <span class="string">"ButtonPushedFcn"</span>, @( ~, ~ ) obj.retract() );
+
+            <span class="comment">% Add a panel for the legend-related controls.</span>
+            legendPanel = uipanel( <span class="string">"Parent"</span>, controlLayout, <span class="keyword">...</span>
+                <span class="string">"Title"</span>, <span class="string">"Legend"</span>, <span class="keyword">...</span>
+                <span class="string">"FontWeight"</span>, <span class="string">"bold"</span> );
+            legendLayout = uigridlayout( legendPanel, [7, 2], <span class="keyword">...</span>
+                <span class="string">"RowHeight"</span>, repelem( <span class="string">"fit"</span>, 7 ), <span class="keyword">...</span>
+                <span class="string">"ColumnWidth"</span>, [<span class="string">"fit"</span>, <span class="string">"fit"</span>] );
+            obj.LegendVisibleCheckBox = uicheckbox( <span class="keyword">...</span>
+                <span class="string">"Parent"</span>, legendLayout, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, obj.LegendVisible, <span class="keyword">...</span>
+                <span class="string">"Text"</span>, <span class="string">"Show legend"</span>, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Hide/show the legend"</span>, <span class="keyword">...</span>
+                <span class="string">"ValueChangedFcn"</span>, <span class="keyword">...</span>
+                @( s, ~ ) set( obj, <span class="string">"LegendVisible"</span>, s.Value ) );
+            obj.LegendVisibleCheckBox.Layout.Column = [1, 2];
+            obj.LegendPercentagesCheckBox = uicheckbox( <span class="keyword">...</span>
+                <span class="string">"Parent"</span>, legendLayout, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, obj.LegendPercentages_, <span class="keyword">...</span>
+                <span class="string">"Text"</span>, <span class="string">"Show legend percentages"</span>, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="keyword">...</span>
+                <span class="string">"Show/hide percentages in the legend"</span>, <span class="keyword">...</span>
+                <span class="string">"ValueChangedFcn"</span>, <span class="keyword">...</span>
+                @( s, ~ ) set( obj, <span class="string">"LegendPercentages"</span>, s.Value ) );
+            obj.LegendPercentagesCheckBox.Layout.Column = [1, 2];
+            obj.LegendBoxCheckBox = uicheckbox( <span class="keyword">...</span>
+                <span class="string">"Parent"</span>, legendLayout, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, obj.LegendBox, <span class="keyword">...</span>
+                <span class="string">"Text"</span>, <span class="string">"Box"</span>, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Show/hide the legend box"</span>, <span class="keyword">...</span>
+                <span class="string">"ValueChangedFcn"</span>, <span class="keyword">...</span>
+                @( s, ~ ) set( obj, <span class="string">"LegendBox"</span>, s.Value ) );
+            obj.LegendBoxCheckBox.Layout.Column = [1, 2];
+            uilabel( <span class="string">"Parent"</span>, legendLayout, <span class="keyword">...</span>
+                <span class="string">"Text"</span>, <span class="string">"Legend location:"</span>, <span class="keyword">...</span>
+                <span class="string">"HorizontalAlignment"</span>, <span class="string">"right"</span> );
+            obj.LegendLocationDropDown = uidropdown( <span class="keyword">...</span>
+                <span class="string">"Parent"</span>, legendLayout, <span class="keyword">...</span>
+                <span class="string">"Items"</span>, set( obj.Legend, <span class="string">"Location"</span> ), <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Select the legend location"</span>, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, obj.LegendLocation, <span class="keyword">...</span>
+                <span class="string">"ValueChangedFcn"</span>, <span class="keyword">...</span>
+                @( s, ~ ) set( obj, <span class="string">"LegendLocation"</span>, s.Value ) );
+            uilabel( <span class="string">"Parent"</span>, legendLayout, <span class="keyword">...</span>
+                <span class="string">"Text"</span>, <span class="string">"Number of columns:"</span>, <span class="keyword">...</span>
+                <span class="string">"HorizontalAlignment"</span>, <span class="string">"right"</span> );
+            obj.LegendNumColumnsSpinner = uispinner( <span class="keyword">...</span>
+                <span class="string">"Parent"</span>, legendLayout, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, obj.LegendNumColumns, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="keyword">...</span>
+                <span class="string">"Specify the number of columns in the legend"</span>, <span class="keyword">...</span>
+                <span class="string">"Limits"</span>, [1, Inf], <span class="keyword">...</span>
+                <span class="string">"UpperLimitInclusive"</span>, false, <span class="keyword">...</span>
+                <span class="string">"ValueDisplayFormat"</span>, <span class="string">"%d"</span>, <span class="keyword">...</span>
+                <span class="string">"Step"</span>, 1, <span class="keyword">...</span>
+                <span class="string">"RoundFractionalValues"</span>, <span class="string">"on"</span>, <span class="keyword">...</span>
+                <span class="string">"ValueChangedFcn"</span>, <span class="keyword">...</span>
+                @( s, ~ ) set( obj, <span class="string">"LegendNumColumns"</span>, s.Value ) );
+            uilabel( <span class="string">"Parent"</span>, legendLayout, <span class="keyword">...</span>
+                <span class="string">"Text"</span>, <span class="string">"Legend orientation:"</span>, <span class="keyword">...</span>
+                <span class="string">"HorizontalAlignment"</span>, <span class="string">"right"</span> );
+            obj.LegendOrientationDropDown = uidropdown( <span class="keyword">...</span>
+                <span class="string">"Parent"</span>, legendLayout, <span class="keyword">...</span>
+                <span class="string">"Items"</span>, set( obj.Legend, <span class="string">"Orientation"</span> ), <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Select the legend orientation"</span>, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, obj.LegendOrientation, <span class="keyword">...</span>
+                <span class="string">"ValueChangedFcn"</span>, <span class="keyword">...</span>
+                @( s, ~ ) set( obj, <span class="string">"LegendOrientation"</span>, s.Value ) );
+            uilabel( <span class="string">"Parent"</span>, legendLayout, <span class="keyword">...</span>
+                <span class="string">"Text"</span>, <span class="string">"Legend title:"</span>, <span class="keyword">...</span>
+                <span class="string">"HorizontalAlignment"</span>, <span class="string">"right"</span> );
+            obj.LegendTitleEditField = uieditfield( <span class="keyword">...</span>
+                <span class="string">"Parent"</span>, legendLayout, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, obj.LegendTitle, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Specify the legend title"</span>, <span class="keyword">...</span>
+                <span class="string">"ValueChangedFcn"</span>, <span class="keyword">...</span>
+                @( s, ~ ) set( obj, <span class="string">"LegendTitle"</span>, s.Value ) );
+
+        <span class="keyword">end</span> <span class="comment">% setup</span>
+
+        <span class="keyword">function</span> update( obj )
+            <span class="comment">%UPDATE Refresh the chart graphics.</span>
+
+            <span class="keyword">if</span> obj.ComputationRequired
+
+                <span class="comment">% Number of wedges required.</span>
+                numWedges = numel( obj.Data_ );
+
+                <span class="comment">% Determine the current number of wedges.</span>
+                currentNumWedges = height( obj.WedgeGraphics );
+
+                <span class="comment">% Update the colors.</span>
+                currentNumColors = height( obj.FaceColor_ );
+                <span class="keyword">if</span> currentNumColors &lt; numWedges
+                    obj.FaceColor_(end+1:numWedges, :) = hsv( <span class="keyword">...</span>
+                        numWedges - currentNumColors );
+                <span class="keyword">else</span>
+                    obj.FaceColor_ = obj.FaceColor_(1:numWedges, :);
+                <span class="keyword">end</span> <span class="comment">% if</span>
+
+                <span class="keyword">if</span> numWedges &lt; currentNumWedges
+                    <span class="comment">% Delete the appropriate wedges and labels.</span>
+                    numToDelete = currentNumWedges - numWedges;
+                    <span class="comment">% Wedge graphics.</span>
+                    delete( obj.WedgeGraphics(end-numToDelete+1:end, :) )
+                    obj.WedgeGraphics(end-numToDelete+1:end, :) = [];
+                    <span class="comment">% Wedge labels.</span>
+                    delete( obj.WedgeLabels(end-numToDelete+1:end) )
+                    obj.WedgeLabels(end-numToDelete+1:end) = [];
+                    <span class="comment">% Update the expansion record.</span>
+                    obj.WedgeExpanded = obj.WedgeExpanded(1:numWedges);
+                    <span class="comment">% Label and legend text.</span>
+                    obj.LabelText_ = obj.LabelText_(1:numWedges);
+                    obj.LegendText_ = obj.LegendText_(1:numWedges);
+                <span class="keyword">else</span>
+                    <span class="comment">% Create new wedge graphics and labels.</span>
+                    numToCreate = numWedges - currentNumWedges;
+                    <span class="comment">% Allocate space in the graphics array.</span>
+                    obj.WedgeGraphics = [obj.WedgeGraphics;
+                        gobjects( numToCreate, 6 ) ];
+                    <span class="keyword">for</span> k = currentNumWedges+1:numWedges
+                        <span class="comment">% Create new surface, patch and text objects.</span>
+                        obj.WedgeGraphics(k, 1) = <span class="keyword">...</span>
+                            patch( <span class="string">"Parent"</span>, obj.Axes, <span class="keyword">...</span>
+                            <span class="string">"XData"</span>, NaN, <span class="keyword">...</span>
+                            <span class="string">"YData"</span>, NaN, <span class="keyword">...</span>
+                            <span class="string">"ZData"</span>, NaN );
+                        obj.WedgeGraphics(k, 2) = <span class="keyword">...</span>
+                            patch( <span class="string">"Parent"</span>, obj.Axes, <span class="keyword">...</span>
+                            <span class="string">"HandleVisibility"</span>, <span class="string">"off"</span>, <span class="keyword">...</span>
+                            <span class="string">"XData"</span>, NaN, <span class="keyword">...</span>
+                            <span class="string">"YData"</span>, NaN, <span class="keyword">...</span>
+                            <span class="string">"ZData"</span>, NaN );
+                        obj.WedgeGraphics(k, 3) = <span class="keyword">...</span>
+                            surface( obj.Axes, NaN, NaN, NaN, <span class="keyword">...</span>
+                            <span class="string">"HandleVisibility"</span>, <span class="string">"off"</span> );
+                        obj.WedgeGraphics(k, 4) = <span class="keyword">...</span>
+                            surface( obj.Axes, NaN, NaN, NaN, <span class="keyword">...</span>
+                            <span class="string">"HandleVisibility"</span>, <span class="string">"off"</span> );
+                        obj.WedgeGraphics(k, 5) = <span class="keyword">...</span>
+                            patch( <span class="string">"Parent"</span>, obj.Axes, <span class="keyword">...</span>
+                            <span class="string">"HandleVisibility"</span>, <span class="string">"off"</span>, <span class="keyword">...</span>
+                            <span class="string">"XData"</span>, NaN, <span class="keyword">...</span>
+                            <span class="string">"YData"</span>, NaN, <span class="keyword">...</span>
+                            <span class="string">"ZData"</span>, NaN );
+                        obj.WedgeGraphics(k, 6) = <span class="keyword">...</span>
+                            patch( <span class="string">"Parent"</span>, obj.Axes, <span class="keyword">...</span>
+                            <span class="string">"HandleVisibility"</span>, <span class="string">"off"</span>, <span class="keyword">...</span>
+                            <span class="string">"XData"</span>, NaN, <span class="keyword">...</span>
+                            <span class="string">"YData"</span>, NaN, <span class="keyword">...</span>
+                            <span class="string">"ZData"</span>, NaN );
+                        <span class="comment">% Update the expansion record.</span>
+                        obj.WedgeExpanded(1, k) = false;
+                        <span class="comment">% Update the label and legend text.</span>
+                        <span class="keyword">if</span> numel( obj.LabelText_ ) &lt; k
+                            obj.LabelText_(k, 1) = <span class="string">"Data "</span> + k;
+                        <span class="keyword">end</span> <span class="comment">% if</span>
+                        <span class="keyword">if</span> numel( obj.LegendText ) &lt; k
+                            obj.LegendText_(k, 1) = <span class="string">"Data "</span> + k;
+                        <span class="keyword">end</span> <span class="comment">% if</span>
+                        obj.WedgeLabels(k, 1) = text( <span class="keyword">...</span>
+                            <span class="string">"Parent"</span>, obj.Axes, <span class="keyword">...</span>
+                            <span class="string">"Position"</span>, NaN( 1, 3 ), <span class="keyword">...</span>
+                            <span class="string">"String"</span>, <span class="string">""</span>, <span class="keyword">...</span>
+                            <span class="string">"FontSize"</span>, 10, <span class="keyword">...</span>
+                            <span class="string">"Margin"</span>, 1 );
+                    <span class="keyword">end</span> <span class="comment">% for</span>
+
+                    <span class="comment">% Set graphics properties for each newly-created wedge</span>
+                    <span class="comment">% object.</span>
+                    <span class="keyword">for</span> r = 1 : numWedges
+                        <span class="keyword">for</span> c = 1 : width( obj.WedgeGraphics )
+                            set( obj.WedgeGraphics(r, c), <span class="keyword">...</span>
+                                <span class="string">"EdgeColor"</span>, <span class="string">"none"</span>, <span class="keyword">...</span>
+                                <span class="string">"LineWidth"</span>, 1.75, <span class="keyword">...</span>
+                                <span class="string">"SpecularStrength"</span>, 0, <span class="keyword">...</span>
+                                <span class="string">"AmbientStrength"</span>, 0.45, <span class="keyword">...</span>
+                                <span class="string">"ButtonDownFcn"</span>, @obj.onWedgeClicked, <span class="keyword">...</span>
+                                <span class="string">"Tag"</span>, num2str( r ) )
+                        <span class="keyword">end</span> <span class="comment">% for</span>
+                    <span class="keyword">end</span> <span class="comment">% for</span>
+                <span class="keyword">end</span> <span class="comment">% if</span>
+
+                <span class="comment">% Compute the angular span of each wedge.</span>
+                wedgeSpans = 2 * pi * obj.DataPercentages / 100;
+
+                <span class="comment">% Loop over each wedge to set its data.</span>
+                <span class="keyword">for</span> k = 1 : numWedges
+                    <span class="comment">% Minimum wedge azimuthal angle.</span>
+                    minAz = sum( wedgeSpans(1:k-1) );
+                    <span class="comment">% Maximum wedge azimuthal angle.</span>
+                    maxAz = sum( wedgeSpans(1:k) );
+                    <span class="comment">% Angular subdivision.</span>
+                    fineAngle = linspace( minAz, maxAz, obj.NumEdges );
+                    cosAngle = cos( fineAngle );
+                    sinAngle = sin( fineAngle );
+                    <span class="comment">% Define the surface coordinates.</span>
+                    x = [1; 1] * cosAngle;
+                    y = [1; 1] * sinAngle;
+                    z = [-1; 1] * ones( 1, obj.NumEdges );
+                    <span class="comment">% Top edge.</span>
+                    set( obj.WedgeGraphics(k, 1), <span class="keyword">...</span>
+                        <span class="string">"XData"</span>, <span class="keyword">...</span>
+                        [obj.InnerRadius * cosAngle, <span class="keyword">...</span>
+                        fliplr( obj.OuterRadius * cosAngle )], <span class="keyword">...</span>
+                        <span class="string">"YData"</span>, <span class="keyword">...</span>
+                        [obj.InnerRadius * sinAngle, <span class="keyword">...</span>
+                        fliplr( obj.OuterRadius * sinAngle )], <span class="keyword">...</span>
+                        <span class="string">"ZData"</span>, ones( 1, 2 * obj.NumEdges ) )
+                    <span class="comment">% Bottom edge.</span>
+                    set( obj.WedgeGraphics(k, 2), <span class="keyword">...</span>
+                        <span class="string">"XData"</span>, <span class="keyword">...</span>
+                        [obj.InnerRadius * cosAngle, <span class="keyword">...</span>
+                        fliplr( obj.OuterRadius * cosAngle )], <span class="keyword">...</span>
+                        <span class="string">"YData"</span>, <span class="keyword">...</span>
+                        [obj.InnerRadius * sinAngle, <span class="keyword">...</span>
+                        fliplr( obj.OuterRadius * sinAngle )], <span class="keyword">...</span>
+                        <span class="string">"ZData"</span>, (-1) * ones( 1, 2 * obj.NumEdges ) )
+                    <span class="comment">% Curved surfaces.</span>
+                    set( obj.WedgeGraphics(k, 3), <span class="keyword">...</span>
+                        <span class="string">"XData"</span>, x * obj.InnerRadius, <span class="keyword">...</span>
+                        <span class="string">"YData"</span>, y * obj.InnerRadius, <span class="keyword">...</span>
+                        <span class="string">"ZData"</span>, z )
+                    set( obj.WedgeGraphics(k, 4), <span class="keyword">...</span>
+                        <span class="string">"XData"</span>, x * obj.OuterRadius, <span class="keyword">...</span>
+                        <span class="string">"YData"</span>, y * obj.OuterRadius, <span class="keyword">...</span>
+                        <span class="string">"ZData"</span>, z )
+                    <span class="comment">% Side faces.</span>
+                    cosMinAz = cos( minAz );
+                    sinMinAz = sin( minAz );
+                    cosMaxAz = cos( maxAz );
+                    sinMaxAz = sin( maxAz );
+                    inOutOutIn = [obj.InnerRadius, obj.OuterRadius, <span class="keyword">...</span>
+                        obj.OuterRadius, obj.InnerRadius];
+                    set( obj.WedgeGraphics(k, 5), <span class="keyword">...</span>
+                        <span class="string">"XData"</span>, cosMinAz * inOutOutIn, <span class="keyword">...</span>
+                        <span class="string">"YData"</span>, sinMinAz * inOutOutIn, <span class="keyword">...</span>
+                        <span class="string">"ZData"</span>, [-1, -1, 1, 1] )
+                    set( obj.WedgeGraphics(k, 6), <span class="keyword">...</span>
+                        <span class="string">"XData"</span>, cosMaxAz * inOutOutIn, <span class="keyword">...</span>
+                        <span class="string">"YData"</span>, sinMaxAz * inOutOutIn, <span class="keyword">...</span>
+                        <span class="string">"ZData"</span>, [-1, -1, 1, 1] )
+                <span class="keyword">end</span> <span class="comment">% for</span>
+
+                <span class="comment">% Update the colors. Loop over the wedges and wedge labels.</span>
+                <span class="keyword">for</span> k = 1 : numel( obj.Data_ )
+                    <span class="comment">% Extract the current color.</span>
+                    currentColor = obj.FaceColor_(k, :);
+                    <span class="comment">% Use a darker shade for each text label compared to</span>
+                    <span class="comment">% its associated wedge.</span>
+                    obj.WedgeLabels(k).Color = 0.5 * currentColor;
+                    <span class="comment">% Each wedge comprises four patches and two surfaces.</span>
+                    set( obj.WedgeGraphics(k, :), <span class="keyword">...</span>
+                        <span class="string">"FaceColor"</span>, currentColor )
+                <span class="keyword">end</span> <span class="comment">% for</span>
+
+                <span class="comment">% Update the labels.</span>
+                set( obj.WedgeLabels, <span class="keyword">...</span>
+                    <span class="string">"Visible"</span>, obj.LabelVisible_, <span class="keyword">...</span>
+                    <span class="string">"FontSize"</span>, obj.LabelFontSize_ )
+
+                <span class="comment">% Mark the chart clean.</span>
+                obj.ComputationRequired = false;
+
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+            <span class="comment">% Update the label text and position.</span>
+            obj.updateWedgeLabels()
+            obj.updateLabelPositions( 1:numel( obj.Data_ ) )
+
+            <span class="comment">% Update the legend.</span>
+            obj.updateLegend()
+
+        <span class="keyword">end</span> <span class="comment">% update</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods ( Access = protected )</span>
+
+    <span class="keyword">methods</span> ( Access = private )
+
+        <span class="keyword">function</span> updateWedgeLabels( obj )
+            <span class="comment">%UPDATEWEDGELABELS Update the text in the wedge labels.</span>
+
+            <span class="comment">% If necessary, append the percentages to the labels.</span>
+            <span class="keyword">if</span> obj.LabelPercentages_
+                newLabels = obj.LabelText_ + <span class="string">" ("</span> + <span class="keyword">...</span>
+                    num2str( obj.DataPercentages, <span class="string">"%.1f"</span> ) + <span class="string">"%)"</span>;
+            <span class="keyword">else</span>
+                newLabels = obj.LabelText_;
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+            <span class="comment">% Update the labels.</span>
+            <span class="keyword">for</span> k = 1:numel( newLabels )
+                obj.WedgeLabels(k).String = newLabels(k);
+            <span class="keyword">end</span> <span class="comment">% for</span>
+
+        <span class="keyword">end</span> <span class="comment">% updateWedgeLabels</span>
+
+        <span class="keyword">function</span> updateLabelPositions( obj, wedgeIdx )
+            <span class="comment">%UPDATELABELPOSITIONS Update the wedge label positions for the</span>
+            <span class="comment">%specified wedges.</span>
+
+            <span class="comment">% Compute the angular span of each wedge.</span>
+            wedgeSpans = 2 * pi * obj.DataPercentages / 100;
+
+            <span class="comment">% Record the current view.</span>
+            [currentAzimuth, currentElevation] = view( obj.Axes );
+
+            <span class="comment">% Loop over the required wedges.</span>
+            <span class="keyword">for</span> k = wedgeIdx
+
+                <span class="comment">% Compute the average angle within the angular extension.</span>
+                averageAngle = 0.5 * (sum( wedgeSpans(1:k-1) ) + <span class="keyword">...</span>
+                    sum( wedgeSpans(1:k) ));
+
+                <span class="comment">% Compute phi: this angle is needed to deal with the issue</span>
+                <span class="comment">% of 3d perspective when setting the label positions.</span>
+                phi = mod( averageAngle - currentAzimuth * pi / 180, <span class="keyword">...</span>
+                    2 * pi );
+
+                <span class="comment">% Compute dr: this controls how much further out the label</span>
+                <span class="comment">% needs to be positioned in order to solve the perspective</span>
+                <span class="comment">% problem.</span>
+                dr = tand( 90 - currentElevation ) * abs( sin( phi ) );
+
+                <span class="comment">% If the individual wedge is exploded, take into account</span>
+                <span class="comment">% the extra radial extension.</span>
+                <span class="keyword">if</span> obj.WedgeExpanded(k)
+                    dr = dr + obj.ExplosionFactor * obj.ExplosionRange;
+                <span class="keyword">end</span> <span class="comment">% if</span>
+
+                <span class="comment">% Determine the horizontal text alignment.</span>
+                <span class="keyword">if</span> phi &gt; 0.5 * pi &amp;&amp; phi &lt; 1.5 * pi
+                    textAlignment = <span class="string">"right"</span>;
+                <span class="keyword">elseif</span> phi == 0.5 * pi || phi == 1.5 * pi
+                    textAlignment = <span class="string">"center"</span>;
+                <span class="keyword">else</span>
+                    textAlignment = <span class="string">"left"</span>;
+                <span class="keyword">end</span> <span class="comment">% if</span>
+
+                <span class="comment">% Determine the vertical alignment (the angle phi is needed</span>
+                <span class="comment">% because the current view needs to be taken into account).</span>
+                <span class="keyword">if</span> phi &lt;= pi
+                    obj.WedgeLabels(k).VerticalAlignment = <span class="string">"bottom"</span>;
+                <span class="keyword">else</span>
+                    obj.WedgeLabels(k).VerticalAlignment = <span class="string">"top"</span>;
+                <span class="keyword">end</span> <span class="comment">% if</span>
+
+                <span class="comment">% Calculate the new (x, y) coordinates and update the label</span>
+                <span class="comment">% position.</span>
+                x = (dr + obj.OuterRadius) * cos( averageAngle );
+                y = (dr + obj.OuterRadius) * sin( averageAngle );
+                set( obj.WedgeLabels(k), <span class="string">"Position"</span>, [x, y, 0], <span class="keyword">...</span>
+                    <span class="string">"HorizontalAlignment"</span>, textAlignment )
+
+            <span class="keyword">end</span> <span class="comment">% for</span>
+
+        <span class="keyword">end</span> <span class="comment">% updateLabelPositions</span>
+
+        <span class="keyword">function</span> moveWedge( obj, wedgeIdx )
+            <span class="comment">%MOVEWEDGE Move the wedge specified by wedgeIdx.</span>
+
+            <span class="comment">% Compute the angular span of each wedge.</span>
+            wedgeSpans = 2 * pi * obj.DataPercentages / 100;
+
+            <span class="comment">% Compute the sign from the record of which wedges are expanded</span>
+            <span class="comment">% (the logical vector WedgeExpanded).</span>
+            <span class="comment">% Sign 1 means that the wedge should be exploded, -1 means that</span>
+            <span class="comment">% the wedge should be contracted.</span>
+            sgn = -1 + 2 * obj.WedgeExpanded(wedgeIdx);
+
+            <span class="comment">% Loop over the wedges to move.</span>
+            <span class="keyword">for</span> w = 1 : numel( wedgeIdx )
+
+                <span class="comment">% Compute the average angle within the angular span.</span>
+                averageAngle = 0.5 * (<span class="keyword">...</span>
+                    sum( wedgeSpans(1:wedgeIdx(w)-1)) + <span class="keyword">...</span>
+                    sum( wedgeSpans(1:wedgeIdx(w)) ));
+
+                <span class="comment">% Update the data of each wedge piece.</span>
+                radius = obj.ExplosionFactor * obj.ExplosionRange;
+                <span class="keyword">for</span> k = 1 : width( obj.WedgeGraphics )
+                    set( obj.WedgeGraphics(wedgeIdx(w), k), <span class="keyword">...</span>
+                        <span class="string">"XData"</span>, <span class="keyword">...</span>
+                        obj.WedgeGraphics(wedgeIdx(w), k).XData + <span class="keyword">...</span>
+                        sgn(w) * radius * cos( averageAngle ), <span class="keyword">...</span>
+                        <span class="string">"YData"</span>, <span class="keyword">...</span>
+                        obj.WedgeGraphics(wedgeIdx(w), k).YData + <span class="keyword">...</span>
+                        sgn(w) * radius * sin( averageAngle ) )
+                <span class="keyword">end</span> <span class="comment">% for</span>
+            <span class="keyword">end</span> <span class="comment">% for</span>
+
+            <span class="comment">% Update the label positions because the wedges have moved.</span>
+            drawnow()
+            obj.updateLabelPositions( wedgeIdx )
+
+        <span class="keyword">end</span> <span class="comment">% moveWedge</span>
+
+        <span class="keyword">function</span> onWedgeClicked( obj, s, ~ )
+            <span class="comment">%ONWEDGECLICKED Respond to user clicks on the annulus' wedges.</span>
+
+            <span class="comment">% Recover the wedge index from the Tag property.</span>
+            wedgeIdx = str2double( s.Tag );
+
+            <span class="comment">% Update the record of which wedges are expanded.</span>
+            obj.WedgeExpanded(wedgeIdx) = ~obj.WedgeExpanded(wedgeIdx);
+
+            <span class="comment">% Move the wedge.</span>
+            obj.moveWedge( wedgeIdx )
+
+        <span class="keyword">end</span> <span class="comment">% onWedgeClicked</span>
+
+        <span class="keyword">function</span> updateLegend( obj )
+            <span class="comment">%UPDATELEGEND Update the chart's legend.</span>
+
+            <span class="comment">% Update the legend text.</span>
+            <span class="keyword">if</span> obj.LegendPercentages_
+                newLegendText = obj.LegendText_ + <span class="string">" ("</span> + <span class="keyword">...</span>
+                    num2str( obj.DataPercentages, <span class="string">"%.1f"</span> ) + <span class="string">"%)"</span>;
+            <span class="keyword">else</span>
+                newLegendText = obj.LegendText_;
+            <span class="keyword">end</span> <span class="comment">% if</span>
+            obj.Legend.String = newLegendText;
+
+        <span class="keyword">end</span> <span class="comment">% updateLegend</span>
+
+        <span class="keyword">function</span> onToggleButtonPressed( obj, ~, ~ )
+            <span class="comment">%ONTOGGLEBUTTONPRESSED Hide/show the chart controls.</span>
+
+            toggleDown = obj.ToggleButton.Value;
+
+            <span class="keyword">if</span> toggleDown
+                <span class="comment">% Show the controls.</span>
+                obj.LayoutGrid.ColumnWidth{2} = <span class="string">"fit"</span>;
+                obj.ToggleButton.Tooltip = <span class="string">"Hide chart controls"</span>;
+            <span class="keyword">else</span>
+                <span class="comment">% Hide the controls.</span>
+                obj.LayoutGrid.ColumnWidth{2} = <span class="string">"0x"</span>;
+                obj.ToggleButton.Tooltip = <span class="string">"Show chart controls"</span>;
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+        <span class="keyword">end</span> <span class="comment">% onToggleButtonPressed</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods ( Access = private )</span>
+
+<span class="keyword">end</span> <span class="comment">% classdef</span>
+</pre>
+</div>
+<!--
+##### SOURCE BEGIN #####
+classdef AnnulusChart < Component
+    %ANNULUSCHART Annulus (ring) chart, similar to a 3D pie chart.
+
+    % Copyright 2019-2025 The MathWorks, Inc.
+
+    properties ( Dependent )
+        % Chart data, comprising a positive vector.
+        Data(:, 1) double {mustBeNonempty, mustBePositive}
+        % Wedge face colors.
+        FaceColor  
+        % Wedge label text.
+        LabelText(:, 1) string
+        % Wedge label font size.
+        LabelFontSize(1, 1) double {mustBePositive, mustBeFinite}
+        % Specifies whether percentages are shown on the labels.
+        LabelPercentages(1, 1) matlab.lang.OnOffSwitchState
+        % Visibility of the wedge labels.
+        LabelVisible(1, 1) matlab.lang.OnOffSwitchState
+        % Legend text.
+        LegendText(:, 1) string
+        % Specifies whether percentages are shown in the legend.
+        LegendPercentages(1, 1) matlab.lang.OnOffSwitchState        
+        % Legend color.
+        LegendColor
+        % Legend location.
+        LegendLocation(1, 1) string {mustBeLegendLocation}
+        % Number of columns in the legend.
+        LegendNumColumns(1, 1) double {mustBeInteger, mustBePositive}
+        % Legend orientation.
+        LegendOrientation(1, 1) string ...
+            {mustBeMember( LegendOrientation, ...
+            ["vertical", "horizontal"] )}
+        % Legend title.
+        LegendTitle(1, 1) string
+        % Visibility of the chart legend.
+        LegendVisible(1, 1) matlab.lang.OnOffSwitchState
+        % Font size used in the legend.
+        LegendFontSize(1, 1) double {mustBePositive, mustBeFinite}
+        % Box property of the legend.
+        LegendBox(1, 1) matlab.lang.OnOffSwitchState
+        % Chart controls.
+        Controls(1, 1) matlab.lang.OnOffSwitchState
+    end % properties ( Dependent )
+
+    properties ( Dependent, SetAccess = private )
+        % Chart data, in percentage form.
+        DataPercentages(:, 1) double {mustBeNonempty, ...
+            mustBeInRange( DataPercentages, 0, 100 )}
+    end % properties ( Dependent, SetAccess = private )
+
+    properties ( Access = private )
+        % Internal storage for the Data property.
+        Data_(:, 1) double {mustBeNonempty, mustBePositive} = 1
+        % Internal storage for the FaceColor property.
+        FaceColor_(:, 3) double {mustBeInRange( FaceColor_, 0, 1 )} = ...
+            [0, 0, 0]
+        % Internal storage for the Label property.
+        LabelText_(:, 1) string = string.empty( 0, 1 )
+        % Internal storage for the LabelFontSize property.
+        LabelFontSize_(1, 1) double {mustBePositive, mustBeFinite} = 10
+        % Internal storage for the LabelPercentages property.
+        LabelPercentages_(1, 1) matlab.lang.OnOffSwitchState = "on"
+        % Internal storage for the LabelVisible property.
+        LabelVisible_(1, 1) matlab.lang.OnOffSwitchState = "on"        
+        % Internal storage for the LegendText property.
+        LegendText_(:, 1) string = string.empty( 0, 1 )
+        % Internal storage for the LegendPercentages property.
+        LegendPercentages_(1, 1) matlab.lang.OnOffSwitchState = "off"
+        % Explosion logic for each wedge.
+        WedgeExpanded(1, :) logical = false
+        % Logical scalar specifying whether an update is required.
+        ComputationRequired(1, 1) logical = true
+    end % properties ( Access = private )
+
+    properties ( Access = private, Transient, NonCopyable )
+        % Chart layout.
+        LayoutGrid(:, 1) matlab.ui.container.GridLayout ...
+            {mustBeScalarOrEmpty}
+        % Chart axes.
+        Axes(:, 1) matlab.graphics.axis.Axes {mustBeScalarOrEmpty}
+        % Axes legend.
+        Legend(:, 1) matlab.graphics.illustration.Legend ...
+            {mustBeScalarOrEmpty}
+        % Toggle button for the chart controls.
+        ToggleButton(:, 1) matlab.ui.controls.ToolbarStateButton ...
+            {mustBeScalarOrEmpty}
+        % Graphics objects (patches and surfaces) used for the wedges.
+        WedgeGraphics(:, 6) matlab.graphics.Graphics = gobjects( 0, 6 )
+        % Text objects used for the wedge labels.
+        WedgeLabels(:, 1) matlab.graphics.primitive.Text        
+        % Check box for the label visibility.
+        VisibleLabelsCheckBox(:, 1) matlab.ui.control.CheckBox ...
+            {mustBeScalarOrEmpty}
+        % Check box for the label percentages.
+        LabelPercentagesCheckBox(:, 1) matlab.ui.control.CheckBox ...
+            {mustBeScalarOrEmpty}
+        % Button to explode all wedges.
+        ExplodeButton(:, 1) matlab.ui.control.Button {mustBeScalarOrEmpty}
+        % Button to retract all wedges.
+        RetractButton(:, 1) matlab.ui.control.Button {mustBeScalarOrEmpty}
+        % Spinner for the label font size.
+        LabelFontSizeSpinner(:, 1) matlab.ui.control.Spinner ...
+            {mustBeScalarOrEmpty}
+        % Check box for the legend visibility.
+        LegendVisibleCheckBox(:, 1) matlab.ui.control.CheckBox ...
+            {mustBeScalarOrEmpty}
+        % Check box for the legend percentages.
+        LegendPercentagesCheckBox(:, 1) matlab.ui.control.CheckBox ...
+            {mustBeScalarOrEmpty}
+        % Check box for the legend box.
+        LegendBoxCheckBox(:, 1) matlab.ui.control.CheckBox ...
+            {mustBeScalarOrEmpty}
+        % Dropdown menu for the legend location.
+        LegendLocationDropDown(:, 1) matlab.ui.control.DropDown ...
+            {mustBeScalarOrEmpty}
+        % Spinnder for the number of columns in the legend.
+        LegendNumColumnsSpinner(:, 1) matlab.ui.control.Spinner ...
+            {mustBeScalarOrEmpty}
+        % Dropdown menu for the legend orientation.
+        LegendOrientationDropDown(:, 1) matlab.ui.control.DropDown ...
+            {mustBeScalarOrEmpty}
+        % Edit field for the legend title.
+        LegendTitleEditField(:, 1) matlab.ui.control.EditField ...
+            {mustBeScalarOrEmpty}
+    end % properties ( Access = private, Transient, NonCopyable )
+
+    properties ( Constant, GetAccess = private )
+        % Inner radius of the annulus.
+        InnerRadius(1, 1) double {mustBeNonnegative, mustBeFinite} = 4
+        % Outer radius of the annulus.
+        OuterRadius(1, 1) double {mustBeNonnegative, mustBeFinite} = 9
+        % Number of edges in each wedge.
+        NumEdges(1, 1) double {mustBeInteger, mustBePositive} = 100
+        % Explosion range (radial distance).
+        ExplosionRange(1, 1) double {mustBeNonnegative, mustBeFinite} = 0.5
+        % Explosion factor used for individual wedges.
+        ExplosionFactor(1, 1) double {mustBeNonnegative, mustBeFinite} = 2
+    end % properties ( Constant, GetAccess = private )
+
+    properties ( Constant, Hidden )
+        % Product dependencies.
+        Dependencies(1, :) string = "MATLAB"
+        % Description.
+        ShortDescription(1, 1) string = "Visualize relative " + ...
+            "proportions in a data vector using an annulus (ring)"
+    end % properties ( Constant, Hidden )
+
+    methods
+
+        function value = get.Data( obj )
+
+            value = obj.Data_;
+
+        end % get.Data
+
+        function set.Data( obj, value )
+
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+
+            % Store the internal value.
+            obj.Data_ = value;
+
+        end % set.Data
+
+        function value = get.LabelText( obj )
+
+            value = obj.LabelText_;
+
+        end % get.Label
+
+        function set.LabelText( obj, value )
+
+            % Check that we have the right number of strings.
+            assert( numel( value ) == numel( obj.Data_ ), ...
+                "AnnulusChart:LabelTextLengthMismatch", ...
+                "The number of labels must match the number " + ...
+                "of data values." )
+
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+
+            % Update the internal, stored property.
+            obj.LabelText_ = value;            
+
+        end % set.LabelText
+
+        function value = get.LabelVisible( obj )
+
+            if isempty( obj.WedgeLabels )
+                value = "on";
+            else
+                value = obj.WedgeLabels(1).Visible;
+            end % if
+
+            value = matlab.lang.OnOffSwitchState( value );
+
+        end % get.VisibleLabels
+
+        function set.LabelVisible( obj, value )
+
+            % Update the flags.
+            obj.ComputationRequired = true;
+            obj.LabelVisible_ = value;
+
+            % Update the controls.
+            obj.VisibleLabelsCheckBox.Value = value;
+
+        end % set.VisibleLabels
+
+        function value = get.LabelFontSize( obj )
+
+            value = obj.LabelFontSize_;
+
+        end % get.LabelFontSize
+
+        function set.LabelFontSize( obj, value )
+
+            obj.ComputationRequired = true;
+            obj.LabelFontSize_ = value;
+            obj.LabelFontSizeSpinner.Value = value;
+
+        end % set.LabelFontSize
+
+        function value = get.LabelPercentages( obj )
+
+            value = obj.LabelPercentages_;
+
+        end % get.LabelPercentages
+
+        function set.LabelPercentages( obj, value )
+
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+
+            % Update the internal stored value.
+            obj.LabelPercentages_ = value;
+
+            % Update the control.
+            obj.LabelPercentagesCheckBox.Value = value;            
+
+        end % set.LabelPercentages
+
+        function value = get.FaceColor( obj )
+
+            value = cell2mat( ...
+                get( obj.WedgeGraphics(:, 1), "FaceColor" ) );
+
+        end % get.FaceColor
+
+        function set.FaceColor( obj, value )
+
+            % Check that we have the right number of colors.
+            value = validatecolor( value, "multiple" );
+            assert( height( value ) == numel( obj.Data_ ), ...
+                "AnnulusChart:FaceColorHeightMismatch", ...
+                "The number of face colors must match the number " + ...
+                "of data values." )
+
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+
+            % Store the internal value.
+            obj.FaceColor_ = value;
+
+        end % set.FaceColor
+
+        function value = get.LegendText( obj )
+
+            value = obj.LegendText_;
+
+        end % get.LegendText
+
+        function set.LegendText( obj, value )
+
+            % Check that we have the right number of strings.
+            assert( numel( value ) == numel( obj.Data_ ), ...
+                "AnnulusChart:LegendTextLengthMismatch", ...
+                "The number of legend entries must match the number " + ...
+                "of data values." )
+
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+
+            % Store the internal value.
+            obj.LegendText_ = value;
+            
+        end % set.LegendText
+
+        function value = get.LegendColor( obj )
+
+            value = obj.Legend.Color;
+
+        end % get.LegendColor
+
+        function set.LegendColor( obj, value )
+
+            if ~isequal( value, "none" )
+                value = validatecolor( value, "one" );
+            end % if
+            obj.Legend.Color = value;
+
+        end % set.LegendColor
+
+        function value = get.LegendLocation( obj )
+
+            value = obj.Legend.Location;
+
+        end % get.LegendLocation
+
+        function set.LegendLocation( obj, value )
+
+            % Update the legend.
+            obj.Legend.Location = value;
+
+            % Update the control.
+            obj.LegendLocationDropDown.Value = value;
+
+        end % set.LegendLocation
+
+        function value = get.LegendNumColumns( obj )
+
+            value = obj.Legend.NumColumns;
+
+        end % get.LegendNumColumns
+
+        function set.LegendNumColumns( obj, value )
+
+            % Update the legend.
+            obj.Legend.NumColumns = value;
+
+            % Update the control.
+            obj.LegendNumColumnsSpinner.Value = value;
+
+        end % set.LegendNumColumns
+
+        function value = get.LegendOrientation( obj )
+
+            value = obj.Legend.Orientation;
+
+        end % get.LegendOrientation
+
+        function set.LegendOrientation( obj, value )
+
+            % Update the legend.
+            obj.Legend.Orientation = value;
+
+            % Update the control.
+            obj.LegendOrientationDropDown.Value = value;
+
+        end % set.LegendOrientation
+
+        function value = get.LegendTitle( obj )
+
+            value = obj.Legend.Title.String;
+
+        end % get.LegendTitle
+
+        function set.LegendTitle( obj, value )
+
+            obj.Legend.Title.String = value;
+            obj.LegendTitleEditField.Value = value;
+
+        end % set.LegendTitle
+
+        function value = get.LegendPercentages( obj )
+
+            value = obj.LegendPercentages_;
+
+        end % get.LegendPercentages
+
+        function set.LegendPercentages( obj, value )
+
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+
+            % Store the internal value.
+            obj.LegendPercentages_ = value;
+
+            % Update the control.
+            obj.LegendPercentagesCheckBox.Value = value;            
+
+        end % set.LegendPercentages
+
+        function value = get.LegendVisible( obj )
+
+            value = obj.Legend.Visible;
+
+        end % get.LegendVisible
+
+        function set.LegendVisible( obj, value )
+
+            % Update the legend.
+            obj.Legend.Visible = value;
+
+            % Update the control.
+            obj.LegendVisibleCheckBox.Value = value;
+
+        end % set.LegendVisible
+
+        function value = get.LegendFontSize( obj )
+
+            value = obj.Legend.FontSize;
+
+        end % get.LegendFontSize
+
+        function set.LegendFontSize( obj, value )
+
+            obj.Legend.FontSize = value;
+
+        end % set.LegendFontSize
+
+        function value = get.LegendBox( obj )
+
+            value = obj.Legend.Box;
+
+        end % get.LegendBox
+
+        function set.LegendBox( obj, value )
+
+            % Update the legend.
+            obj.Legend.Box = value;
+
+            % Update the control.
+            obj.LegendBoxCheckBox.Value = value;
+
+        end % set.LegendBox
+
+        function value = get.Controls( obj )
+
+            value = obj.ToggleButton.Value;
+
+        end % get.Controls
+
+        function set.Controls( obj, value )
+
+            % Update the toggle button.
+            obj.ToggleButton.Value = value;
+
+            % Invoke the toggle button callback.
+            obj.onToggleButtonPressed()
+
+        end % set.Controls
+
+        function value = get.DataPercentages( obj )
+
+            value = 100 * obj.Data_ / sum( obj.Data_ );
+
+        end % get.DataPercentages
+
+    end % methods
+
+    methods
+
+        function obj = AnnulusChart( namedArgs )
+            %ANNULUSCHART Construct an AnnulusChart, given optional
+            %name-value arguments.
+
+            arguments ( Input )
+                namedArgs.?AnnulusChart
+            end % arguments ( Input )
+
+            % Set any user-defined properties.
+            set( obj, namedArgs )
+
+        end % constructor
+
+        function varargout = title( obj, varargin )
+
+            [varargout{1:nargout}] = title( obj.Axes, varargin{:} );
+
+        end % title
+
+        function varargout = view( obj, varargin )
+
+            % Call the view function on the chart's axes.
+            [varargout{1:nargout}] = view( obj.Axes, varargin{:} );
+
+            % Update the wedge label positions.
+            drawnow()
+            obj.updateLabelPositions( 1:numel( obj.Data_ ) )
+
+        end % view
+
+        function resetView( obj )
+            %RESETVIEW Restore the default chart view.
+
+            % Reset the view.
+            view( obj.Axes, [0, 50] )
+
+            % Update the label positions.
+            drawnow()
+            obj.updateLabelPositions( 1:numel( obj.Data_ ) )
+
+        end % resetView
+
+        function explode( obj, wedgeIdx )
+            %EXPLODE Explode wedges.
+
+            arguments ( Input )
+                obj(1, 1) AnnulusChart
+                wedgeIdx(1, :) double {mustBeInteger, mustBePositive} = ...
+                    1 : numel( obj.Data_ )
+            end % arguments ( Input )
+
+            % Validate the wedge indices.
+            assert( all( wedgeIdx <= numel( obj.Data_ ) ), ...
+                "AnnulusChart:IndexOutOfBounds", ...
+                "The wedge indices must lie between 1 and the number" + ...
+                " of data values." )
+
+            % Retract any previously exploded wedges.
+            expandedWedgesIdx = intersect( find( obj.WedgeExpanded ), ...
+                wedgeIdx );
+            obj.WedgeExpanded(expandedWedgesIdx) = false;
+            obj.moveWedge( expandedWedgesIdx )
+
+            % Mark the required wedges for explosion.
+            obj.WedgeExpanded(wedgeIdx) = true;
+
+            % Explode the wedges.
+            obj.moveWedge( wedgeIdx )
+
+        end % explode
+
+        function retract( obj, wedgeIdx )
+            %RETRACT Retract all wedges.
+
+            arguments ( Input )
+                obj(1, 1) AnnulusChart
+                wedgeIdx(1, :) double {mustBeInteger, mustBePositive} = ...
+                    1 : numel( obj.Data_ )
+            end % arguments ( Input )
+
+            % Expand any previously retracted wedges.
+            retractedWedgesIdx = intersect( find( ~obj.WedgeExpanded ), ...
+                wedgeIdx );
+            obj.WedgeExpanded(retractedWedgesIdx) = true;
+            obj.moveWedge( retractedWedgesIdx )
+
+            % Mark all wedges for retraction.
+            obj.WedgeExpanded(wedgeIdx) = false;
+
+            % Retract the wedges.
+            obj.moveWedge( wedgeIdx )
+
+        end % retract
+
+    end % methods
+
+    methods ( Access = protected )
+
+        function setup( obj )
+            %SETUP Initialize the chart graphics.
+
+            % Define the layout grid.
+            obj.LayoutGrid = uigridlayout( obj, [1, 2], ...
+                "ColumnWidth", ["1x", "0x"] );
+
+            % Create the chart's axes, legend and title.
+            obj.Axes = axes( "Parent", obj.LayoutGrid, ...
+                "DataAspectRatio", [1, 1, 1], ...
+                "Visible", "off", ...
+                "View", [0, 50] );
+            obj.Legend = legend( obj.Axes, "ButtonDownFcn", [] );
+            title( obj.Axes, "Annulus Chart", "Visible", "on" )
+
+            % Create a light object within the axes.
+            light( obj.Axes )
+
+            % Add a state button to show/hide the chart's controls.
+            tb = axtoolbar( obj.Axes, "rotate" );
+            iconPath = fullfile( chartsRoot(), "charts", "images", ...
+                "Cog.png" );
+            obj.ToggleButton = axtoolbarbtn( tb, "state", ...
+                "Value", "off", ...
+                "Tooltip", "Show chart controls", ...
+                "Icon", iconPath, ...
+                "ValueChangedFcn", @obj.onToggleButtonPressed );
+
+            % Create a panel for the chart controls.
+            mainControlPanel = uipanel( "Parent", obj.LayoutGrid, ...
+                "Title", "Chart Controls", ...
+                "FontWeight", "bold" );
+            mainControlPanel.Layout.Column = 2;
+
+            % Define the control layout.
+            controlLayout = uigridlayout( mainControlPanel, [2, 1], ...
+                "RowHeight", ["fit", "fit"] );
+
+            % Add a panel for the wedge-related controls.
+            wedgePanel = uipanel( "Parent", controlLayout, ...
+                "Title", "Wedges", ...
+                "FontWeight", "bold" );
+            wedgeLayout = uigridlayout( wedgePanel, [4, 2], ...
+                "RowHeight", repelem( "fit", 4 ) );
+            obj.VisibleLabelsCheckBox = uicheckbox( ...
+                "Parent", wedgeLayout, ...
+                "Value", obj.LabelVisible, ...
+                "Text", "Show labels", ...
+                "Tooltip", "Show/hide the wedge labels", ...
+                "ValueChangedFcn", ...
+                @( s, ~ ) set( obj, "LabelVisible", s.Value ) );
+            obj.VisibleLabelsCheckBox.Layout.Column = [1, 2];
+            obj.LabelPercentagesCheckBox = uicheckbox( ...
+                "Parent", wedgeLayout, ...
+                "Value", obj.LabelPercentages_, ...
+                "Text", "Show label percentages", ...
+                "Tooltip", ...
+                "Show/hide percentages in the wedge labels", ...
+                "ValueChangedFcn", ...
+                @( s, ~ ) set( obj, "LabelPercentages", s.Value ) );
+            obj.LabelPercentagesCheckBox.Layout.Column = [1, 2];
+            uilabel( "Parent", wedgeLayout, ...
+                "Text", "Label font size:", ...
+                "HorizontalAlignment", "right" );
+            obj.LabelFontSizeSpinner = uispinner( ...
+                "Parent", wedgeLayout, ...
+                "Value", obj.LabelFontSize_, ...
+                "Step", 1, ...
+                "Limits", [0, Inf], ...
+                "LowerLimitInclusive", "off", ...
+                "UpperLimitInclusive", "off", ...
+                "ValueChangedFcn", ...
+                @( s, ~ ) set( obj, "LabelFontSize", s.Value ) );            
+            obj.ExplodeButton = uibutton( "Parent", wedgeLayout, ...
+                "Text", "Explode", ...
+                "Tooltip", "Explode all wedges", ...
+                "ButtonPushedFcn", @( ~, ~ ) obj.explode() );
+            obj.RetractButton = uibutton( "Parent", wedgeLayout, ...
+                "Text", "Retract", ...
+                "Tooltip", "Retract all wedges", ...
+                "ButtonPushedFcn", @( ~, ~ ) obj.retract() );
+
+            % Add a panel for the legend-related controls.
+            legendPanel = uipanel( "Parent", controlLayout, ...
+                "Title", "Legend", ...
+                "FontWeight", "bold" );
+            legendLayout = uigridlayout( legendPanel, [7, 2], ...
+                "RowHeight", repelem( "fit", 7 ), ...
+                "ColumnWidth", ["fit", "fit"] );
+            obj.LegendVisibleCheckBox = uicheckbox( ...
+                "Parent", legendLayout, ...
+                "Value", obj.LegendVisible, ...
+                "Text", "Show legend", ...
+                "Tooltip", "Hide/show the legend", ...
+                "ValueChangedFcn", ...
+                @( s, ~ ) set( obj, "LegendVisible", s.Value ) );
+            obj.LegendVisibleCheckBox.Layout.Column = [1, 2];
+            obj.LegendPercentagesCheckBox = uicheckbox( ...
+                "Parent", legendLayout, ...
+                "Value", obj.LegendPercentages_, ...
+                "Text", "Show legend percentages", ...
+                "Tooltip", ...
+                "Show/hide percentages in the legend", ...
+                "ValueChangedFcn", ...
+                @( s, ~ ) set( obj, "LegendPercentages", s.Value ) );
+            obj.LegendPercentagesCheckBox.Layout.Column = [1, 2];
+            obj.LegendBoxCheckBox = uicheckbox( ...
+                "Parent", legendLayout, ...
+                "Value", obj.LegendBox, ...
+                "Text", "Box", ...
+                "Tooltip", "Show/hide the legend box", ...
+                "ValueChangedFcn", ...
+                @( s, ~ ) set( obj, "LegendBox", s.Value ) );
+            obj.LegendBoxCheckBox.Layout.Column = [1, 2];
+            uilabel( "Parent", legendLayout, ...
+                "Text", "Legend location:", ...
+                "HorizontalAlignment", "right" );
+            obj.LegendLocationDropDown = uidropdown( ...
+                "Parent", legendLayout, ...
+                "Items", set( obj.Legend, "Location" ), ...
+                "Tooltip", "Select the legend location", ...
+                "Value", obj.LegendLocation, ...
+                "ValueChangedFcn", ...
+                @( s, ~ ) set( obj, "LegendLocation", s.Value ) );
+            uilabel( "Parent", legendLayout, ...
+                "Text", "Number of columns:", ...
+                "HorizontalAlignment", "right" );
+            obj.LegendNumColumnsSpinner = uispinner( ...
+                "Parent", legendLayout, ...
+                "Value", obj.LegendNumColumns, ...
+                "Tooltip", ...
+                "Specify the number of columns in the legend", ...
+                "Limits", [1, Inf], ...
+                "UpperLimitInclusive", false, ...
+                "ValueDisplayFormat", "%d", ...
+                "Step", 1, ...
+                "RoundFractionalValues", "on", ...
+                "ValueChangedFcn", ...
+                @( s, ~ ) set( obj, "LegendNumColumns", s.Value ) );
+            uilabel( "Parent", legendLayout, ...
+                "Text", "Legend orientation:", ...
+                "HorizontalAlignment", "right" );
+            obj.LegendOrientationDropDown = uidropdown( ...
+                "Parent", legendLayout, ...
+                "Items", set( obj.Legend, "Orientation" ), ...
+                "Tooltip", "Select the legend orientation", ...
+                "Value", obj.LegendOrientation, ...
+                "ValueChangedFcn", ...
+                @( s, ~ ) set( obj, "LegendOrientation", s.Value ) );
+            uilabel( "Parent", legendLayout, ...
+                "Text", "Legend title:", ...
+                "HorizontalAlignment", "right" );
+            obj.LegendTitleEditField = uieditfield( ...
+                "Parent", legendLayout, ...
+                "Value", obj.LegendTitle, ...
+                "Tooltip", "Specify the legend title", ...
+                "ValueChangedFcn", ...
+                @( s, ~ ) set( obj, "LegendTitle", s.Value ) );
+
+        end % setup
+
+        function update( obj )
+            %UPDATE Refresh the chart graphics.
+
+            if obj.ComputationRequired
+
+                % Number of wedges required.
+                numWedges = numel( obj.Data_ );
+
+                % Determine the current number of wedges.
+                currentNumWedges = height( obj.WedgeGraphics );
+
+                % Update the colors.
+                currentNumColors = height( obj.FaceColor_ );
+                if currentNumColors < numWedges                    
+                    obj.FaceColor_(end+1:numWedges, :) = hsv( ...
+                        numWedges - currentNumColors );
+                else
+                    obj.FaceColor_ = obj.FaceColor_(1:numWedges, :);
+                end % if                
+
+                if numWedges < currentNumWedges
+                    % Delete the appropriate wedges and labels.
+                    numToDelete = currentNumWedges - numWedges;
+                    % Wedge graphics.
+                    delete( obj.WedgeGraphics(end-numToDelete+1:end, :) )
+                    obj.WedgeGraphics(end-numToDelete+1:end, :) = [];
+                    % Wedge labels.
+                    delete( obj.WedgeLabels(end-numToDelete+1:end) )
+                    obj.WedgeLabels(end-numToDelete+1:end) = [];
+                    % Update the expansion record.
+                    obj.WedgeExpanded = obj.WedgeExpanded(1:numWedges);
+                    % Label and legend text.
+                    obj.LabelText_ = obj.LabelText_(1:numWedges);
+                    obj.LegendText_ = obj.LegendText_(1:numWedges);
+                else
+                    % Create new wedge graphics and labels.
+                    numToCreate = numWedges - currentNumWedges;
+                    % Allocate space in the graphics array.
+                    obj.WedgeGraphics = [obj.WedgeGraphics;
+                        gobjects( numToCreate, 6 ) ];
+                    for k = currentNumWedges+1:numWedges
+                        % Create new surface, patch and text objects.
+                        obj.WedgeGraphics(k, 1) = ...
+                            patch( "Parent", obj.Axes, ...
+                            "XData", NaN, ...
+                            "YData", NaN, ...
+                            "ZData", NaN );
+                        obj.WedgeGraphics(k, 2) = ...
+                            patch( "Parent", obj.Axes, ...
+                            "HandleVisibility", "off", ...
+                            "XData", NaN, ...
+                            "YData", NaN, ...
+                            "ZData", NaN );
+                        obj.WedgeGraphics(k, 3) = ...
+                            surface( obj.Axes, NaN, NaN, NaN, ...
+                            "HandleVisibility", "off" );
+                        obj.WedgeGraphics(k, 4) = ...
+                            surface( obj.Axes, NaN, NaN, NaN, ...
+                            "HandleVisibility", "off" );
+                        obj.WedgeGraphics(k, 5) = ...
+                            patch( "Parent", obj.Axes, ...
+                            "HandleVisibility", "off", ...
+                            "XData", NaN, ...
+                            "YData", NaN, ...
+                            "ZData", NaN );
+                        obj.WedgeGraphics(k, 6) = ...
+                            patch( "Parent", obj.Axes, ...
+                            "HandleVisibility", "off", ...
+                            "XData", NaN, ...
+                            "YData", NaN, ...
+                            "ZData", NaN );
+                        % Update the expansion record.
+                        obj.WedgeExpanded(1, k) = false;
+                        % Update the label and legend text.
+                        if numel( obj.LabelText_ ) < k
+                            obj.LabelText_(k, 1) = "Data " + k;
+                        end % if
+                        if numel( obj.LegendText ) < k
+                            obj.LegendText_(k, 1) = "Data " + k;                        
+                        end % if
+                        obj.WedgeLabels(k, 1) = text( ...
+                            "Parent", obj.Axes, ...
+                            "Position", NaN( 1, 3 ), ...
+                            "String", "", ...
+                            "FontSize", 10, ...                            
+                            "Margin", 1 );
+                    end % for
+
+                    % Set graphics properties for each newly-created wedge
+                    % object.
+                    for r = 1 : numWedges
+                        for c = 1 : width( obj.WedgeGraphics )
+                            set( obj.WedgeGraphics(r, c), ...
+                                "EdgeColor", "none", ...                                
+                                "LineWidth", 1.75, ...
+                                "SpecularStrength", 0, ...
+                                "AmbientStrength", 0.45, ...
+                                "ButtonDownFcn", @obj.onWedgeClicked, ...
+                                "Tag", num2str( r ) )
+                        end % for
+                    end % for
+                end % if
+
+                % Compute the angular span of each wedge.
+                wedgeSpans = 2 * pi * obj.DataPercentages / 100;
+
+                % Loop over each wedge to set its data.
+                for k = 1 : numWedges
+                    % Minimum wedge azimuthal angle.
+                    minAz = sum( wedgeSpans(1:k-1) );
+                    % Maximum wedge azimuthal angle.
+                    maxAz = sum( wedgeSpans(1:k) );
+                    % Angular subdivision.
+                    fineAngle = linspace( minAz, maxAz, obj.NumEdges );
+                    cosAngle = cos( fineAngle );
+                    sinAngle = sin( fineAngle );
+                    % Define the surface coordinates.
+                    x = [1; 1] * cosAngle;
+                    y = [1; 1] * sinAngle;
+                    z = [-1; 1] * ones( 1, obj.NumEdges );
+                    % Top edge.
+                    set( obj.WedgeGraphics(k, 1), ...
+                        "XData", ...
+                        [obj.InnerRadius * cosAngle, ...
+                        fliplr( obj.OuterRadius * cosAngle )], ...
+                        "YData", ...
+                        [obj.InnerRadius * sinAngle, ...
+                        fliplr( obj.OuterRadius * sinAngle )], ...
+                        "ZData", ones( 1, 2 * obj.NumEdges ) )
+                    % Bottom edge.
+                    set( obj.WedgeGraphics(k, 2), ...
+                        "XData", ...
+                        [obj.InnerRadius * cosAngle, ...
+                        fliplr( obj.OuterRadius * cosAngle )], ...
+                        "YData", ...
+                        [obj.InnerRadius * sinAngle, ...
+                        fliplr( obj.OuterRadius * sinAngle )], ...
+                        "ZData", (-1) * ones( 1, 2 * obj.NumEdges ) )
+                    % Curved surfaces.
+                    set( obj.WedgeGraphics(k, 3), ...
+                        "XData", x * obj.InnerRadius, ...
+                        "YData", y * obj.InnerRadius, ...
+                        "ZData", z )
+                    set( obj.WedgeGraphics(k, 4), ...
+                        "XData", x * obj.OuterRadius, ...
+                        "YData", y * obj.OuterRadius, ...
+                        "ZData", z )
+                    % Side faces.
+                    cosMinAz = cos( minAz );
+                    sinMinAz = sin( minAz );
+                    cosMaxAz = cos( maxAz );
+                    sinMaxAz = sin( maxAz );
+                    inOutOutIn = [obj.InnerRadius, obj.OuterRadius, ...
+                        obj.OuterRadius, obj.InnerRadius];
+                    set( obj.WedgeGraphics(k, 5), ...
+                        "XData", cosMinAz * inOutOutIn, ...
+                        "YData", sinMinAz * inOutOutIn, ...
+                        "ZData", [-1, -1, 1, 1] )
+                    set( obj.WedgeGraphics(k, 6), ...
+                        "XData", cosMaxAz * inOutOutIn, ...
+                        "YData", sinMaxAz * inOutOutIn, ...
+                        "ZData", [-1, -1, 1, 1] )
+                end % for
+
+                % Update the colors. Loop over the wedges and wedge labels.
+                for k = 1 : numel( obj.Data_ )
+                    % Extract the current color.
+                    currentColor = obj.FaceColor_(k, :);
+                    % Use a darker shade for each text label compared to 
+                    % its associated wedge.
+                    obj.WedgeLabels(k).Color = 0.5 * currentColor;
+                    % Each wedge comprises four patches and two surfaces.
+                    set( obj.WedgeGraphics(k, :), ...
+                        "FaceColor", currentColor )
+                end % for
+
+                % Update the labels.
+                set( obj.WedgeLabels, ...
+                    "Visible", obj.LabelVisible_, ...
+                    "FontSize", obj.LabelFontSize_ )
+
+                % Mark the chart clean.
+                obj.ComputationRequired = false;
+
+            end % if
+
+            % Update the label text and position.
+            obj.updateWedgeLabels()            
+            obj.updateLabelPositions( 1:numel( obj.Data_ ) )
+
+            % Update the legend.
+            obj.updateLegend()            
+
+        end % update
+
+    end % methods ( Access = protected )
+
+    methods ( Access = private )
+
+        function updateWedgeLabels( obj )
+            %UPDATEWEDGELABELS Update the text in the wedge labels.
+
+            % If necessary, append the percentages to the labels.
+            if obj.LabelPercentages_
+                newLabels = obj.LabelText_ + " (" + ...
+                    num2str( obj.DataPercentages, "%.1f" ) + "%)";
+            else
+                newLabels = obj.LabelText_;
+            end % if
+
+            % Update the labels.
+            for k = 1:numel( newLabels )
+                obj.WedgeLabels(k).String = newLabels(k);
+            end % for
+
+        end % updateWedgeLabels
+
+        function updateLabelPositions( obj, wedgeIdx )
+            %UPDATELABELPOSITIONS Update the wedge label positions for the
+            %specified wedges.
+
+            % Compute the angular span of each wedge.
+            wedgeSpans = 2 * pi * obj.DataPercentages / 100;
+
+            % Record the current view.
+            [currentAzimuth, currentElevation] = view( obj.Axes );
+
+            % Loop over the required wedges.
+            for k = wedgeIdx
+
+                % Compute the average angle within the angular extension.
+                averageAngle = 0.5 * (sum( wedgeSpans(1:k-1) ) + ...
+                    sum( wedgeSpans(1:k) ));
+
+                % Compute phi: this angle is needed to deal with the issue
+                % of 3d perspective when setting the label positions.
+                phi = mod( averageAngle - currentAzimuth * pi / 180, ...
+                    2 * pi );
+
+                % Compute dr: this controls how much further out the label
+                % needs to be positioned in order to solve the perspective
+                % problem.
+                dr = tand( 90 - currentElevation ) * abs( sin( phi ) );
+
+                % If the individual wedge is exploded, take into account
+                % the extra radial extension.
+                if obj.WedgeExpanded(k)
+                    dr = dr + obj.ExplosionFactor * obj.ExplosionRange;
+                end % if
+
+                % Determine the horizontal text alignment.
+                if phi > 0.5 * pi && phi < 1.5 * pi
+                    textAlignment = "right";
+                elseif phi == 0.5 * pi || phi == 1.5 * pi
+                    textAlignment = "center";
+                else
+                    textAlignment = "left";
+                end % if
+
+                % Determine the vertical alignment (the angle phi is needed
+                % because the current view needs to be taken into account).
+                if phi <= pi
+                    obj.WedgeLabels(k).VerticalAlignment = "bottom";
+                else
+                    obj.WedgeLabels(k).VerticalAlignment = "top";
+                end % if
+
+                % Calculate the new (x, y) coordinates and update the label
+                % position.
+                x = (dr + obj.OuterRadius) * cos( averageAngle );
+                y = (dr + obj.OuterRadius) * sin( averageAngle );
+                set( obj.WedgeLabels(k), "Position", [x, y, 0], ...
+                    "HorizontalAlignment", textAlignment )
+
+            end % for
+
+        end % updateLabelPositions
+
+        function moveWedge( obj, wedgeIdx )
+            %MOVEWEDGE Move the wedge specified by wedgeIdx.
+
+            % Compute the angular span of each wedge.
+            wedgeSpans = 2 * pi * obj.DataPercentages / 100;
+
+            % Compute the sign from the record of which wedges are expanded
+            % (the logical vector WedgeExpanded).
+            % Sign 1 means that the wedge should be exploded, -1 means that
+            % the wedge should be contracted.
+            sgn = -1 + 2 * obj.WedgeExpanded(wedgeIdx);
+
+            % Loop over the wedges to move.
+            for w = 1 : numel( wedgeIdx )
+
+                % Compute the average angle within the angular span.
+                averageAngle = 0.5 * (...
+                    sum( wedgeSpans(1:wedgeIdx(w)-1)) + ...
+                    sum( wedgeSpans(1:wedgeIdx(w)) ));
+
+                % Update the data of each wedge piece.
+                radius = obj.ExplosionFactor * obj.ExplosionRange;
+                for k = 1 : width( obj.WedgeGraphics )
+                    set( obj.WedgeGraphics(wedgeIdx(w), k), ...
+                        "XData", ...
+                        obj.WedgeGraphics(wedgeIdx(w), k).XData + ...
+                        sgn(w) * radius * cos( averageAngle ), ...
+                        "YData", ...
+                        obj.WedgeGraphics(wedgeIdx(w), k).YData + ...
+                        sgn(w) * radius * sin( averageAngle ) )
+                end % for
+            end % for
+
+            % Update the label positions because the wedges have moved.
+            drawnow()
+            obj.updateLabelPositions( wedgeIdx )
+
+        end % moveWedge
+
+        function onWedgeClicked( obj, s, ~ )
+            %ONWEDGECLICKED Respond to user clicks on the annulus' wedges.
+
+            % Recover the wedge index from the Tag property.
+            wedgeIdx = str2double( s.Tag );
+
+            % Update the record of which wedges are expanded.
+            obj.WedgeExpanded(wedgeIdx) = ~obj.WedgeExpanded(wedgeIdx);
+
+            % Move the wedge.
+            obj.moveWedge( wedgeIdx )
+
+        end % onWedgeClicked
+
+        function updateLegend( obj )
+            %UPDATELEGEND Update the chart's legend.
+
+            % Update the legend text.
+            if obj.LegendPercentages_
+                newLegendText = obj.LegendText_ + " (" + ...
+                    num2str( obj.DataPercentages, "%.1f" ) + "%)";
+            else
+                newLegendText = obj.LegendText_;
+            end % if
+            obj.Legend.String = newLegendText;
+
+        end % updateLegend        
+
+        function onToggleButtonPressed( obj, ~, ~ )
+            %ONTOGGLEBUTTONPRESSED Hide/show the chart controls.
+
+            toggleDown = obj.ToggleButton.Value;
+
+            if toggleDown
+                % Show the controls.
+                obj.LayoutGrid.ColumnWidth{2} = "fit";
+                obj.ToggleButton.Tooltip = "Hide chart controls";
+            else
+                % Hide the controls.
+                obj.LayoutGrid.ColumnWidth{2} = "0x";
+                obj.ToggleButton.Tooltip = "Show chart controls";
+            end % if
+
+        end % onToggleButtonPressed
+
+    end % methods ( Access = private )
+
+end % classdef
+##### SOURCE END #####
+-->
+</body>
+</html>

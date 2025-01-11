@@ -1,0 +1,1501 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      -->
+<title>SnailTrailChart</title>
+<meta name="generator" content="MATLAB 25.1">
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+<meta name="DC.date" content="2025-01-11">
+<meta name="DC.source" content="SnailTrailChart.m">
+<style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style>
+</head>
+<body>
+<div class="content">
+<pre class="codeinput">
+<span class="keyword">classdef</span> SnailTrailChart &lt; Component
+    <span class="comment">%SNAILTRAILCHART Chart for displaying excess return against tracking</span>
+    <span class="comment">%error for a given asset return series relative to a given benchmark</span>
+    <span class="comment">%return series.</span>
+
+    <span class="comment">% Copyright 2018-2025 The MathWorks, Inc.</span>
+
+    <span class="keyword">properties</span>
+        <span class="comment">% Marker size.</span>
+        MarkerSize<span class="typesection">(1, 1) double {mustBePositive, mustBeFinite}</span> = 8
+        <span class="comment">% Cross hair line width.</span>
+        CrossHairLineWidth<span class="typesection">(1, 1) double {mustBePositive, mustBeFinite}</span> = 3
+        <span class="comment">% Snail trail line width.</span>
+        TrailLineWidth<span class="typesection">(1, 1) double {mustBePositive, mustBeFinite}</span> = 2
+    <span class="keyword">end</span> <span class="comment">% properties</span>
+
+    <span class="keyword">properties</span> ( Dependent )
+        <span class="comment">% Chart data, comprising a timetable with two return series.</span>
+        Returns<span class="typesection">(:, 2) timetable {mustBeAssetAndBenchmarkReturns}</span>
+        <span class="comment">% Number of points in the trail, including the head.</span>
+        TrailLength<span class="typesection">(1, 1) double {mustBeInteger, mustBePositive}</span>
+        <span class="comment">% Index of the snail's current position.</span>
+        CurrentIndex<span class="typesection">(1, 1) double {mustBeInteger, mustBePositive}</span>
+        <span class="comment">% Current date.</span>
+        CurrentDate<span class="typesection">(1, 1) datetime</span>
+        <span class="comment">% Number of observations used for the window size in the rolling</span>
+        <span class="comment">% excess return and tracking error computation.</span>
+        Period<span class="typesection">(1, 1) double {mustBeInteger, mustBePositive}</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Dependent )</span>
+
+    <span class="keyword">properties</span> ( Dependent )
+        <span class="comment">% Visibility of the chart controls.</span>
+        Controls<span class="typesection">(1, 1) matlab.lang.OnOffSwitchState</span>
+        <span class="comment">% Visibility of the current point information.</span>
+        ShowCurrentPointDetails<span class="typesection">(1, 1) matlab.lang.OnOffSwitchState</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Dependent )</span>
+
+    <span class="keyword">properties</span> ( Dependent, SetAccess = private )
+        <span class="comment">% Performance statistics. This is a table comprising a datetime</span>
+        <span class="comment">% vector of end dates for the rolling periods, and three double</span>
+        <span class="comment">% vectors containing the excess return, tracking error and</span>
+        <span class="comment">% information ratio for each period.</span>
+        PerformanceStatistics<span class="typesection">(:, 3) timetable</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Dependent, SetAccess = private )</span>
+
+    <span class="keyword">properties</span> ( Access = private )
+        <span class="comment">% Backing property for the chart data.</span>
+        Returns_<span class="typesection">(:, 2) timetable {mustBeAssetAndBenchmarkReturns}</span> = <span class="keyword">...</span>
+            defaultReturnsData()
+        <span class="comment">% Backing property for the trail length.</span>
+        TrailLength_<span class="typesection">(1, 1) double {mustBeInteger, mustBePositive}</span> = 5
+        <span class="comment">% Backing property for the current index.</span>
+        CurrentIndex_<span class="typesection">(1, 1) double {mustBeInteger, mustBePositive}</span> = 1
+        <span class="comment">% Backing property for the period.</span>
+        Period_<span class="typesection">(1, 1) double {mustBeInteger, mustBePositive}</span> = 5
+        <span class="comment">% Logical scalar specifying whether a computation is required.</span>
+        ComputationRequired<span class="typesection">(1, 1) logical </span>= false
+    <span class="keyword">end</span> <span class="comment">% properties ( Access = private )</span>
+
+    <span class="keyword">properties</span> ( Access = private, Transient, NonCopyable )
+        <span class="comment">% Chart layout.</span>
+        LayoutGrid<span class="typesection">(:, 1) matlab.ui.container.GridLayout </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Chart axes.</span>
+        Axes<span class="typesection">(:, 1) matlab.graphics.axis.Axes {mustBeScalarOrEmpty}</span>
+        <span class="comment">% Toggle button for the chart controls.</span>
+        ToggleButton<span class="typesection">(:, 1) matlab.ui.controls.ToolbarStateButton </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% 2D scatter series for the excess return vs. tracking error.</span>
+        ScatterSeries<span class="typesection">(:, 1) matlab.graphics.chart.primitive.Scatter </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Line object for the snail head.</span>
+        Head<span class="typesection">(:, 1) matlab.graphics.primitive.Line {mustBeScalarOrEmpty}</span>
+        <span class="comment">% Line object for the trail.</span>
+        Trail<span class="typesection">(:, 1) matlab.graphics.primitive.Line {mustBeScalarOrEmpty}</span>
+        <span class="comment">% Line objects for the axes crosshair.</span>
+        CrossHair<span class="typesection">(2, 1) matlab.graphics.primitive.Line</span>
+        <span class="comment">% Text box for the performance statistics.</span>
+        TextBox<span class="typesection">(:, 1) matlab.graphics.primitive.Text {mustBeScalarOrEmpty}</span>
+        <span class="comment">% Colorbar check box.</span>
+        ColorbarCheckBox<span class="typesection">(:, 1) matlab.ui.control.CheckBox </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Current point information check box.</span>
+        CurrentPointCheckBox<span class="typesection">(:, 1) matlab.ui.control.CheckBox </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Spinner for the number of steps.</span>
+        NumStepsSpinner<span class="typesection">(:, 1) matlab.ui.control.Spinner </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Button to move the head of the trail.</span>
+        StepButton<span class="typesection">(:, 1) matlab.ui.control.Button {mustBeScalarOrEmpty}</span>
+        <span class="comment">% Button to reset the head of the trail.</span>
+        RewindButton<span class="typesection">(:, 1) matlab.ui.control.Button {mustBeScalarOrEmpty}</span>
+        <span class="comment">% Button to animate the snail trail.</span>
+        AnimateButton<span class="typesection">(:, 1) matlab.ui.control.Button {mustBeScalarOrEmpty}</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Access = private, Transient, NonCopyable )</span>
+
+    <span class="keyword">properties</span> ( Constant, Hidden )
+        <span class="comment">% Product dependencies.</span>
+        Dependencies<span class="typesection">(1, :) string </span>= <span class="string">"MATLAB"</span>
+        <span class="comment">% Description.</span>
+        ShortDescription<span class="typesection">(1, 1) string </span>= <span class="string">"Plot excess returns against"</span> + <span class="keyword">...</span>
+            <span class="string">" tracking errors for an asset relative to a benchmark"</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Constant, Hidden )</span>
+
+    <span class="keyword">methods</span>
+
+        <span class="keyword">function</span> value = get.Returns( obj )
+
+            value = obj.Returns_;
+
+        <span class="keyword">end</span> <span class="comment">% get.Returns</span>
+
+        <span class="keyword">function</span> set.Returns( obj, value )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Store the internal data.</span>
+            obj.Returns_ = value;
+
+            <span class="comment">% Rewind the snail trail.</span>
+            rewind( obj )
+
+        <span class="keyword">end</span> <span class="comment">% set.Returns</span>
+
+        <span class="keyword">function</span> value = get.TrailLength( obj )
+
+            value = obj.TrailLength_;
+
+        <span class="keyword">end</span> <span class="comment">% get.TrailLength</span>
+
+        <span class="keyword">function</span> set.TrailLength( obj, value )
+
+            <span class="comment">% Check the proposed trail length.</span>
+            h = height( obj.PerformanceStatistics );
+            assert( value &lt;= h, <span class="string">"SnailTrailChart:InvalidTrailLength"</span>, <span class="keyword">...</span>
+                <span class="string">"The trail length cannot exceed the height of the "</span> + <span class="keyword">...</span>
+                <span class="string">"PerformanceStatistics table, %d."</span>, h )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Set the internal property.</span>
+            obj.TrailLength_ = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.TrailLength</span>
+
+        <span class="keyword">function</span> value = get.CurrentIndex( obj )
+
+            value = obj.CurrentIndex_;
+
+        <span class="keyword">end</span> <span class="comment">% get.CurrentIndex</span>
+
+        <span class="keyword">function</span> set.CurrentIndex( obj, value )
+
+            <span class="comment">% Check the proposed index.</span>
+            h = height( obj.PerformanceStatistics );
+            assert( value &lt;= h, <span class="string">"SnailTrail:InvalidCurrentIndex"</span>, <span class="keyword">...</span>
+                <span class="string">"The current index cannot exceed the height of the "</span> + <span class="keyword">...</span>
+                <span class="string">"PerformanceStatistics table, %d."</span>, h )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Set the internal property.</span>
+            obj.CurrentIndex_ = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.CurrentIndex</span>
+
+        <span class="keyword">function</span> value = get.CurrentDate( obj )
+
+            value = obj.PerformanceStatistics. <span class="keyword">...</span>
+                PeriodEndDate(obj.CurrentIndex_);
+
+        <span class="keyword">end</span> <span class="comment">% get.CurrentDate</span>
+
+        <span class="keyword">function</span> set.CurrentDate( obj, value )
+
+            <span class="comment">% Validate the new date.</span>
+            [dateInRange, idx] = ismember( value, <span class="keyword">...</span>
+                obj.PerformanceStatistics.PeriodEndDate );
+            assert( dateInRange, <span class="string">"SnailTrail:InvalidCurrentDate"</span>, <span class="keyword">...</span>
+                <span class="string">"The current date must be chosen from the "</span> + <span class="keyword">...</span>
+                <span class="string">"available period end dates."</span> )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Update the current index.</span>
+            obj.CurrentIndex = idx;
+
+        <span class="keyword">end</span> <span class="comment">% set.CurrentDate</span>
+
+        <span class="keyword">function</span> value = get.Period( obj )
+
+            value = obj.Period_;
+
+        <span class="keyword">end</span> <span class="comment">% get.Period</span>
+
+        <span class="keyword">function</span> set.Period( obj, value )
+
+            <span class="comment">% Check the proposed period.</span>
+            h = height( obj.PerformanceStatistics );
+            assert( value &lt;= h/2, <span class="string">"SnailTrail:InvalidPeriod"</span>, <span class="keyword">...</span>
+                <span class="string">"The current index cannot exceed half the height "</span> + <span class="keyword">...</span>
+                <span class="string">"of the PerformanceStatistics table, %d."</span>, h )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Set the internal property.</span>
+            obj.Period_ = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.Period</span>
+
+        <span class="keyword">function</span> value = get.Controls( obj )
+
+            value = obj.ToggleButton.Value;
+
+        <span class="keyword">end</span> <span class="comment">% get.Controls</span>
+
+        <span class="keyword">function</span> set.Controls( obj, value )
+
+            <span class="comment">% Update the toggle button.</span>
+            obj.ToggleButton.Value = value;
+
+            <span class="comment">% Invoke the toggle button callback.</span>
+            obj.onToggleButtonPressed()
+
+        <span class="keyword">end</span> <span class="comment">% set.Controls</span>
+
+        <span class="keyword">function</span> value = get.ShowCurrentPointDetails( obj )
+
+            value = obj.CurrentPointCheckBox.Value;
+
+        <span class="keyword">end</span> <span class="comment">% get.ShowCurrentPointDetails</span>
+
+        <span class="keyword">function</span> set.ShowCurrentPointDetails( obj, value )
+
+            <span class="comment">% Update the check box.</span>
+            obj.CurrentPointCheckBox.Value = value;
+
+            <span class="comment">% Invoke the check box callback.</span>
+            obj.onCurrentPointDetailsSelected()
+
+        <span class="keyword">end</span> <span class="comment">% set.ShowCurrentPointDetails</span>
+
+        <span class="keyword">function</span> value = get.PerformanceStatistics( obj )
+
+            <span class="comment">% Period end dates.</span>
+            PeriodEndDate = obj.Returns_.Properties.RowTimes;
+            PeriodEndDate = PeriodEndDate(obj.Period_:end);
+
+            <span class="comment">% Window size.</span>
+            n = obj.Period_;
+
+            <span class="comment">% Asset and benchmark.</span>
+            benchmark = obj.Returns_{:, 1};
+            asset = obj.Returns_{:, 2};
+
+            <span class="comment">% Rolling mean difference.</span>
+            ExcessReturn = double.empty( 0, 1 );
+            <span class="keyword">for</span> k = height( obj.Returns_ ) : -1 : n
+                ExcessReturn(k-n+1, 1) = <span class="keyword">...</span>
+                    mean( asset(k-n+1:k) - benchmark(k-n+1:k) );
+            <span class="keyword">end</span> <span class="comment">% for</span>
+
+            <span class="comment">% Rolling std difference.</span>
+            TrackingError = double.empty( 0, 1 );
+            <span class="keyword">for</span> k = height( obj.Returns_ ) : -1 : n
+                TrackingError(k-n+1, 1) = <span class="keyword">...</span>
+                    std( asset(k-n+1:k) - benchmark(k-n+1:k) );
+            <span class="keyword">end</span> <span class="comment">% for</span>
+
+            <span class="comment">% Information ratio.</span>
+            InformationRatio = ExcessReturn ./ TrackingError;
+
+            <span class="comment">% Place the results in a timetable.</span>
+            value = timetable( PeriodEndDate, ExcessReturn, <span class="keyword">...</span>
+                TrackingError, InformationRatio );
+
+        <span class="keyword">end</span> <span class="comment">% get.PerformanceStatistics</span>
+
+        <span class="keyword">function</span> step( obj, numSteps )
+            <span class="comment">%STEP Increment/decrement the trail by the given number of</span>
+            <span class="comment">%steps.</span>
+
+            <span class="comment">% Validate the number of steps.</span>
+            <span class="keyword">if</span> nargin &lt; 2
+                numSteps = 1;
+            <span class="keyword">else</span>
+                validateattributes( numSteps, <span class="string">"double"</span>, <span class="keyword">...</span>
+                    [<span class="string">"scalar"</span>, <span class="string">"real"</span>, <span class="string">"finite"</span>, <span class="string">"integer"</span>], <span class="keyword">...</span>
+                    <span class="string">"step"</span>, <span class="string">"the number of steps"</span> )
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+            <span class="comment">% Saturate if the number of steps is too large or too small.</span>
+            <span class="keyword">if</span> numSteps &gt;= 0
+                obj.CurrentIndex = min( obj.CurrentIndex_ + numSteps, <span class="keyword">...</span>
+                    height( obj.PerformanceStatistics ) );
+            <span class="keyword">else</span>
+                obj.CurrentIndex = max( 1, obj.CurrentIndex_ + numSteps );
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+        <span class="keyword">end</span> <span class="comment">% step</span>
+
+        <span class="keyword">function</span> rewind( obj )
+            <span class="comment">%REWIND Rewind the snail trail.</span>
+
+            obj.CurrentIndex = 1;
+
+        <span class="keyword">end</span> <span class="comment">% rewind</span>
+
+        <span class="keyword">function</span> animate( obj )
+            <span class="comment">%ANIMATE Animate the snail trail.</span>
+
+            <span class="keyword">for</span> k = 1:height( obj.PerformanceStatistics )
+                obj.CurrentIndex = k;
+                drawnow()
+            <span class="keyword">end</span> <span class="comment">% for</span>
+
+        <span class="keyword">end</span> <span class="comment">% animate</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods</span>
+
+    <span class="keyword">methods</span>
+
+        <span class="keyword">function</span> obj = SnailTrailChart( namedArgs )
+            <span class="comment">%SNAILTRAILCHART Construct a SnailTrailChart object, given</span>
+            <span class="comment">%optional name-value arguments.</span>
+
+            <span class="keyword">arguments</span> ( Input )
+                namedArgs.?SnailTrailChart
+            <span class="keyword">end</span> <span class="comment">% arguments ( Input )</span>
+
+            <span class="comment">% Set any user-defined properties.</span>
+            set( obj, namedArgs )
+
+        <span class="keyword">end</span> <span class="comment">% constructor</span>
+
+        <span class="keyword">function</span> varargout = xlabel( obj, varargin )
+
+            [varargout{1:nargout}] = xlabel( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% xlabel</span>
+
+        <span class="keyword">function</span> varargout = ylabel( obj, varargin )
+
+            [varargout{1:nargout}] = ylabel( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% ylabel</span>
+
+        <span class="keyword">function</span> varargout = title( obj, varargin )
+
+            [varargout{1:nargout}] = title( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% title</span>
+
+        <span class="keyword">function</span> varargout = colorbar( obj, varargin )
+
+            <span class="comment">% Call the colorbar function on the chart's axes.</span>
+            [varargout{1:nargout}] = colorbar( obj.Axes, varargin{:} );
+
+            <span class="comment">% Ensure the colorbar check box is up-to-date.</span>
+            hasbar = ~isempty( obj.Axes.Colorbar );
+            obj.ColorbarCheckBox.Value = hasbar;
+
+            <span class="comment">% Update the label if necessary.</span>
+            <span class="keyword">if</span> hasbar
+                obj.Axes.Colorbar.Label.String = <span class="string">"Information ratio"</span>;
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+        <span class="keyword">end</span> <span class="comment">% colorbar</span>
+
+        <span class="keyword">function</span> varargout = colormap( obj, varargin )
+
+            <span class="comment">% Call the colormap function on the chart's axes.</span>
+            [varargout{1:nargout}] = colormap( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% colormap</span>
+
+        <span class="keyword">function</span> varargout = axis( obj, varargin )
+
+            [varargout{1:nargout}] = axis( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% axis</span>
+
+        <span class="keyword">function</span> exportgraphics( obj, varargin )
+
+            exportgraphics( obj.Axes, varargin{:} )
+
+        <span class="keyword">end</span> <span class="comment">% exportgraphics</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods</span>
+
+    <span class="keyword">methods</span> ( Access = protected )
+
+        <span class="keyword">function</span> setup( obj )
+            <span class="comment">%SETUP Initialize the chart graphics.</span>
+
+            <span class="comment">% Define the layout grid.</span>
+            obj.LayoutGrid = uigridlayout( obj, [1, 2], <span class="keyword">...</span>
+                <span class="string">"ColumnWidth"</span>, [<span class="string">"1x"</span>, <span class="string">"0x"</span>] );
+
+            <span class="comment">% Create the chart's axes.</span>
+            obj.Axes = axes( <span class="string">"Parent"</span>, obj.LayoutGrid, <span class="keyword">...</span>
+                <span class="string">"XGrid"</span>, <span class="string">"on"</span>, <span class="keyword">...</span>
+                <span class="string">"YGrid"</span>, <span class="string">"on"</span> );
+
+            <span class="comment">% Add a state button to show/hide the chart's controls.</span>
+            tb = axtoolbar( obj.Axes, <span class="string">"default"</span> );
+            iconPath = fullfile( chartsRoot(), <span class="string">"charts"</span>, <span class="string">"images"</span>, <span class="keyword">...</span>
+                <span class="string">"Cog.png"</span> );
+            obj.ToggleButton = axtoolbarbtn( tb, <span class="string">"state"</span>, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, <span class="string">"off"</span>, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Show chart controls"</span>, <span class="keyword">...</span>
+                <span class="string">"Icon"</span>, iconPath, <span class="keyword">...</span>
+                <span class="string">"ValueChangedFcn"</span>, @obj.onToggleButtonPressed );
+
+            <span class="comment">% Add default annotations.</span>
+            xlabel( obj.Axes, <span class="string">"Tracking error"</span> )
+            ylabel( obj.Axes, <span class="string">"Excess return"</span> )
+            title( obj.Axes, <span class="string">"SnailTrail Chart"</span> )
+
+            <span class="comment">% Add the scatter plot.</span>
+            hold( obj.Axes, <span class="string">"on"</span> )
+            obj.ScatterSeries = scatter( obj.Axes, [], [], 12, [], <span class="keyword">...</span>
+                <span class="string">"o"</span>, <span class="string">"filled"</span> );
+            hold( obj.Axes, <span class="string">"off"</span> )
+
+            <span class="comment">% Create the trail.</span>
+            obj.Trail = line( <span class="string">"Parent"</span>, obj.Axes, <span class="keyword">...</span>
+                <span class="string">"XData"</span>, [], <span class="keyword">...</span>
+                <span class="string">"YData"</span>, [], <span class="keyword">...</span>
+                <span class="string">"Color"</span>, [0.8, 0, 0], <span class="keyword">...</span>
+                <span class="string">"Marker"</span>, <span class="string">"."</span>, <span class="keyword">...</span>
+                <span class="string">"MarkerSize"</span>, 12, <span class="keyword">...</span>
+                <span class="string">"LineWidth"</span>, 1.5 );
+
+            <span class="comment">% Create the head.</span>
+            obj.Head = line( <span class="string">"Parent"</span>, obj.Axes, <span class="keyword">...</span>
+                <span class="string">"XData"</span>, [], <span class="keyword">...</span>
+                <span class="string">"YData"</span>, [], <span class="keyword">...</span>
+                <span class="string">"Marker"</span>, <span class="string">"s"</span>, <span class="keyword">...</span>
+                <span class="string">"MarkerEdgeColor"</span>, <span class="string">"k"</span>, <span class="keyword">...</span>
+                <span class="string">"MarkerFaceColor"</span>, <span class="string">"m"</span> );
+
+            <span class="comment">% Draw the crosshair to create the appearance of four</span>
+            <span class="comment">% quadrants.</span>
+            obj.CrossHair(1) = line( <span class="string">"Parent"</span>, obj.Axes, <span class="keyword">...</span>
+                <span class="string">"XData"</span>, [NaN, NaN], <span class="keyword">...</span>
+                <span class="string">"YData"</span>, [0, 0], <span class="keyword">...</span>
+                <span class="string">"Color"</span>, 1 - obj.Axes.Color, <span class="keyword">...</span>
+                <span class="string">"LineWidth"</span>, 2.5 );
+            obj.CrossHair(2) = line( <span class="string">"Parent"</span>, obj.Axes, <span class="keyword">...</span>
+                <span class="string">"XData"</span>, [0, 0], <span class="keyword">...</span>
+                <span class="string">"YData"</span>, [NaN, NaN], <span class="keyword">...</span>
+                <span class="string">"Color"</span>, 1 - obj.Axes.Color, <span class="keyword">...</span>
+                <span class="string">"LineWidth"</span>, 2.5 );
+
+            <span class="comment">% Add the colorbar.</span>
+            c = colorbar( obj.Axes );
+            c.Label.String = <span class="string">"Information ratio"</span>;
+
+            <span class="comment">% Create the text box.</span>
+            obj.TextBox = text( NaN, NaN, <span class="string">""</span>, <span class="keyword">...</span>
+                <span class="string">"Parent"</span>, obj.Axes );
+
+            <span class="comment">% Add the chart control panel and layout.</span>
+            p = uipanel( <span class="string">"Parent"</span>, obj.LayoutGrid, <span class="keyword">...</span>
+                <span class="string">"Title"</span>, <span class="string">"Chart Controls"</span>, <span class="keyword">...</span>
+                <span class="string">"FontWeight"</span>, <span class="string">"bold"</span> );
+            p.Layout.Column = 2;
+            controlLayout = uigridlayout( p, [5, 2], <span class="keyword">...</span>
+                <span class="string">"RowHeight"</span>, repmat( <span class="string">"fit"</span>, 5, 1 ) );
+
+            <span class="comment">% Colorbar check box.</span>
+            obj.ColorbarCheckBox = uicheckbox( <span class="keyword">...</span>
+                <span class="string">"Parent"</span>, controlLayout, <span class="keyword">...</span>
+                <span class="string">"Interruptible"</span>, <span class="string">"off"</span>, <span class="keyword">...</span>
+                <span class="string">"BusyAction"</span>, <span class="string">"cancel"</span>, <span class="keyword">...</span>
+                <span class="string">"Text"</span>, <span class="string">"Colorbar"</span>, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Show/hide the colorbar"</span>, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, true, <span class="keyword">...</span>
+                <span class="string">"ValueChangedFcn"</span>, @obj.onColorbarSelected );
+
+            <span class="comment">% Current point details check box.</span>
+            obj.CurrentPointCheckBox = uicheckbox( <span class="keyword">...</span>
+                <span class="string">"Parent"</span>, controlLayout, <span class="keyword">...</span>
+                <span class="string">"Interruptible"</span>, <span class="string">"off"</span>, <span class="keyword">...</span>
+                <span class="string">"BusyAction"</span>, <span class="string">"cancel"</span>, <span class="keyword">...</span>
+                <span class="string">"Text"</span>, <span class="string">"Current point details"</span>, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Show/hide the current point details"</span>, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, true, <span class="keyword">...</span>
+                <span class="string">"ValueChangedFcn"</span>, @obj.onCurrentPointDetailsSelected );
+
+            <span class="comment">% Spinner for the number of steps.</span>
+            uilabel( <span class="string">"Parent"</span>, controlLayout, <span class="keyword">...</span>
+                <span class="string">"Text"</span>, <span class="string">"Number of steps:"</span> );
+            obj.NumStepsSpinner = uispinner( <span class="string">"Parent"</span>, controlLayout, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, 1, <span class="keyword">...</span>
+                <span class="string">"Step"</span>, 1, <span class="keyword">...</span>
+                <span class="string">"RoundFractionalValues"</span>, <span class="string">"on"</span>, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Select the number of steps"</span>, <span class="keyword">...</span>
+                <span class="string">"ValueDisplayFormat"</span>, <span class="string">"%d"</span> );
+
+            <span class="comment">% Button for taking steps.</span>
+            obj.StepButton = uibutton( controlLayout, <span class="string">"push"</span>, <span class="keyword">...</span>
+                <span class="string">"Interruptible"</span>, <span class="string">"off"</span>, <span class="keyword">...</span>
+                <span class="string">"BusyAction"</span>, <span class="string">"cancel"</span>, <span class="keyword">...</span>
+                <span class="string">"Text"</span>, char( 10139 ) + <span class="string">" Step "</span>, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="keyword">...</span>
+                <span class="string">"Take the specified number of steps in the trail"</span>, <span class="keyword">...</span>
+                <span class="string">"ButtonPushedFcn"</span>, @obj.onStepButtonPushed );
+            obj.StepButton.Layout.Column = [1, 2];
+
+            <span class="comment">% Rewind button.</span>
+            obj.RewindButton = uibutton( controlLayout, <span class="string">"push"</span>, <span class="keyword">...</span>
+                <span class="string">"Interruptible"</span>, <span class="string">"off"</span>, <span class="keyword">...</span>
+                <span class="string">"BusyAction"</span>, <span class="string">"cancel"</span>, <span class="keyword">...</span>
+                <span class="string">"Text"</span>, char( 9194 ) + <span class="string">" Rewind"</span>, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="keyword">...</span>
+                <span class="string">"Rewind the trail back to the starting point"</span>, <span class="keyword">...</span>
+                <span class="string">"ButtonPushedFcn"</span>, @obj.onRewindButtonPushed );
+            obj.RewindButton.Layout.Column = [1, 2];
+
+            <span class="comment">% Animate button.</span>
+            obj.AnimateButton = uibutton( controlLayout, <span class="string">"push"</span>, <span class="keyword">...</span>
+                <span class="string">"Interruptible"</span>, <span class="string">"off"</span>, <span class="keyword">...</span>
+                <span class="string">"BusyAction"</span>, <span class="string">"cancel"</span>, <span class="keyword">...</span>
+                <span class="string">"Text"</span>, char( 9654 ) + <span class="string">" Animate"</span>, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Animate the entire snail trail"</span>, <span class="keyword">...</span>
+                <span class="string">"ButtonPushedFcn"</span>, @obj.onAnimateButtonPushed );
+            obj.AnimateButton.Layout.Column = [1, 2];
+
+        <span class="keyword">end</span> <span class="comment">% setup</span>
+
+        <span class="keyword">function</span> update( obj )
+            <span class="comment">%UPDATE Refresh the chart graphics.</span>
+
+            <span class="keyword">if</span> obj.ComputationRequired
+
+                <span class="comment">% Reset the cross hairs.</span>
+                obj.CrossHair(1).XData = NaN( 1, 2 );
+                obj.CrossHair(2).YData = NaN( 1, 2 );
+
+                <span class="comment">% Scatter series.</span>
+                set( obj.ScatterSeries, <span class="keyword">...</span>
+                    <span class="string">"XData"</span>, obj.PerformanceStatistics.TrackingError, <span class="keyword">...</span>
+                    <span class="string">"YData"</span>, obj.PerformanceStatistics.ExcessReturn, <span class="keyword">...</span>
+                    <span class="string">"CData"</span>, obj.PerformanceStatistics.InformationRatio )
+
+                <span class="comment">% Trail.</span>
+                p = obj.CurrentIndex_;
+                t = obj.TrailLength_;
+                <span class="keyword">if</span> p &gt;= t
+                    set( obj.Trail, <span class="keyword">...</span>
+                        <span class="string">"XData"</span>, obj.PerformanceStatistics<span class="keyword">...</span>
+                        .TrackingError(p-t+1:p), <span class="keyword">...</span>
+                        <span class="string">"YData"</span>, obj.PerformanceStatistics<span class="keyword">...</span>
+                        .ExcessReturn(p-t+1:p) )
+                <span class="keyword">else</span>
+                    set( obj.Trail, <span class="string">"XData"</span>, <span class="keyword">...</span>
+                        obj.PerformanceStatistics.TrackingError(1:p), <span class="keyword">...</span>
+                        <span class="string">"YData"</span>, <span class="keyword">...</span>
+                        obj.PerformanceStatistics.ExcessReturn(1:p) )
+                <span class="keyword">end</span> <span class="comment">% if</span>
+
+                <span class="comment">% Head.</span>
+                set( obj.Head, <span class="string">"XData"</span>, <span class="keyword">...</span>
+                    obj.PerformanceStatistics.TrackingError(p), <span class="keyword">...</span>
+                    <span class="string">"YData"</span>, <span class="keyword">...</span>
+                    obj.PerformanceStatistics.ExcessReturn(p) )
+
+                <span class="comment">% Update the text box.</span>
+                x = obj.Axes.XLim(1) + 0.005;
+                y = obj.Axes.YLim(2) - 0.10 * diff( obj.Axes.YLim );
+                d = obj.CurrentDate;
+                idx = obj.CurrentIndex_;
+                er = obj.PerformanceStatistics.ExcessReturn(idx);
+                te = obj.PerformanceStatistics.TrackingError(idx);
+                ir = obj.PerformanceStatistics.InformationRatio(idx);
+                set( obj.TextBox, <span class="string">"Position"</span>, [x, y, 0], <span class="keyword">...</span>
+                    <span class="string">"String"</span>, [<span class="string">"Date: "</span> + string( d ); <span class="keyword">...</span>
+                    <span class="string">"Excess return: "</span> + num2str( er ); <span class="keyword">...</span>
+                    <span class="string">"Tracking error: "</span> + num2str( te ); <span class="keyword">...</span>
+                    <span class="string">"Information ratio: "</span> + num2str( ir )] )
+
+                <span class="comment">% Update the cross hairs.</span>
+                obj.CrossHair(1).XData = obj.Axes.XLim;
+                obj.CrossHair(2).YData = obj.Axes.YLim;
+
+                <span class="comment">% Mark the chart clean.</span>
+                obj.ComputationRequired = false;
+
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+            <span class="comment">% Update the stylistic properties.</span>
+            set( obj.CrossHair, <span class="string">"Color"</span>, 1 - obj.Axes.Color, <span class="keyword">...</span>
+                <span class="string">"LineWidth"</span>, obj.CrossHairLineWidth )
+            obj.ScatterSeries.SizeData = obj.MarkerSize^2;
+            set( [obj.Head, obj.Trail], <span class="string">"MarkerSize"</span>, obj.MarkerSize )
+            obj.Trail.LineWidth = obj.TrailLineWidth;
+
+        <span class="keyword">end</span> <span class="comment">% update</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods ( Access = protected )</span>
+
+    <span class="keyword">methods</span> ( Access = private )
+
+        <span class="keyword">function</span> onToggleButtonPressed( obj, ~, ~ )
+            <span class="comment">%ONTOGGLEBUTTONPRESSED Hide/show the chart controls.</span>
+
+            toggleDown = obj.ToggleButton.Value;
+
+            <span class="keyword">if</span> toggleDown
+                <span class="comment">% Show the controls.</span>
+                obj.LayoutGrid.ColumnWidth{2} = <span class="string">"fit"</span>;
+                obj.ToggleButton.Tooltip = <span class="string">"Hide chart controls"</span>;
+            <span class="keyword">else</span>
+                <span class="comment">% Hide the controls.</span>
+                obj.LayoutGrid.ColumnWidth{2} = <span class="string">"0x"</span>;
+                obj.ToggleButton.Tooltip = <span class="string">"Show chart controls"</span>;
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+        <span class="keyword">end</span> <span class="comment">% onToggleButtonPressed</span>
+
+        <span class="keyword">function</span> onColorbarSelected( obj, ~, ~ )
+            <span class="comment">%ONCOLORBARSELECTED Show/hide the colorbar.</span>
+
+            checked = obj.ColorbarCheckBox.Value;
+            <span class="keyword">if</span> checked
+                colorbar( obj )
+            <span class="keyword">else</span>
+                colorbar( obj, <span class="string">"off"</span> )
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+        <span class="keyword">end</span> <span class="comment">% onColorbarSelected</span>
+
+        <span class="keyword">function</span> onCurrentPointDetailsSelected( obj, ~, ~ )
+            <span class="comment">%ONCURRENTPOINTDETAILSSELECTED Show/hide the current point</span>
+            <span class="comment">%details.</span>
+
+            obj.TextBox.Visible = obj.CurrentPointCheckBox.Value;
+
+        <span class="keyword">end</span> <span class="comment">% onCurrentPointDetailsSelected</span>
+
+        <span class="keyword">function</span> onStepButtonPushed( obj, ~, ~ )
+            <span class="comment">%ONSTEPBUTTONPUSHED Call the step() method.</span>
+
+            step( obj, obj.NumStepsSpinner.Value )
+
+        <span class="keyword">end</span> <span class="comment">% onStepButtonPushed</span>
+
+        <span class="keyword">function</span> onRewindButtonPushed( obj, ~, ~ )
+            <span class="comment">%ONREWINDBUTTONPUSHED Call the rewind() method.</span>
+
+            rewind( obj )
+
+        <span class="keyword">end</span> <span class="comment">% onRewindButtonPushed</span>
+
+        <span class="keyword">function</span> onAnimateButtonPushed( obj, ~, ~ )
+            <span class="comment">%ONANIMATEBUTTONPUSHED Call the animate() method.</span>
+
+            obj.AnimateButton.Enable = <span class="string">"off"</span>;
+            animate( obj )
+            obj.AnimateButton.Enable = <span class="string">"on"</span>;
+
+        <span class="keyword">end</span> <span class="comment">% onAnimateButtonPushed</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods ( Access = private )</span>
+
+<span class="keyword">end</span> <span class="comment">% classdef</span>
+
+<span class="keyword">function</span> rets = defaultReturnsData()
+<span class="comment">%DEFAULTRETURNSDATA Create an empty timetable of returns data.</span>
+
+Date = datetime.empty( 0, 1 );
+Asset = double.empty( 0, 1 );
+Benchmark = double.empty( 0, 1 );
+rets = timetable( Date, Asset, Benchmark );
+
+<span class="keyword">end</span> <span class="comment">% defaultReturnsData</span>
+
+<span class="keyword">function</span> mustBeAssetAndBenchmarkReturns( tt )
+<span class="comment">%MUSTBEASSETANDBENCHMARKRETURNS Validate the given input data.</span>
+
+<span class="keyword">if</span> ~isempty( tt )
+
+    <span class="comment">% Check that we have enough data.</span>
+    assert( height( tt ) &gt;= 10, <span class="string">"SnailTrailChart:ShortData"</span>, <span class="keyword">...</span>
+        <span class="string">"At least 10 observations are required."</span> )
+
+    <span class="comment">% Check the dates and the individual variables.</span>
+    d = tt.Properties.RowTimes;
+    assert( isa( d, <span class="string">"datetime"</span> ) &amp;&amp; issorted( d ), <span class="keyword">...</span>
+        <span class="string">"SnailTrail:InvalidDates"</span>, <span class="keyword">...</span>
+        <span class="string">"Timetable row times must be increasing datetime values."</span> )
+    names = [<span class="string">"asset"</span>, <span class="string">"benchmark"</span>];
+    <span class="keyword">for</span> k = [1, 2]
+        validateattributes( tt{:, k}, <span class="string">"double"</span>, [<span class="string">"real"</span>, <span class="string">"finite"</span>], <span class="keyword">...</span>
+            <span class="string">"SnailTrailChart"</span>, <span class="string">"the "</span> + names(k) + <span class="string">" series"</span> )
+    <span class="keyword">end</span> <span class="comment">% for</span>
+
+<span class="keyword">end</span> <span class="comment">% if</span>
+
+<span class="keyword">end</span> <span class="comment">% mustBeAssetAndBenchmarkReturns</span>
+</pre>
+</div>
+<!--
+##### SOURCE BEGIN #####
+classdef SnailTrailChart < Component
+    %SNAILTRAILCHART Chart for displaying excess return against tracking
+    %error for a given asset return series relative to a given benchmark
+    %return series.
+
+    % Copyright 2018-2025 The MathWorks, Inc.
+
+    properties
+        % Marker size.
+        MarkerSize(1, 1) double {mustBePositive, mustBeFinite} = 8
+        % Cross hair line width.
+        CrossHairLineWidth(1, 1) double {mustBePositive, mustBeFinite} = 3
+        % Snail trail line width.
+        TrailLineWidth(1, 1) double {mustBePositive, mustBeFinite} = 2
+    end % properties
+
+    properties ( Dependent )
+        % Chart data, comprising a timetable with two return series.
+        Returns(:, 2) timetable {mustBeAssetAndBenchmarkReturns}
+        % Number of points in the trail, including the head.
+        TrailLength(1, 1) double {mustBeInteger, mustBePositive}
+        % Index of the snail's current position.
+        CurrentIndex(1, 1) double {mustBeInteger, mustBePositive}
+        % Current date.
+        CurrentDate(1, 1) datetime
+        % Number of observations used for the window size in the rolling
+        % excess return and tracking error computation.
+        Period(1, 1) double {mustBeInteger, mustBePositive}
+    end % properties ( Dependent )
+
+    properties ( Dependent )
+        % Visibility of the chart controls.
+        Controls(1, 1) matlab.lang.OnOffSwitchState
+        % Visibility of the current point information.
+        ShowCurrentPointDetails(1, 1) matlab.lang.OnOffSwitchState
+    end % properties ( Dependent )
+
+    properties ( Dependent, SetAccess = private )
+        % Performance statistics. This is a table comprising a datetime
+        % vector of end dates for the rolling periods, and three double
+        % vectors containing the excess return, tracking error and
+        % information ratio for each period.
+        PerformanceStatistics(:, 3) timetable
+    end % properties ( Dependent, SetAccess = private )
+
+    properties ( Access = private )
+        % Backing property for the chart data.
+        Returns_(:, 2) timetable {mustBeAssetAndBenchmarkReturns} = ...
+            defaultReturnsData()
+        % Backing property for the trail length.
+        TrailLength_(1, 1) double {mustBeInteger, mustBePositive} = 5
+        % Backing property for the current index.
+        CurrentIndex_(1, 1) double {mustBeInteger, mustBePositive} = 1
+        % Backing property for the period.
+        Period_(1, 1) double {mustBeInteger, mustBePositive} = 5
+        % Logical scalar specifying whether a computation is required.
+        ComputationRequired(1, 1) logical = false
+    end % properties ( Access = private )
+
+    properties ( Access = private, Transient, NonCopyable )
+        % Chart layout.
+        LayoutGrid(:, 1) matlab.ui.container.GridLayout ...
+            {mustBeScalarOrEmpty}
+        % Chart axes.
+        Axes(:, 1) matlab.graphics.axis.Axes {mustBeScalarOrEmpty}
+        % Toggle button for the chart controls.
+        ToggleButton(:, 1) matlab.ui.controls.ToolbarStateButton ...
+            {mustBeScalarOrEmpty}
+        % 2D scatter series for the excess return vs. tracking error.
+        ScatterSeries(:, 1) matlab.graphics.chart.primitive.Scatter ...
+            {mustBeScalarOrEmpty}
+        % Line object for the snail head.
+        Head(:, 1) matlab.graphics.primitive.Line {mustBeScalarOrEmpty}
+        % Line object for the trail.
+        Trail(:, 1) matlab.graphics.primitive.Line {mustBeScalarOrEmpty}
+        % Line objects for the axes crosshair.
+        CrossHair(2, 1) matlab.graphics.primitive.Line
+        % Text box for the performance statistics.
+        TextBox(:, 1) matlab.graphics.primitive.Text {mustBeScalarOrEmpty}
+        % Colorbar check box.
+        ColorbarCheckBox(:, 1) matlab.ui.control.CheckBox ...
+            {mustBeScalarOrEmpty}
+        % Current point information check box.
+        CurrentPointCheckBox(:, 1) matlab.ui.control.CheckBox ...
+            {mustBeScalarOrEmpty}
+        % Spinner for the number of steps.
+        NumStepsSpinner(:, 1) matlab.ui.control.Spinner ...
+            {mustBeScalarOrEmpty}
+        % Button to move the head of the trail.
+        StepButton(:, 1) matlab.ui.control.Button {mustBeScalarOrEmpty}
+        % Button to reset the head of the trail.
+        RewindButton(:, 1) matlab.ui.control.Button {mustBeScalarOrEmpty}
+        % Button to animate the snail trail.
+        AnimateButton(:, 1) matlab.ui.control.Button {mustBeScalarOrEmpty}
+    end % properties ( Access = private, Transient, NonCopyable )
+
+    properties ( Constant, Hidden )
+        % Product dependencies.
+        Dependencies(1, :) string = "MATLAB"
+        % Description.
+        ShortDescription(1, 1) string = "Plot excess returns against" + ...
+            " tracking errors for an asset relative to a benchmark"
+    end % properties ( Constant, Hidden )
+
+    methods
+
+        function value = get.Returns( obj )
+
+            value = obj.Returns_;
+
+        end % get.Returns
+
+        function set.Returns( obj, value )
+
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+
+            % Store the internal data.
+            obj.Returns_ = value;
+
+            % Rewind the snail trail.
+            rewind( obj )
+
+        end % set.Returns
+
+        function value = get.TrailLength( obj )
+
+            value = obj.TrailLength_;
+
+        end % get.TrailLength
+
+        function set.TrailLength( obj, value )
+
+            % Check the proposed trail length.
+            h = height( obj.PerformanceStatistics );
+            assert( value <= h, "SnailTrailChart:InvalidTrailLength", ...
+                "The trail length cannot exceed the height of the " + ...
+                "PerformanceStatistics table, %d.", h )
+
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+
+            % Set the internal property.
+            obj.TrailLength_ = value;
+
+        end % set.TrailLength
+
+        function value = get.CurrentIndex( obj )
+
+            value = obj.CurrentIndex_;
+
+        end % get.CurrentIndex
+
+        function set.CurrentIndex( obj, value )
+
+            % Check the proposed index.
+            h = height( obj.PerformanceStatistics );
+            assert( value <= h, "SnailTrail:InvalidCurrentIndex", ...
+                "The current index cannot exceed the height of the " + ...
+                "PerformanceStatistics table, %d.", h )
+
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+
+            % Set the internal property.
+            obj.CurrentIndex_ = value;
+
+        end % set.CurrentIndex
+
+        function value = get.CurrentDate( obj )
+
+            value = obj.PerformanceStatistics. ...
+                PeriodEndDate(obj.CurrentIndex_);
+
+        end % get.CurrentDate
+
+        function set.CurrentDate( obj, value )
+
+            % Validate the new date.
+            [dateInRange, idx] = ismember( value, ...
+                obj.PerformanceStatistics.PeriodEndDate );
+            assert( dateInRange, "SnailTrail:InvalidCurrentDate", ...
+                "The current date must be chosen from the " + ...
+                "available period end dates." )
+
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+
+            % Update the current index.
+            obj.CurrentIndex = idx;
+
+        end % set.CurrentDate
+
+        function value = get.Period( obj )
+
+            value = obj.Period_;
+
+        end % get.Period
+
+        function set.Period( obj, value )
+
+            % Check the proposed period.
+            h = height( obj.PerformanceStatistics );
+            assert( value <= h/2, "SnailTrail:InvalidPeriod", ...
+                "The current index cannot exceed half the height " + ...
+                "of the PerformanceStatistics table, %d.", h )
+
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+
+            % Set the internal property.
+            obj.Period_ = value;
+
+        end % set.Period
+
+        function value = get.Controls( obj )
+
+            value = obj.ToggleButton.Value;
+
+        end % get.Controls
+
+        function set.Controls( obj, value )
+
+            % Update the toggle button.
+            obj.ToggleButton.Value = value;
+
+            % Invoke the toggle button callback.
+            obj.onToggleButtonPressed()
+
+        end % set.Controls
+
+        function value = get.ShowCurrentPointDetails( obj )
+
+            value = obj.CurrentPointCheckBox.Value;
+
+        end % get.ShowCurrentPointDetails
+
+        function set.ShowCurrentPointDetails( obj, value )
+
+            % Update the check box.
+            obj.CurrentPointCheckBox.Value = value;
+
+            % Invoke the check box callback.
+            obj.onCurrentPointDetailsSelected()
+
+        end % set.ShowCurrentPointDetails
+
+        function value = get.PerformanceStatistics( obj )
+
+            % Period end dates.
+            PeriodEndDate = obj.Returns_.Properties.RowTimes;
+            PeriodEndDate = PeriodEndDate(obj.Period_:end);
+
+            % Window size.
+            n = obj.Period_;
+
+            % Asset and benchmark.
+            benchmark = obj.Returns_{:, 1};
+            asset = obj.Returns_{:, 2};
+
+            % Rolling mean difference.
+            ExcessReturn = double.empty( 0, 1 );
+            for k = height( obj.Returns_ ) : -1 : n
+                ExcessReturn(k-n+1, 1) = ...
+                    mean( asset(k-n+1:k) - benchmark(k-n+1:k) );
+            end % for
+
+            % Rolling std difference.
+            TrackingError = double.empty( 0, 1 );
+            for k = height( obj.Returns_ ) : -1 : n
+                TrackingError(k-n+1, 1) = ...
+                    std( asset(k-n+1:k) - benchmark(k-n+1:k) );
+            end % for
+
+            % Information ratio.
+            InformationRatio = ExcessReturn ./ TrackingError;
+
+            % Place the results in a timetable.
+            value = timetable( PeriodEndDate, ExcessReturn, ...
+                TrackingError, InformationRatio );
+
+        end % get.PerformanceStatistics
+
+        function step( obj, numSteps )
+            %STEP Increment/decrement the trail by the given number of
+            %steps.
+
+            % Validate the number of steps.
+            if nargin < 2
+                numSteps = 1;
+            else
+                validateattributes( numSteps, "double", ...
+                    ["scalar", "real", "finite", "integer"], ...
+                    "step", "the number of steps" )
+            end % if
+
+            % Saturate if the number of steps is too large or too small.
+            if numSteps >= 0
+                obj.CurrentIndex = min( obj.CurrentIndex_ + numSteps, ...
+                    height( obj.PerformanceStatistics ) );
+            else
+                obj.CurrentIndex = max( 1, obj.CurrentIndex_ + numSteps );
+            end % if
+
+        end % step
+
+        function rewind( obj )
+            %REWIND Rewind the snail trail.
+
+            obj.CurrentIndex = 1;
+
+        end % rewind
+
+        function animate( obj )
+            %ANIMATE Animate the snail trail.
+
+            for k = 1:height( obj.PerformanceStatistics )
+                obj.CurrentIndex = k;
+                drawnow()
+            end % for
+
+        end % animate
+
+    end % methods
+
+    methods
+
+        function obj = SnailTrailChart( namedArgs )
+            %SNAILTRAILCHART Construct a SnailTrailChart object, given 
+            %optional name-value arguments.
+
+            arguments ( Input )
+                namedArgs.?SnailTrailChart
+            end % arguments ( Input )            
+
+            % Set any user-defined properties.
+            set( obj, namedArgs )
+
+        end % constructor
+
+        function varargout = xlabel( obj, varargin )
+
+            [varargout{1:nargout}] = xlabel( obj.Axes, varargin{:} );
+
+        end % xlabel
+
+        function varargout = ylabel( obj, varargin )
+
+            [varargout{1:nargout}] = ylabel( obj.Axes, varargin{:} );
+
+        end % ylabel
+
+        function varargout = title( obj, varargin )
+
+            [varargout{1:nargout}] = title( obj.Axes, varargin{:} );
+
+        end % title
+
+        function varargout = colorbar( obj, varargin )
+
+            % Call the colorbar function on the chart's axes.
+            [varargout{1:nargout}] = colorbar( obj.Axes, varargin{:} );
+
+            % Ensure the colorbar check box is up-to-date.
+            hasbar = ~isempty( obj.Axes.Colorbar );
+            obj.ColorbarCheckBox.Value = hasbar;
+
+            % Update the label if necessary.
+            if hasbar
+                obj.Axes.Colorbar.Label.String = "Information ratio";
+            end % if
+
+        end % colorbar
+
+        function varargout = colormap( obj, varargin )
+
+            % Call the colormap function on the chart's axes.
+            [varargout{1:nargout}] = colormap( obj.Axes, varargin{:} );
+
+        end % colormap
+
+        function varargout = axis( obj, varargin )
+
+            [varargout{1:nargout}] = axis( obj.Axes, varargin{:} );
+
+        end % axis
+
+        function exportgraphics( obj, varargin )
+
+            exportgraphics( obj.Axes, varargin{:} )
+
+        end % exportgraphics
+
+    end % methods
+
+    methods ( Access = protected )
+
+        function setup( obj )
+            %SETUP Initialize the chart graphics.
+
+            % Define the layout grid.
+            obj.LayoutGrid = uigridlayout( obj, [1, 2], ...
+                "ColumnWidth", ["1x", "0x"] );
+
+            % Create the chart's axes.
+            obj.Axes = axes( "Parent", obj.LayoutGrid, ...
+                "XGrid", "on", ...
+                "YGrid", "on" );
+
+            % Add a state button to show/hide the chart's controls.
+            tb = axtoolbar( obj.Axes, "default" );
+            iconPath = fullfile( chartsRoot(), "charts", "images", ...
+                "Cog.png" );
+            obj.ToggleButton = axtoolbarbtn( tb, "state", ...
+                "Value", "off", ...
+                "Tooltip", "Show chart controls", ...
+                "Icon", iconPath, ...
+                "ValueChangedFcn", @obj.onToggleButtonPressed );
+
+            % Add default annotations.
+            xlabel( obj.Axes, "Tracking error" )
+            ylabel( obj.Axes, "Excess return" )
+            title( obj.Axes, "SnailTrail Chart" )
+
+            % Add the scatter plot.
+            hold( obj.Axes, "on" )
+            obj.ScatterSeries = scatter( obj.Axes, [], [], 12, [], ...
+                "o", "filled" );
+            hold( obj.Axes, "off" )
+
+            % Create the trail.
+            obj.Trail = line( "Parent", obj.Axes, ...
+                "XData", [], ...
+                "YData", [], ...
+                "Color", [0.8, 0, 0], ...
+                "Marker", ".", ...
+                "MarkerSize", 12, ...
+                "LineWidth", 1.5 );
+
+            % Create the head.
+            obj.Head = line( "Parent", obj.Axes, ...
+                "XData", [], ...
+                "YData", [], ...
+                "Marker", "s", ...
+                "MarkerEdgeColor", "k", ...
+                "MarkerFaceColor", "m" );
+
+            % Draw the crosshair to create the appearance of four
+            % quadrants.
+            obj.CrossHair(1) = line( "Parent", obj.Axes, ...
+                "XData", [NaN, NaN], ...
+                "YData", [0, 0], ...
+                "Color", 1 - obj.Axes.Color, ...
+                "LineWidth", 2.5 );
+            obj.CrossHair(2) = line( "Parent", obj.Axes, ...
+                "XData", [0, 0], ...
+                "YData", [NaN, NaN], ...
+                "Color", 1 - obj.Axes.Color, ...
+                "LineWidth", 2.5 );
+
+            % Add the colorbar.
+            c = colorbar( obj.Axes );
+            c.Label.String = "Information ratio";
+
+            % Create the text box.
+            obj.TextBox = text( NaN, NaN, "", ...
+                "Parent", obj.Axes );
+
+            % Add the chart control panel and layout.
+            p = uipanel( "Parent", obj.LayoutGrid, ...
+                "Title", "Chart Controls", ...
+                "FontWeight", "bold" );
+            p.Layout.Column = 2;
+            controlLayout = uigridlayout( p, [5, 2], ...
+                "RowHeight", repmat( "fit", 5, 1 ) );
+
+            % Colorbar check box.
+            obj.ColorbarCheckBox = uicheckbox( ...
+                "Parent", controlLayout, ...
+                "Interruptible", "off", ...
+                "BusyAction", "cancel", ...
+                "Text", "Colorbar", ...
+                "Tooltip", "Show/hide the colorbar", ...
+                "Value", true, ...
+                "ValueChangedFcn", @obj.onColorbarSelected );
+            
+            % Current point details check box.
+            obj.CurrentPointCheckBox = uicheckbox( ...
+                "Parent", controlLayout, ...
+                "Interruptible", "off", ...
+                "BusyAction", "cancel", ...
+                "Text", "Current point details", ...
+                "Tooltip", "Show/hide the current point details", ...
+                "Value", true, ...
+                "ValueChangedFcn", @obj.onCurrentPointDetailsSelected );
+
+            % Spinner for the number of steps.
+            uilabel( "Parent", controlLayout, ...
+                "Text", "Number of steps:" );
+            obj.NumStepsSpinner = uispinner( "Parent", controlLayout, ...
+                "Value", 1, ...
+                "Step", 1, ...
+                "RoundFractionalValues", "on", ...
+                "Tooltip", "Select the number of steps", ...
+                "ValueDisplayFormat", "%d" );
+
+            % Button for taking steps.
+            obj.StepButton = uibutton( controlLayout, "push", ...
+                "Interruptible", "off", ...
+                "BusyAction", "cancel", ...
+                "Text", char( 10139 ) + " Step ", ...
+                "Tooltip", ...
+                "Take the specified number of steps in the trail", ...
+                "ButtonPushedFcn", @obj.onStepButtonPushed );
+            obj.StepButton.Layout.Column = [1, 2];
+
+            % Rewind button.
+            obj.RewindButton = uibutton( controlLayout, "push", ...
+                "Interruptible", "off", ...
+                "BusyAction", "cancel", ...
+                "Text", char( 9194 ) + " Rewind", ...
+                "Tooltip", ...
+                "Rewind the trail back to the starting point", ...
+                "ButtonPushedFcn", @obj.onRewindButtonPushed );
+            obj.RewindButton.Layout.Column = [1, 2];
+
+            % Animate button.
+            obj.AnimateButton = uibutton( controlLayout, "push", ...
+                "Interruptible", "off", ...
+                "BusyAction", "cancel", ...
+                "Text", char( 9654 ) + " Animate", ...
+                "Tooltip", "Animate the entire snail trail", ...
+                "ButtonPushedFcn", @obj.onAnimateButtonPushed );
+            obj.AnimateButton.Layout.Column = [1, 2];
+
+        end % setup
+
+        function update( obj )
+            %UPDATE Refresh the chart graphics.
+
+            if obj.ComputationRequired
+
+                % Reset the cross hairs.
+                obj.CrossHair(1).XData = NaN( 1, 2 );
+                obj.CrossHair(2).YData = NaN( 1, 2 );
+
+                % Scatter series.
+                set( obj.ScatterSeries, ...
+                    "XData", obj.PerformanceStatistics.TrackingError, ...
+                    "YData", obj.PerformanceStatistics.ExcessReturn, ...
+                    "CData", obj.PerformanceStatistics.InformationRatio )
+
+                % Trail.
+                p = obj.CurrentIndex_;
+                t = obj.TrailLength_;
+                if p >= t
+                    set( obj.Trail, ...
+                        "XData", obj.PerformanceStatistics...
+                        .TrackingError(p-t+1:p), ...
+                        "YData", obj.PerformanceStatistics...
+                        .ExcessReturn(p-t+1:p) )
+                else
+                    set( obj.Trail, "XData", ...
+                        obj.PerformanceStatistics.TrackingError(1:p), ...
+                        "YData", ...
+                        obj.PerformanceStatistics.ExcessReturn(1:p) )
+                end % if
+
+                % Head.
+                set( obj.Head, "XData", ...
+                    obj.PerformanceStatistics.TrackingError(p), ...
+                    "YData", ...
+                    obj.PerformanceStatistics.ExcessReturn(p) )
+
+                % Update the text box.
+                x = obj.Axes.XLim(1) + 0.005;
+                y = obj.Axes.YLim(2) - 0.10 * diff( obj.Axes.YLim );
+                d = obj.CurrentDate;
+                idx = obj.CurrentIndex_;
+                er = obj.PerformanceStatistics.ExcessReturn(idx);
+                te = obj.PerformanceStatistics.TrackingError(idx);
+                ir = obj.PerformanceStatistics.InformationRatio(idx);
+                set( obj.TextBox, "Position", [x, y, 0], ...
+                    "String", ["Date: " + string( d ); ...
+                    "Excess return: " + num2str( er ); ...
+                    "Tracking error: " + num2str( te ); ...
+                    "Information ratio: " + num2str( ir )] )
+
+                % Update the cross hairs.
+                obj.CrossHair(1).XData = obj.Axes.XLim;
+                obj.CrossHair(2).YData = obj.Axes.YLim;
+
+                % Mark the chart clean.
+                obj.ComputationRequired = false;
+
+            end % if
+
+            % Update the stylistic properties.
+            set( obj.CrossHair, "Color", 1 - obj.Axes.Color, ...
+                "LineWidth", obj.CrossHairLineWidth )
+            obj.ScatterSeries.SizeData = obj.MarkerSize^2;
+            set( [obj.Head, obj.Trail], "MarkerSize", obj.MarkerSize )
+            obj.Trail.LineWidth = obj.TrailLineWidth;
+
+        end % update
+
+    end % methods ( Access = protected )
+
+    methods ( Access = private )
+
+        function onToggleButtonPressed( obj, ~, ~ )
+            %ONTOGGLEBUTTONPRESSED Hide/show the chart controls.
+
+            toggleDown = obj.ToggleButton.Value;
+
+            if toggleDown
+                % Show the controls.
+                obj.LayoutGrid.ColumnWidth{2} = "fit";
+                obj.ToggleButton.Tooltip = "Hide chart controls";
+            else
+                % Hide the controls.
+                obj.LayoutGrid.ColumnWidth{2} = "0x";
+                obj.ToggleButton.Tooltip = "Show chart controls";
+            end % if
+
+        end % onToggleButtonPressed
+
+        function onColorbarSelected( obj, ~, ~ )
+            %ONCOLORBARSELECTED Show/hide the colorbar.
+
+            checked = obj.ColorbarCheckBox.Value;
+            if checked
+                colorbar( obj )
+            else
+                colorbar( obj, "off" )
+            end % if
+
+        end % onColorbarSelected
+
+        function onCurrentPointDetailsSelected( obj, ~, ~ )
+            %ONCURRENTPOINTDETAILSSELECTED Show/hide the current point
+            %details.
+
+            obj.TextBox.Visible = obj.CurrentPointCheckBox.Value;
+
+        end % onCurrentPointDetailsSelected
+
+        function onStepButtonPushed( obj, ~, ~ )
+            %ONSTEPBUTTONPUSHED Call the step() method.
+
+            step( obj, obj.NumStepsSpinner.Value )
+
+        end % onStepButtonPushed
+
+        function onRewindButtonPushed( obj, ~, ~ )
+            %ONREWINDBUTTONPUSHED Call the rewind() method.
+
+            rewind( obj )
+
+        end % onRewindButtonPushed
+
+        function onAnimateButtonPushed( obj, ~, ~ )
+            %ONANIMATEBUTTONPUSHED Call the animate() method.
+
+            obj.AnimateButton.Enable = "off";
+            animate( obj )
+            obj.AnimateButton.Enable = "on";
+
+        end % onAnimateButtonPushed
+
+    end % methods ( Access = private )
+
+end % classdef
+
+function rets = defaultReturnsData()
+%DEFAULTRETURNSDATA Create an empty timetable of returns data.
+
+Date = datetime.empty( 0, 1 );
+Asset = double.empty( 0, 1 );
+Benchmark = double.empty( 0, 1 );
+rets = timetable( Date, Asset, Benchmark );
+
+end % defaultReturnsData
+
+function mustBeAssetAndBenchmarkReturns( tt )
+%MUSTBEASSETANDBENCHMARKRETURNS Validate the given input data.
+
+if ~isempty( tt )
+
+    % Check that we have enough data.
+    assert( height( tt ) >= 10, "SnailTrailChart:ShortData", ...
+        "At least 10 observations are required." )
+
+    % Check the dates and the individual variables.
+    d = tt.Properties.RowTimes;
+    assert( isa( d, "datetime" ) && issorted( d ), ...
+        "SnailTrail:InvalidDates", ...
+        "Timetable row times must be increasing datetime values." )
+    names = ["asset", "benchmark"];
+    for k = [1, 2]
+        validateattributes( tt{:, k}, "double", ["real", "finite"], ...
+            "SnailTrailChart", "the " + names(k) + " series" )
+    end % for
+
+end % if
+
+end % mustBeAssetAndBenchmarkReturns
+##### SOURCE END #####
+-->
+</body>
+</html>

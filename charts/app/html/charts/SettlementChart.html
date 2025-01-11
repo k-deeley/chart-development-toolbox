@@ -1,0 +1,1349 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      -->
+<title>SettlementChart</title>
+<meta name="generator" content="MATLAB 25.1">
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+<meta name="DC.date" content="2025-01-11">
+<meta name="DC.source" content="SettlementChart.m">
+<style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style>
+</head>
+<body>
+<div class="content">
+<pre class="codeinput">
+<span class="keyword">classdef</span> SettlementChart &lt; Component
+    <span class="comment">%SETTLEMENTCHART Chart displaying option prices against strike prices.</span>
+    <span class="comment">%A settlement chart plots option prices on the y-axis against strike</span>
+    <span class="comment">%prices on the x-axis. The option prices comprise put prices below</span>
+    <span class="comment">%the at-the-money (ATM) price, and call prices above the at-the-money</span>
+    <span class="comment">%price.</span>
+    <span class="comment">%</span>
+    <span class="comment">% See also BLSPRICE.</span>
+
+    <span class="comment">% Copyright 2019-2025 The MathWorks, Inc.</span>
+
+    <span class="keyword">properties</span> ( Dependent )
+        <span class="comment">% The strike (i.e., exercise) price of the option.</span>
+        Strike<span class="typesection">(:, 1) double {mustBeNonnegative, mustBeFinite}</span>
+        <span class="comment">% The price of the underlying asset, in currency units.</span>
+        Price<span class="typesection">(1, 1) double {mustBeNonnegative, mustBeFinite}</span>
+        <span class="comment">% Annualized continuously compounded risk-free rate of return</span>
+        <span class="comment">% over the life of the option.</span>
+        Rate<span class="typesection">(1, 1) double {mustBeInRange( Rate, 0, 1 )}</span>
+        <span class="comment">% The time to expiray of the option, expressed in years.</span>
+        Time<span class="typesection">(1, 1) double {mustBeNonnegative, mustBeFinite}</span>
+        <span class="comment">% Annualized asset price volatility.</span>
+        Volatility<span class="typesection">(1, 1) double {mustBeInRange( Volatility, 0, 1 )}</span>
+        <span class="comment">% Annualized continuously compounded yield of the underlying asset</span>
+        <span class="comment">% over the life of the option.</span>
+        Yield<span class="typesection">(1, 1) double {mustBeInRange( Yield, 0, 1 )}</span>
+    <span class="keyword">end</span> <span class="comment">% properties</span>
+
+    <span class="keyword">properties</span> ( Dependent, SetAccess = private )
+        <span class="comment">% Call and put prices computed using the Black-Scholes model.</span>
+        OptionPrices<span class="typesection">(:, 2) double {mustBeNonnegative, mustBeFinite}</span>
+        <span class="comment">% At-the-money price (call-put parity price).</span>
+        AtTheMoneyPrice<span class="typesection">(:, 1) double {mustBeNonnegative, mustBeFinite}</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Dependent, SetAccess = private )</span>
+
+    <span class="keyword">properties</span>
+        <span class="comment">% Call curve color.</span>
+        CallColor <span class="typesection">{validatecolor}</span> = [0, 0.4470, 0.7410]
+        <span class="comment">% Call curve line style.</span>
+        CallLineStyle<span class="typesection">(1, 1) string {mustBeLineStyle}</span> = <span class="string">"-"</span>
+        <span class="comment">% Call curve line width.</span>
+        CallLineWidth<span class="typesection">(1, 1) double {mustBePositive, mustBeFinite}</span> = 1.5
+        <span class="comment">% Call curve marker.</span>
+        CallMarker<span class="typesection">(1, 1) string {mustBeMarker}</span> = <span class="string">"."</span>
+        <span class="comment">% Call curve marker size.</span>
+        CallMarkerSize<span class="typesection">(1, 1) double {mustBePositive, mustBeFinite}</span> = 12
+        <span class="comment">% Put curve color.</span>
+        PutColor <span class="typesection">{validatecolor}</span> = [0.85, 0.325, 0.098]
+        <span class="comment">% Put curve line style.</span>
+        PutLineStyle<span class="typesection">(1, 1) string {mustBeLineStyle}</span> = <span class="string">"-"</span>
+        <span class="comment">% Put curve line width.</span>
+        PutLineWidth<span class="typesection">(1, 1) double {mustBePositive, mustBeFinite}</span> = 1.5
+        <span class="comment">% Put curve marker.</span>
+        PutMarker<span class="typesection">(1, 1) string {mustBeMarker}</span> = <span class="string">"."</span>
+        <span class="comment">% Put curve marker size.</span>
+        PutMarkerSize<span class="typesection">(1, 1) double {mustBePositive, mustBeFinite}</span> = 12
+        <span class="comment">% Call-put parity line color.</span>
+        AtTheMoneyColor <span class="typesection">{validatecolor}</span> = [0.5, 0.5, 0.5]
+        <span class="comment">% Call-put parity line line style.</span>
+        AtTheMoneyLineStyle<span class="typesection">(1, 1) string {mustBeLineStyle}</span> = <span class="string">"-"</span>
+        <span class="comment">% Call-put parity line line width.</span>
+        AtTheMoneyLineWidth<span class="typesection">(1, 1) double {mustBePositive, mustBeFinite}</span> = 2
+        <span class="comment">% Call-put parity line label.</span>
+        AtTheMoneyLabel<span class="typesection">(1, 1) string </span>= <span class="string">""</span>
+    <span class="keyword">end</span> <span class="comment">% properties</span>
+
+    <span class="keyword">properties</span> ( Dependent )
+        <span class="comment">% Visibility of the chart controls.</span>
+        Controls<span class="typesection">(1, 1) matlab.lang.OnOffSwitchState</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Dependent )</span>
+
+    <span class="keyword">properties</span> ( Access = private )
+        <span class="comment">% Internal storage for the Price property.</span>
+        Price_<span class="typesection">(1, 1) double {mustBeNonnegative, mustBeFinite}</span> = 100
+        <span class="comment">% Internal storage for the Rate property.</span>
+        Rate_<span class="typesection">(1, 1) double {mustBeInRange( Rate_, 0, 1 )}</span> = 0.1
+        <span class="comment">% Internal storage for the Time property.</span>
+        Time_<span class="typesection">(1, 1) double {mustBeNonnegative, mustBeFinite}</span> = 0.1
+        <span class="comment">% Internal storage for the Volatility property.</span>
+        Volatility_<span class="typesection">(1, 1) double {mustBeInRange( Volatility_, 0, 1 )}</span> = 0.1
+        <span class="comment">% Internal storage for the Yield property.</span>
+        Yield_<span class="typesection">(1, 1) double {mustBeInRange( Yield_, 0, 1 )}</span> = 0.1
+        <span class="comment">% Internal storage for the Strike property.</span>
+        Strike_<span class="typesection">(:, 1) double {mustBeNonnegative, mustBeFinite}</span> = (85:115).'
+        <span class="comment">% Logical scalar specifying whether a computation is required.</span>
+        ComputationRequired<span class="typesection">(1, 1) logical </span>= false
+    <span class="keyword">end</span> <span class="comment">% properties ( Access = private )</span>
+
+    <span class="keyword">properties</span> ( Access = private, Transient, NonCopyable )
+        <span class="comment">% Chart layout.</span>
+        LayoutGrid<span class="typesection">(:, 1) matlab.ui.container.GridLayout </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Chart axes.</span>
+        Axes<span class="typesection">(:, 1) matlab.graphics.axis.Axes {mustBeScalarOrEmpty}</span>
+        <span class="comment">% Toggle button for the chart controls.</span>
+        ToggleButton<span class="typesection">(:, 1) matlab.ui.controls.ToolbarStateButton </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Call curve.</span>
+        CallLine<span class="typesection">(:, 1) matlab.graphics.primitive.Line {mustBeScalarOrEmpty}</span>
+        <span class="comment">% Put curve.</span>
+        PutLine<span class="typesection">(:, 1) matlab.graphics.primitive.Line {mustBeScalarOrEmpty}</span>
+        <span class="comment">% At the money line.</span>
+        AtTheMoneyLine<span class="typesection">(1, 1) matlab.graphics.chart.decoration.ConstantLine</span>
+        <span class="comment">% Strike price edit fields.</span>
+        StrikeEditFields<span class="typesection">(3, 1) matlab.ui.control.NumericEditField</span>
+        <span class="comment">% Underlying asset price spinner.</span>
+        PriceSpinner<span class="typesection">(:, 1) matlab.ui.control.Spinner {mustBeScalarOrEmpty}</span>
+        <span class="comment">% Interest rate spinner.</span>
+        RateSpinner<span class="typesection">(:, 1) matlab.ui.control.Spinner {mustBeScalarOrEmpty}</span>
+        <span class="comment">% Expiry time spinner.</span>
+        TimeSpinner<span class="typesection">(:, 1) matlab.ui.control.Spinner {mustBeScalarOrEmpty}</span>
+        <span class="comment">% Volatility spinner.</span>
+        VolatilitySpinner<span class="typesection">(:, 1) matlab.ui.control.Spinner </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Yield spinner.</span>
+        YieldSpinner<span class="typesection">(:, 1) matlab.ui.control.Spinner {mustBeScalarOrEmpty}</span>
+        <span class="comment">% Update button.</span>
+        UpdateButton<span class="typesection">(:, 1) matlab.ui.control.Button {mustBeScalarOrEmpty}</span>
+        <span class="comment">% Default button.</span>
+        DefaultButton<span class="typesection">(:, 1) matlab.ui.control.Button {mustBeScalarOrEmpty}</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Access = private, Transient, NonCopyable )</span>
+
+    <span class="keyword">properties</span> ( Constant, Hidden )
+        <span class="comment">% Product dependencies.</span>
+        Dependencies<span class="typesection">(1, :) </span>= [<span class="string">"MATLAB"</span>, <span class="keyword">...</span>
+            <span class="string">"Statistics and Machine Learning Toolbox"</span>, <span class="keyword">...</span>
+            <span class="string">"Financial Toolbox"</span> ]
+        <span class="comment">% Description.</span>
+        ShortDescription<span class="typesection">(1, 1) string </span>= <span class="string">"Plot in the money option"</span> + <span class="keyword">...</span>
+            <span class="string">" prices against strike prices"</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Constant, Hidden )</span>
+
+    <span class="keyword">methods</span>
+
+        <span class="keyword">function</span> value = get.Price( obj )
+
+            value = obj.Price_;
+
+        <span class="keyword">end</span> <span class="comment">% get.Price</span>
+
+        <span class="keyword">function</span> set.Price( obj, value )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Update the control.</span>
+            obj.PriceSpinner.Value = value;
+
+            <span class="comment">% Update the internal stored property.</span>
+            obj.Price_ = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.Price</span>
+
+        <span class="keyword">function</span> value = get.Rate( obj )
+
+            value = obj.Rate_;
+
+        <span class="keyword">end</span> <span class="comment">% get.Rate</span>
+
+        <span class="keyword">function</span> set.Rate( obj, value )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Update the control.</span>
+            obj.RateSpinner.Value = value;
+
+            <span class="comment">% Update the internal stored property.</span>
+            obj.Rate_ = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.Rate</span>
+
+        <span class="keyword">function</span> value = get.Time( obj )
+
+            value = obj.Time_;
+
+        <span class="keyword">end</span> <span class="comment">% get.Time</span>
+
+        <span class="keyword">function</span> set.Time( obj, value )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Update the control.</span>
+            obj.TimeSpinner.Value = value;
+
+            <span class="comment">% Update the internal stored property.</span>
+            obj.Time_ = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.Time</span>
+
+        <span class="keyword">function</span> value = get.Volatility( obj )
+
+            value = obj.Volatility_;
+
+        <span class="keyword">end</span> <span class="comment">% get.Volatility</span>
+
+        <span class="keyword">function</span> set.Volatility( obj, value )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Update the control.</span>
+            obj.VolatilitySpinner.Value = value;
+
+            <span class="comment">% Update the internal stored property.</span>
+            obj.Volatility_ = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.Volatility</span>
+
+        <span class="keyword">function</span> value = get.Yield( obj )
+
+            value = obj.Yield_;
+
+        <span class="keyword">end</span> <span class="comment">% get.Yield</span>
+
+        <span class="keyword">function</span> set.Yield( obj, value )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Update the control.</span>
+            obj.YieldSpinner.Value = value;
+
+            <span class="comment">% Update the internal stored property.</span>
+            obj.Yield_ = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.Yield</span>
+
+        <span class="keyword">function</span> value = get.Strike( obj )
+
+            value = obj.Strike_;
+
+        <span class="keyword">end</span> <span class="comment">% get.Strike</span>
+
+        <span class="keyword">function</span> set.Strike( obj, value )
+
+            <span class="comment">% Check that the strike prices are sorted and contain at least</span>
+            <span class="comment">% three values.</span>
+            assert( numel( value ) &gt;= 3 &amp;&amp; issorted( value ), <span class="keyword">...</span>
+                <span class="string">"Settlement:InvalidStrike"</span>, <span class="keyword">...</span>
+                <span class="string">"The strike price vector should contain at least "</span> + <span class="keyword">...</span>
+                <span class="string">"three values, and should be sorted in increasing order."</span> )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Update the control.</span>
+            obj.StrikeEditFields(1).Value = value(1);
+            obj.StrikeEditFields(2).Value = mean( diff( value ) );
+            obj.StrikeEditFields(3).Value = value(end);
+
+            <span class="comment">% Update the internal stored property.</span>
+            obj.Strike_ = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.Strike</span>
+
+        <span class="keyword">function</span> value = get.OptionPrices( obj )
+
+            [value(:, 1), value(:, 2)] = <span class="keyword">...</span>
+                blsprice( obj.Price_, obj.Strike_, obj.Rate_, <span class="keyword">...</span>
+                obj.Time_, obj.Volatility_, obj.Yield_ );
+
+        <span class="keyword">end</span> <span class="comment">% get.OptionPrices</span>
+
+        <span class="keyword">function</span> value = get.AtTheMoneyPrice( obj )
+
+            <span class="comment">% This is derived by solving C - P = 0 for K, and from the</span>
+            <span class="comment">% call-put parity formula:</span>
+            <span class="comment">% C - P = S - K * exp( - ( r - q ) * T )</span>
+            <span class="comment">% This gives the expression K = S * exp( (r - q) * T ) for the</span>
+            <span class="comment">% at-the-money price.</span>
+            value = obj.Price_ * <span class="keyword">...</span>
+                exp( ( obj.Rate_ - obj.Yield_ ) * obj.Time_ );
+
+        <span class="keyword">end</span> <span class="comment">% get.AtTheMoneyPrice</span>
+
+        <span class="keyword">function</span> value = get.Controls( obj )
+
+            value = obj.ToggleButton.Value;
+
+        <span class="keyword">end</span> <span class="comment">% get.Controls</span>
+
+        <span class="keyword">function</span> set.Controls( obj, value )
+
+            <span class="comment">% Update the toggle button.</span>
+            obj.ToggleButton.Value = value;
+
+            <span class="comment">% Invoke the toggle button callback.</span>
+            obj.onToggleButtonPressed()
+
+        <span class="keyword">end</span> <span class="comment">% set.Controls</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods</span>
+
+    <span class="keyword">methods</span>
+
+        <span class="keyword">function</span> obj = SettlementChart( namedArgs )
+            <span class="comment">%SETTLEMENTCHART Construct a SettlementChart object, given</span>
+            <span class="comment">%optional name-value arguments.</span>
+
+            <span class="keyword">arguments</span> ( Input )
+                namedArgs.?SettlementChart
+            <span class="keyword">end</span> <span class="comment">% arguments ( Input )</span>
+
+            <span class="comment">% Set any user-defined properties.</span>
+            set( obj, namedArgs )
+
+        <span class="keyword">end</span> <span class="comment">% constructor</span>
+
+        <span class="keyword">function</span> varargout = xlabel( obj, varargin )
+
+            [varargout{1:nargout}] = xlabel( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% xlabel</span>
+
+        <span class="keyword">function</span> varargout = ylabel( obj, varargin )
+
+            [varargout{1:nargout}] = ylabel( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% ylabel</span>
+
+        <span class="keyword">function</span> varargout = title( obj, varargin )
+
+            [varargout{1:nargout}] = title( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% title</span>
+
+        <span class="keyword">function</span> grid( obj, varargin )
+
+            <span class="comment">% Invoke grid on the axes.</span>
+            grid( obj.Axes, varargin{:} )
+
+        <span class="keyword">end</span> <span class="comment">% grid</span>
+
+        <span class="keyword">function</span> varargout = legend( obj, varargin )
+
+            [varargout{1:nargout}] = legend( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% legend</span>
+
+        <span class="keyword">function</span> varargout = axis( obj, varargin )
+
+            [varargout{1:nargout}] = axis( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% axis</span>
+
+        <span class="keyword">function</span> exportgraphics( obj, varargin )
+
+            exportgraphics( obj.Axes, varargin{:} )
+
+        <span class="keyword">end</span> <span class="comment">% exportgraphics</span>
+
+        <span class="keyword">function</span> reset( obj )
+            <span class="comment">%RESET Set the default chart data.</span>
+
+            obj.Strike     = (85:0.1:115).';
+            obj.Price      = 100;
+            obj.Rate       = 0.05;
+            obj.Time       = 0.25;
+            obj.Volatility = 0.5;
+            obj.Yield      = 0;
+
+        <span class="keyword">end</span> <span class="comment">% reset</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods</span>
+
+    <span class="keyword">methods</span> ( Access = protected )
+
+        <span class="keyword">function</span> setup( obj )
+            <span class="comment">%SETUP Initialize the chart graphics.</span>
+
+            <span class="comment">% Define the chart layout.</span>
+            obj.LayoutGrid = uigridlayout( obj, [1, 2], <span class="keyword">...</span>
+                <span class="string">"ColumnWidth"</span>, [<span class="string">"1x"</span>, <span class="string">"0x"</span>] );
+
+            <span class="comment">% Create the chart's axes.</span>
+            obj.Axes = axes( <span class="string">"Parent"</span>, obj.LayoutGrid );
+
+            <span class="comment">% Add a state button to show/hide the chart's controls.</span>
+            tb = axtoolbar( obj.Axes, <span class="string">"default"</span> );
+            iconPath = fullfile( chartsRoot(), <span class="string">"charts"</span>, <span class="string">"images"</span>, <span class="keyword">...</span>
+                <span class="string">"Cog.png"</span> );
+            obj.ToggleButton = axtoolbarbtn( tb, <span class="string">"state"</span>, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, <span class="string">"off"</span>, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Show chart controls"</span>, <span class="keyword">...</span>
+                <span class="string">"Icon"</span>, iconPath, <span class="keyword">...</span>
+                <span class="string">"ValueChangedFcn"</span>, @obj.onToggleButtonPressed );
+
+            <span class="comment">% Create the various option plots.</span>
+            hold( obj.Axes, <span class="string">"on"</span> )
+            obj.CallLine = line( <span class="string">"Parent"</span>, obj.Axes, <span class="keyword">...</span>
+                <span class="string">"XData"</span>, NaN, <span class="keyword">...</span>
+                <span class="string">"YData"</span>, NaN, <span class="keyword">...</span>
+                <span class="string">"DisplayName"</span>, <span class="string">"Call prices"</span> );
+            obj.PutLine = line( <span class="string">"Parent"</span>, obj.Axes, <span class="keyword">...</span>
+                <span class="string">"XData"</span>, NaN, <span class="keyword">...</span>
+                <span class="string">"YData"</span>, NaN, <span class="keyword">...</span>
+                <span class="string">"DisplayName"</span>, <span class="string">"Put prices"</span> );
+            obj.AtTheMoneyLine = xline( obj.Axes, 0, <span class="keyword">...</span>
+                <span class="string">"Alpha"</span>, 1, <span class="keyword">...</span>
+                <span class="string">"LabelOrientation"</span>, <span class="string">"horizontal"</span>, <span class="keyword">...</span>
+                <span class="string">"LabelHorizontalAlignment"</span>, <span class="string">"left"</span>, <span class="keyword">...</span>
+                <span class="string">"HandleVisibility"</span>, <span class="string">"off"</span> );
+            hold( obj.Axes, <span class="string">"off"</span> )
+
+            <span class="comment">% Add some initial annotations.</span>
+            xlabel( obj.Axes, <span class="string">"Strike price"</span> )
+            ylabel( obj.Axes, <span class="string">"Option price"</span> )
+            title( obj.Axes, <span class="string">"Settlement Chart"</span> )
+            grid( obj.Axes, <span class="string">"on"</span> )
+            legend( obj.Axes )
+
+            <span class="comment">% Add the chart controls.</span>
+            p = uipanel( <span class="string">"Parent"</span>, obj.LayoutGrid, <span class="keyword">...</span>
+                <span class="string">"Title"</span>, <span class="string">"Chart Controls"</span>, <span class="keyword">...</span>
+                <span class="string">"FontWeight"</span>, <span class="string">"bold"</span> );
+            p.Layout.Column = 2;
+            verticalLayout = uigridlayout( p, [2, 1], <span class="keyword">...</span>
+                <span class="string">"RowHeight"</span>, [<span class="string">"fit"</span>, <span class="string">"1x"</span>] );
+
+            <span class="comment">% First, the strike price specification.</span>
+            strikeLayout = uigridlayout( verticalLayout, [3, 3], <span class="keyword">...</span>
+                <span class="string">"Padding"</span>, 2, <span class="keyword">...</span>
+                <span class="string">"RowSpacing"</span>, 2, <span class="keyword">...</span>
+                <span class="string">"ColumnWidth"</span>, repmat( <span class="string">"fit"</span>, 1, 3 ), <span class="keyword">...</span>
+                <span class="string">"RowHeight"</span>, repmat( <span class="string">"fit"</span>, 1, 3 ) );
+            uilabel( strikeLayout, <span class="string">"Text"</span>, <span class="string">"Strike (K):"</span>, <span class="keyword">...</span>
+                <span class="string">"HorizontalAlignment"</span>, <span class="string">"right"</span> );
+            uilabel( strikeLayout, <span class="string">"Text"</span>, <span class="string">"Min:"</span>, <span class="keyword">...</span>
+                <span class="string">"HorizontalAlignment"</span>, <span class="string">"right"</span> );
+            obj.StrikeEditFields(1) = uieditfield( <span class="keyword">...</span>
+                strikeLayout, <span class="string">"numeric"</span>, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, obj.Strike(1), <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Specify the minimum strike price"</span>, <span class="keyword">...</span>
+                <span class="string">"Limits"</span>, [0, Inf], <span class="keyword">...</span>
+                <span class="string">"UpperLimitInclusive"</span>, false );
+            lb = uilabel( strikeLayout, <span class="string">"Text"</span>, <span class="string">"Step:"</span>, <span class="keyword">...</span>
+                <span class="string">"HorizontalAlignment"</span>, <span class="string">"right"</span> );
+            lb.Layout.Column = 2;
+            obj.StrikeEditFields(2) = uieditfield( <span class="keyword">...</span>
+                strikeLayout, <span class="string">"numeric"</span>, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, diff( obj.Strike(1:2) ), <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="keyword">...</span>
+                <span class="string">"Specify the step size in the strike price vector"</span>, <span class="keyword">...</span>
+                <span class="string">"Limits"</span>, [0, Inf], <span class="keyword">...</span>
+                <span class="string">"LowerLimitInclusive"</span>, false, <span class="keyword">...</span>
+                <span class="string">"UpperLimitInclusive"</span>, false );
+            lb = uilabel( strikeLayout, <span class="string">"Text"</span>, <span class="string">"Max:"</span>, <span class="keyword">...</span>
+                <span class="string">"HorizontalAlignment"</span>, <span class="string">"right"</span> );
+            lb.Layout.Column = 2;
+            obj.StrikeEditFields(3) = uieditfield( <span class="keyword">...</span>
+                strikeLayout, <span class="string">"numeric"</span>, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, obj.Strike(end), <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Specify the maximum strike price"</span>, <span class="keyword">...</span>
+                <span class="string">"Limits"</span>, [0, Inf], <span class="keyword">...</span>
+                <span class="string">"UpperLimitInclusive"</span>, false );
+
+            <span class="comment">% Next, the underlying asset price.</span>
+            controlLayout = uigridlayout( verticalLayout, [8, 2], <span class="keyword">...</span>
+                <span class="string">"RowHeight"</span>, repmat( <span class="string">"fit"</span>, 1, 8 ), <span class="keyword">...</span>
+                <span class="string">"ColumnWidth"</span>, [<span class="string">"fit"</span>, <span class="string">"1x"</span>] );
+            uilabel( controlLayout, <span class="string">"Text"</span>, <span class="string">"Price (S):"</span>, <span class="keyword">...</span>
+                <span class="string">"HorizontalAlignment"</span>, <span class="string">"right"</span> );
+            obj.PriceSpinner = uispinner( controlLayout, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, obj.Price, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Specify the underlying asset price"</span>, <span class="keyword">...</span>
+                <span class="string">"Limits"</span>, [0, Inf], <span class="keyword">...</span>
+                <span class="string">"UpperLimitInclusive"</span>, false, <span class="keyword">...</span>
+                <span class="string">"Step"</span>, 1 );
+
+            <span class="comment">% Risk-free interest rate.</span>
+            uilabel( controlLayout, <span class="string">"Text"</span>, <span class="string">"Rate (r):"</span>, <span class="keyword">...</span>
+                <span class="string">"HorizontalAlignment"</span>, <span class="string">"right"</span> );
+            obj.RateSpinner = uispinner( controlLayout, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, obj.Rate, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Specify the risk-free interest rate"</span>, <span class="keyword">...</span>
+                <span class="string">"Limits"</span>, [0, 1], <span class="keyword">...</span>
+                <span class="string">"Step"</span>, 0.01, <span class="keyword">...</span>
+                <span class="string">"ValueDisplayFormat"</span>, <span class="string">"%.2f"</span> );
+
+            <span class="comment">% Expiry time.</span>
+            uilabel( controlLayout, <span class="string">"Text"</span>, <span class="string">"Time (T):"</span>, <span class="keyword">...</span>
+                <span class="string">"HorizontalAlignment"</span>, <span class="string">"right"</span> );
+            obj.TimeSpinner = uispinner( controlLayout, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, obj.Time, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Specify the expiry time"</span>, <span class="keyword">...</span>
+                <span class="string">"Limits"</span>, [0, Inf], <span class="keyword">...</span>
+                <span class="string">"UpperLimitInclusive"</span>, false, <span class="keyword">...</span>
+                <span class="string">"Step"</span>, 0.25, <span class="keyword">...</span>
+                <span class="string">"ValueDisplayFormat"</span>, <span class="string">"%.2f"</span> );
+
+            <span class="comment">% Volatility.</span>
+            uilabel( controlLayout, <span class="keyword">...</span>
+                <span class="string">"Text"</span>, <span class="string">"Volatility ("</span> + char( 963 ) + <span class="string">"):"</span>, <span class="keyword">...</span>
+                <span class="string">"HorizontalAlignment"</span>, <span class="string">"right"</span> );
+            obj.VolatilitySpinner = uispinner( controlLayout, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, obj.Volatility, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Specify the volatility"</span>, <span class="keyword">...</span>
+                <span class="string">"Limits"</span>, [0, 1], <span class="keyword">...</span>
+                <span class="string">"Step"</span>, 0.01, <span class="keyword">...</span>
+                <span class="string">"ValueDisplayFormat"</span>, <span class="string">"%.2f"</span> );
+
+            <span class="comment">% Yield.</span>
+            uilabel( controlLayout, <span class="string">"Text"</span>, <span class="string">"Yield (q):"</span>, <span class="keyword">...</span>
+                <span class="string">"HorizontalAlignment"</span>, <span class="string">"right"</span> );
+            obj.YieldSpinner = uispinner( controlLayout, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, obj.Yield, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Specify the yield"</span>, <span class="keyword">...</span>
+                <span class="string">"Limits"</span>, [0, 1], <span class="keyword">...</span>
+                <span class="string">"Step"</span>, 0.01, <span class="keyword">...</span>
+                <span class="string">"ValueDisplayFormat"</span>, <span class="string">"%.2f"</span> );
+
+            <span class="comment">% Button to update the chart data.</span>
+            obj.UpdateButton = uibutton( controlLayout, <span class="keyword">...</span>
+                <span class="string">"Text"</span>, char( 9654 ) + <span class="string">" Update "</span>, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="keyword">...</span>
+                <span class="string">"Set the settlement chart data "</span> + <span class="keyword">...</span>
+                <span class="string">"using the specified values"</span>, <span class="keyword">...</span>
+                <span class="string">"ButtonPushedFcn"</span>, @obj.onUpdateButtonPushed );
+            obj.UpdateButton.Layout.Column = [1, 2];
+
+            <span class="comment">% Button to revert to the default values.</span>
+            obj.DefaultButton = uibutton( controlLayout, <span class="keyword">...</span>
+                <span class="string">"Text"</span>, char( 8635 ) + <span class="string">" Set default values"</span>, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="keyword">...</span>
+                <span class="string">"Set the default settlement chart data values"</span>, <span class="keyword">...</span>
+                <span class="string">"ButtonPushedFcn"</span>, @obj.onDefaultButtonPushed );
+            obj.DefaultButton.Layout.Column = [1, 2];
+
+        <span class="keyword">end</span> <span class="comment">% setup</span>
+
+        <span class="keyword">function</span> update( obj )
+            <span class="comment">%UPDATE Refresh the chart graphics.</span>
+
+            <span class="keyword">if</span> obj.ComputationRequired
+                <span class="comment">% Update the call price curve.</span>
+                callIdx = obj.Strike &gt;= obj.AtTheMoneyPrice;
+                set( obj.CallLine, <span class="string">"XData"</span>, obj.Strike(callIdx), <span class="keyword">...</span>
+                    <span class="string">"YData"</span>, obj.OptionPrices(callIdx, 1) )
+                <span class="comment">% Update the put price curve.</span>
+                putIdx = obj.Strike &lt;= obj.AtTheMoneyPrice;
+                set( obj.PutLine, <span class="string">"XData"</span>, obj.Strike(putIdx), <span class="keyword">...</span>
+                    <span class="string">"YData"</span>, obj.OptionPrices(putIdx, 2) )
+                <span class="comment">% Update the at-the-money line.</span>
+                obj.AtTheMoneyLine.Value = obj.AtTheMoneyPrice;
+                <span class="comment">% Mark the chart clean.</span>
+                obj.ComputationRequired = false;
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+            <span class="comment">% Update the chart's decorative properties.</span>
+            set( obj.CallLine, <span class="string">"LineStyle"</span>, obj.CallLineStyle, <span class="keyword">...</span>
+                <span class="string">"LineWidth"</span>, obj.CallLineWidth, <span class="keyword">...</span>
+                <span class="string">"Color"</span>, obj.CallColor, <span class="keyword">...</span>
+                <span class="string">"Marker"</span>, obj.CallMarker, <span class="keyword">...</span>
+                <span class="string">"MarkerSize"</span>, obj.CallMarkerSize )
+            set( obj.PutLine, <span class="string">"LineStyle"</span>, obj.PutLineStyle, <span class="keyword">...</span>
+                <span class="string">"LineWidth"</span>, obj.PutLineWidth, <span class="keyword">...</span>
+                <span class="string">"Color"</span>, obj.PutColor, <span class="keyword">...</span>
+                <span class="string">"Marker"</span>, obj.PutMarker, <span class="keyword">...</span>
+                <span class="string">"MarkerSize"</span>, obj.PutMarkerSize )
+            set( obj.AtTheMoneyLine, <span class="keyword">...</span>
+                <span class="string">"Label"</span>, obj.AtTheMoneyLabel, <span class="keyword">...</span>
+                <span class="string">"LineStyle"</span>, obj.AtTheMoneyLineStyle, <span class="keyword">...</span>
+                <span class="string">"Color"</span>, obj.AtTheMoneyColor, <span class="keyword">...</span>
+                <span class="string">"LineWidth"</span>, obj.AtTheMoneyLineWidth )
+
+        <span class="keyword">end</span> <span class="comment">% update</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods ( Access = protected )</span>
+
+    <span class="keyword">methods</span> ( Access = private )
+
+        <span class="keyword">function</span> onToggleButtonPressed( obj, ~, ~ )
+            <span class="comment">%ONTOGGLEBUTTONPRESSED Hide/show the chart controls.</span>
+
+            toggleDown = obj.ToggleButton.Value;
+
+            <span class="keyword">if</span> toggleDown
+                <span class="comment">% Show the controls.</span>
+                obj.LayoutGrid.ColumnWidth{2} = <span class="string">"fit"</span>;
+                obj.ToggleButton.Tooltip = <span class="string">"Hide chart controls"</span>;
+            <span class="keyword">else</span>
+                <span class="comment">% Hide the controls.</span>
+                obj.LayoutGrid.ColumnWidth{2} = <span class="string">"0x"</span>;
+                obj.ToggleButton.Tooltip = <span class="string">"Show chart controls"</span>;
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+        <span class="keyword">end</span> <span class="comment">% onToggleButtonPressed</span>
+
+        <span class="keyword">function</span> onUpdateButtonPushed( obj, ~, ~ )
+            <span class="comment">%ONUPDATEBUTTONPUSHED Take the user-entered data from the</span>
+            <span class="comment">%control interface and update the chart.</span>
+
+            <span class="comment">% Issue an alert if the strike price parameters are invalid.</span>
+            kMin = obj.StrikeEditFields(1).Value;
+            kStep = obj.StrikeEditFields(2).Value;
+            kMax = obj.StrikeEditFields(3).Value;
+            <span class="keyword">try</span>
+                obj.Strike = kMin:kStep:kMax;
+            <span class="keyword">catch</span>
+                f = ancestor( obj, <span class="string">"figure"</span> );
+                <span class="keyword">if</span> ~isempty( f )
+                    uialert( f, <span class="keyword">...</span>
+                        <span class="string">"Please check the strike price parameters "</span> + <span class="keyword">...</span>
+                        <span class="string">"(minimum, step size and maximum)."</span>, <span class="keyword">...</span>
+                        <span class="string">"Invalid strike price parameters"</span> )
+                    <span class="keyword">return</span>
+                <span class="keyword">end</span> <span class="comment">% if</span>
+            <span class="keyword">end</span> <span class="comment">% try/catch</span>
+
+            <span class="comment">% Update the chart with the remaining parameter values taken</span>
+            <span class="comment">% from the user-facing controls.</span>
+            set( obj, <span class="string">"Price"</span>, obj.PriceSpinner.Value, <span class="keyword">...</span>
+                <span class="string">"Rate"</span>, obj.RateSpinner.Value, <span class="keyword">...</span>
+                <span class="string">"Time"</span>, obj.TimeSpinner.Value, <span class="keyword">...</span>
+                <span class="string">"Volatility"</span>, obj.VolatilitySpinner.Value, <span class="keyword">...</span>
+                <span class="string">"Yield"</span>, obj.YieldSpinner.Value )
+
+        <span class="keyword">end</span> <span class="comment">% onUpdateButtonPushed</span>
+
+        <span class="keyword">function</span> onDefaultButtonPushed( obj, ~, ~ )
+            <span class="comment">%ONDEFAULTBUTTONPUSHED Revert to the default chart data values.</span>
+
+            reset( obj )
+
+        <span class="keyword">end</span> <span class="comment">% onDefaultButtonPushed</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods ( Access = private )</span>
+
+<span class="keyword">end</span> <span class="comment">% classdef</span>
+</pre>
+</div>
+<!--
+##### SOURCE BEGIN #####
+classdef SettlementChart < Component
+    %SETTLEMENTCHART Chart displaying option prices against strike prices.
+    %A settlement chart plots option prices on the y-axis against strike
+    %prices on the x-axis. The option prices comprise put prices below
+    %the at-the-money (ATM) price, and call prices above the at-the-money
+    %price.
+    %
+    % See also BLSPRICE.
+
+    % Copyright 2019-2025 The MathWorks, Inc.
+
+    properties ( Dependent )
+        % The strike (i.e., exercise) price of the option.
+        Strike(:, 1) double {mustBeNonnegative, mustBeFinite}
+        % The price of the underlying asset, in currency units.
+        Price(1, 1) double {mustBeNonnegative, mustBeFinite}
+        % Annualized continuously compounded risk-free rate of return
+        % over the life of the option.
+        Rate(1, 1) double {mustBeInRange( Rate, 0, 1 )}
+        % The time to expiray of the option, expressed in years.
+        Time(1, 1) double {mustBeNonnegative, mustBeFinite}
+        % Annualized asset price volatility.
+        Volatility(1, 1) double {mustBeInRange( Volatility, 0, 1 )}
+        % Annualized continuously compounded yield of the underlying asset
+        % over the life of the option.
+        Yield(1, 1) double {mustBeInRange( Yield, 0, 1 )}
+    end % properties
+
+    properties ( Dependent, SetAccess = private )
+        % Call and put prices computed using the Black-Scholes model.
+        OptionPrices(:, 2) double {mustBeNonnegative, mustBeFinite}
+        % At-the-money price (call-put parity price).
+        AtTheMoneyPrice(:, 1) double {mustBeNonnegative, mustBeFinite}
+    end % properties ( Dependent, SetAccess = private )
+
+    properties
+        % Call curve color.
+        CallColor {validatecolor} = [0, 0.4470, 0.7410]
+        % Call curve line style.
+        CallLineStyle(1, 1) string {mustBeLineStyle} = "-"
+        % Call curve line width.
+        CallLineWidth(1, 1) double {mustBePositive, mustBeFinite} = 1.5
+        % Call curve marker.
+        CallMarker(1, 1) string {mustBeMarker} = "."
+        % Call curve marker size.
+        CallMarkerSize(1, 1) double {mustBePositive, mustBeFinite} = 12
+        % Put curve color.
+        PutColor {validatecolor} = [0.85, 0.325, 0.098]
+        % Put curve line style.
+        PutLineStyle(1, 1) string {mustBeLineStyle} = "-"
+        % Put curve line width.
+        PutLineWidth(1, 1) double {mustBePositive, mustBeFinite} = 1.5
+        % Put curve marker.
+        PutMarker(1, 1) string {mustBeMarker} = "."
+        % Put curve marker size.
+        PutMarkerSize(1, 1) double {mustBePositive, mustBeFinite} = 12
+        % Call-put parity line color.
+        AtTheMoneyColor {validatecolor} = [0.5, 0.5, 0.5]
+        % Call-put parity line line style.
+        AtTheMoneyLineStyle(1, 1) string {mustBeLineStyle} = "-"
+        % Call-put parity line line width.
+        AtTheMoneyLineWidth(1, 1) double {mustBePositive, mustBeFinite} = 2
+        % Call-put parity line label.
+        AtTheMoneyLabel(1, 1) string = ""
+    end % properties
+
+    properties ( Dependent )
+        % Visibility of the chart controls.
+        Controls(1, 1) matlab.lang.OnOffSwitchState
+    end % properties ( Dependent )
+
+    properties ( Access = private )
+        % Internal storage for the Price property.
+        Price_(1, 1) double {mustBeNonnegative, mustBeFinite} = 100
+        % Internal storage for the Rate property.
+        Rate_(1, 1) double {mustBeInRange( Rate_, 0, 1 )} = 0.1
+        % Internal storage for the Time property.
+        Time_(1, 1) double {mustBeNonnegative, mustBeFinite} = 0.1
+        % Internal storage for the Volatility property.
+        Volatility_(1, 1) double {mustBeInRange( Volatility_, 0, 1 )} = 0.1
+        % Internal storage for the Yield property.
+        Yield_(1, 1) double {mustBeInRange( Yield_, 0, 1 )} = 0.1
+        % Internal storage for the Strike property.
+        Strike_(:, 1) double {mustBeNonnegative, mustBeFinite} = (85:115).'
+        % Logical scalar specifying whether a computation is required.
+        ComputationRequired(1, 1) logical = false
+    end % properties ( Access = private )
+
+    properties ( Access = private, Transient, NonCopyable )
+        % Chart layout.
+        LayoutGrid(:, 1) matlab.ui.container.GridLayout ...
+            {mustBeScalarOrEmpty}
+        % Chart axes.
+        Axes(:, 1) matlab.graphics.axis.Axes {mustBeScalarOrEmpty}
+        % Toggle button for the chart controls.
+        ToggleButton(:, 1) matlab.ui.controls.ToolbarStateButton ...
+            {mustBeScalarOrEmpty}
+        % Call curve.
+        CallLine(:, 1) matlab.graphics.primitive.Line {mustBeScalarOrEmpty}
+        % Put curve.
+        PutLine(:, 1) matlab.graphics.primitive.Line {mustBeScalarOrEmpty}
+        % At the money line.
+        AtTheMoneyLine(1, 1) matlab.graphics.chart.decoration.ConstantLine
+        % Strike price edit fields.
+        StrikeEditFields(3, 1) matlab.ui.control.NumericEditField
+        % Underlying asset price spinner.
+        PriceSpinner(:, 1) matlab.ui.control.Spinner {mustBeScalarOrEmpty}
+        % Interest rate spinner.
+        RateSpinner(:, 1) matlab.ui.control.Spinner {mustBeScalarOrEmpty}
+        % Expiry time spinner.
+        TimeSpinner(:, 1) matlab.ui.control.Spinner {mustBeScalarOrEmpty}
+        % Volatility spinner.
+        VolatilitySpinner(:, 1) matlab.ui.control.Spinner ...
+            {mustBeScalarOrEmpty}
+        % Yield spinner.
+        YieldSpinner(:, 1) matlab.ui.control.Spinner {mustBeScalarOrEmpty}
+        % Update button.
+        UpdateButton(:, 1) matlab.ui.control.Button {mustBeScalarOrEmpty}
+        % Default button.
+        DefaultButton(:, 1) matlab.ui.control.Button {mustBeScalarOrEmpty}
+    end % properties ( Access = private, Transient, NonCopyable )
+
+    properties ( Constant, Hidden )
+        % Product dependencies.
+        Dependencies(1, :) = ["MATLAB", ...
+            "Statistics and Machine Learning Toolbox", ...
+            "Financial Toolbox" ]
+        % Description.
+        ShortDescription(1, 1) string = "Plot in the money option" + ...
+            " prices against strike prices"
+    end % properties ( Constant, Hidden )
+
+    methods
+
+        function value = get.Price( obj )
+
+            value = obj.Price_;
+
+        end % get.Price
+
+        function set.Price( obj, value )
+
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+
+            % Update the control.
+            obj.PriceSpinner.Value = value;
+
+            % Update the internal stored property.
+            obj.Price_ = value;
+
+        end % set.Price
+
+        function value = get.Rate( obj )
+
+            value = obj.Rate_;
+
+        end % get.Rate
+
+        function set.Rate( obj, value )
+
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+
+            % Update the control.
+            obj.RateSpinner.Value = value;
+
+            % Update the internal stored property.
+            obj.Rate_ = value;
+
+        end % set.Rate
+
+        function value = get.Time( obj )
+
+            value = obj.Time_;
+
+        end % get.Time
+
+        function set.Time( obj, value )
+
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+
+            % Update the control.
+            obj.TimeSpinner.Value = value;
+
+            % Update the internal stored property.
+            obj.Time_ = value;
+
+        end % set.Time
+
+        function value = get.Volatility( obj )
+
+            value = obj.Volatility_;
+
+        end % get.Volatility
+
+        function set.Volatility( obj, value )
+
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+
+            % Update the control.
+            obj.VolatilitySpinner.Value = value;
+
+            % Update the internal stored property.
+            obj.Volatility_ = value;
+
+        end % set.Volatility
+
+        function value = get.Yield( obj )
+
+            value = obj.Yield_;
+
+        end % get.Yield
+
+        function set.Yield( obj, value )
+
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+
+            % Update the control.
+            obj.YieldSpinner.Value = value;
+
+            % Update the internal stored property.
+            obj.Yield_ = value;
+
+        end % set.Yield
+
+        function value = get.Strike( obj )
+
+            value = obj.Strike_;
+
+        end % get.Strike
+
+        function set.Strike( obj, value )
+
+            % Check that the strike prices are sorted and contain at least
+            % three values.
+            assert( numel( value ) >= 3 && issorted( value ), ...
+                "Settlement:InvalidStrike", ...
+                "The strike price vector should contain at least " + ...
+                "three values, and should be sorted in increasing order." )
+
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+
+            % Update the control.
+            obj.StrikeEditFields(1).Value = value(1);
+            obj.StrikeEditFields(2).Value = mean( diff( value ) );
+            obj.StrikeEditFields(3).Value = value(end);
+
+            % Update the internal stored property.
+            obj.Strike_ = value;
+
+        end % set.Strike
+
+        function value = get.OptionPrices( obj )
+
+            [value(:, 1), value(:, 2)] = ...
+                blsprice( obj.Price_, obj.Strike_, obj.Rate_, ...
+                obj.Time_, obj.Volatility_, obj.Yield_ );
+
+        end % get.OptionPrices
+
+        function value = get.AtTheMoneyPrice( obj )
+
+            % This is derived by solving C - P = 0 for K, and from the
+            % call-put parity formula:
+            % C - P = S - K * exp( - ( r - q ) * T )
+            % This gives the expression K = S * exp( (r - q) * T ) for the
+            % at-the-money price.
+            value = obj.Price_ * ...
+                exp( ( obj.Rate_ - obj.Yield_ ) * obj.Time_ );
+
+        end % get.AtTheMoneyPrice
+
+        function value = get.Controls( obj )
+
+            value = obj.ToggleButton.Value;
+
+        end % get.Controls
+
+        function set.Controls( obj, value )
+
+            % Update the toggle button.
+            obj.ToggleButton.Value = value;
+
+            % Invoke the toggle button callback.
+            obj.onToggleButtonPressed()
+
+        end % set.Controls
+
+    end % methods
+
+    methods
+
+        function obj = SettlementChart( namedArgs )
+            %SETTLEMENTCHART Construct a SettlementChart object, given
+            %optional name-value arguments.
+
+            arguments ( Input )
+                namedArgs.?SettlementChart
+            end % arguments ( Input )           
+
+            % Set any user-defined properties.
+            set( obj, namedArgs )
+
+        end % constructor
+
+        function varargout = xlabel( obj, varargin )
+
+            [varargout{1:nargout}] = xlabel( obj.Axes, varargin{:} );
+
+        end % xlabel
+
+        function varargout = ylabel( obj, varargin )
+
+            [varargout{1:nargout}] = ylabel( obj.Axes, varargin{:} );
+
+        end % ylabel
+
+        function varargout = title( obj, varargin )
+
+            [varargout{1:nargout}] = title( obj.Axes, varargin{:} );
+
+        end % title
+
+        function grid( obj, varargin )
+
+            % Invoke grid on the axes.
+            grid( obj.Axes, varargin{:} )
+
+        end % grid
+
+        function varargout = legend( obj, varargin )
+
+            [varargout{1:nargout}] = legend( obj.Axes, varargin{:} );
+
+        end % legend
+
+        function varargout = axis( obj, varargin )
+
+            [varargout{1:nargout}] = axis( obj.Axes, varargin{:} );
+
+        end % axis
+
+        function exportgraphics( obj, varargin )
+
+            exportgraphics( obj.Axes, varargin{:} )
+
+        end % exportgraphics
+
+        function reset( obj )
+            %RESET Set the default chart data.
+
+            obj.Strike     = (85:0.1:115).';
+            obj.Price      = 100;
+            obj.Rate       = 0.05;
+            obj.Time       = 0.25;
+            obj.Volatility = 0.5;
+            obj.Yield      = 0;
+
+        end % reset
+
+    end % methods
+
+    methods ( Access = protected )
+
+        function setup( obj )
+            %SETUP Initialize the chart graphics.
+
+            % Define the chart layout.
+            obj.LayoutGrid = uigridlayout( obj, [1, 2], ...
+                "ColumnWidth", ["1x", "0x"] );
+
+            % Create the chart's axes.
+            obj.Axes = axes( "Parent", obj.LayoutGrid );
+
+            % Add a state button to show/hide the chart's controls.
+            tb = axtoolbar( obj.Axes, "default" );
+            iconPath = fullfile( chartsRoot(), "charts", "images", ...
+                "Cog.png" );
+            obj.ToggleButton = axtoolbarbtn( tb, "state", ...
+                "Value", "off", ...
+                "Tooltip", "Show chart controls", ...
+                "Icon", iconPath, ...
+                "ValueChangedFcn", @obj.onToggleButtonPressed );
+
+            % Create the various option plots.
+            hold( obj.Axes, "on" )
+            obj.CallLine = line( "Parent", obj.Axes, ...
+                "XData", NaN, ...
+                "YData", NaN, ...
+                "DisplayName", "Call prices" );
+            obj.PutLine = line( "Parent", obj.Axes, ...
+                "XData", NaN, ...
+                "YData", NaN, ...
+                "DisplayName", "Put prices" );
+            obj.AtTheMoneyLine = xline( obj.Axes, 0, ...
+                "Alpha", 1, ...
+                "LabelOrientation", "horizontal", ...
+                "LabelHorizontalAlignment", "left", ...
+                "HandleVisibility", "off" );
+            hold( obj.Axes, "off" )
+
+            % Add some initial annotations.
+            xlabel( obj.Axes, "Strike price" )
+            ylabel( obj.Axes, "Option price" )
+            title( obj.Axes, "Settlement Chart" )
+            grid( obj.Axes, "on" )
+            legend( obj.Axes )
+
+            % Add the chart controls.
+            p = uipanel( "Parent", obj.LayoutGrid, ...
+                "Title", "Chart Controls", ...
+                "FontWeight", "bold" );
+            p.Layout.Column = 2;
+            verticalLayout = uigridlayout( p, [2, 1], ...
+                "RowHeight", ["fit", "1x"] );
+
+            % First, the strike price specification.
+            strikeLayout = uigridlayout( verticalLayout, [3, 3], ...
+                "Padding", 2, ...
+                "RowSpacing", 2, ...
+                "ColumnWidth", repmat( "fit", 1, 3 ), ...
+                "RowHeight", repmat( "fit", 1, 3 ) );
+            uilabel( strikeLayout, "Text", "Strike (K):", ...
+                "HorizontalAlignment", "right" );
+            uilabel( strikeLayout, "Text", "Min:", ...
+                "HorizontalAlignment", "right" );
+            obj.StrikeEditFields(1) = uieditfield( ...
+                strikeLayout, "numeric", ...
+                "Value", obj.Strike(1), ...
+                "Tooltip", "Specify the minimum strike price", ...
+                "Limits", [0, Inf], ...
+                "UpperLimitInclusive", false );
+            lb = uilabel( strikeLayout, "Text", "Step:", ...
+                "HorizontalAlignment", "right" );
+            lb.Layout.Column = 2;
+            obj.StrikeEditFields(2) = uieditfield( ...
+                strikeLayout, "numeric", ...
+                "Value", diff( obj.Strike(1:2) ), ...
+                "Tooltip", ...
+                "Specify the step size in the strike price vector", ...
+                "Limits", [0, Inf], ...
+                "LowerLimitInclusive", false, ...
+                "UpperLimitInclusive", false );
+            lb = uilabel( strikeLayout, "Text", "Max:", ...
+                "HorizontalAlignment", "right" );
+            lb.Layout.Column = 2;
+            obj.StrikeEditFields(3) = uieditfield( ...
+                strikeLayout, "numeric", ...
+                "Value", obj.Strike(end), ...
+                "Tooltip", "Specify the maximum strike price", ...
+                "Limits", [0, Inf], ...
+                "UpperLimitInclusive", false );
+
+            % Next, the underlying asset price.
+            controlLayout = uigridlayout( verticalLayout, [8, 2], ...
+                "RowHeight", repmat( "fit", 1, 8 ), ...
+                "ColumnWidth", ["fit", "1x"] );
+            uilabel( controlLayout, "Text", "Price (S):", ...
+                "HorizontalAlignment", "right" );
+            obj.PriceSpinner = uispinner( controlLayout, ...
+                "Value", obj.Price, ...
+                "Tooltip", "Specify the underlying asset price", ...
+                "Limits", [0, Inf], ...
+                "UpperLimitInclusive", false, ...
+                "Step", 1 );
+
+            % Risk-free interest rate.
+            uilabel( controlLayout, "Text", "Rate (r):", ...
+                "HorizontalAlignment", "right" );
+            obj.RateSpinner = uispinner( controlLayout, ...
+                "Value", obj.Rate, ...
+                "Tooltip", "Specify the risk-free interest rate", ...
+                "Limits", [0, 1], ...
+                "Step", 0.01, ...
+                "ValueDisplayFormat", "%.2f" );
+
+            % Expiry time.
+            uilabel( controlLayout, "Text", "Time (T):", ...
+                "HorizontalAlignment", "right" );
+            obj.TimeSpinner = uispinner( controlLayout, ...
+                "Value", obj.Time, ...
+                "Tooltip", "Specify the expiry time", ...
+                "Limits", [0, Inf], ...
+                "UpperLimitInclusive", false, ...
+                "Step", 0.25, ...
+                "ValueDisplayFormat", "%.2f" );
+
+            % Volatility.
+            uilabel( controlLayout, ...
+                "Text", "Volatility (" + char( 963 ) + "):", ...
+                "HorizontalAlignment", "right" );
+            obj.VolatilitySpinner = uispinner( controlLayout, ...
+                "Value", obj.Volatility, ...
+                "Tooltip", "Specify the volatility", ...
+                "Limits", [0, 1], ...
+                "Step", 0.01, ...
+                "ValueDisplayFormat", "%.2f" );
+
+            % Yield.
+            uilabel( controlLayout, "Text", "Yield (q):", ...
+                "HorizontalAlignment", "right" );
+            obj.YieldSpinner = uispinner( controlLayout, ...
+                "Value", obj.Yield, ...
+                "Tooltip", "Specify the yield", ...
+                "Limits", [0, 1], ...
+                "Step", 0.01, ...
+                "ValueDisplayFormat", "%.2f" );
+
+            % Button to update the chart data.
+            obj.UpdateButton = uibutton( controlLayout, ...
+                "Text", char( 9654 ) + " Update ", ...
+                "Tooltip", ...
+                "Set the settlement chart data " + ...
+                "using the specified values", ...
+                "ButtonPushedFcn", @obj.onUpdateButtonPushed );
+            obj.UpdateButton.Layout.Column = [1, 2];
+
+            % Button to revert to the default values.
+            obj.DefaultButton = uibutton( controlLayout, ...
+                "Text", char( 8635 ) + " Set default values", ...
+                "Tooltip", ...
+                "Set the default settlement chart data values", ...
+                "ButtonPushedFcn", @obj.onDefaultButtonPushed );
+            obj.DefaultButton.Layout.Column = [1, 2];
+
+        end % setup
+
+        function update( obj )
+            %UPDATE Refresh the chart graphics.
+
+            if obj.ComputationRequired
+                % Update the call price curve.
+                callIdx = obj.Strike >= obj.AtTheMoneyPrice;
+                set( obj.CallLine, "XData", obj.Strike(callIdx), ...
+                    "YData", obj.OptionPrices(callIdx, 1) )
+                % Update the put price curve.
+                putIdx = obj.Strike <= obj.AtTheMoneyPrice;
+                set( obj.PutLine, "XData", obj.Strike(putIdx), ...
+                    "YData", obj.OptionPrices(putIdx, 2) )
+                % Update the at-the-money line.
+                obj.AtTheMoneyLine.Value = obj.AtTheMoneyPrice;
+                % Mark the chart clean.
+                obj.ComputationRequired = false;
+            end % if
+
+            % Update the chart's decorative properties.
+            set( obj.CallLine, "LineStyle", obj.CallLineStyle, ...
+                "LineWidth", obj.CallLineWidth, ...
+                "Color", obj.CallColor, ...
+                "Marker", obj.CallMarker, ...
+                "MarkerSize", obj.CallMarkerSize )
+            set( obj.PutLine, "LineStyle", obj.PutLineStyle, ...
+                "LineWidth", obj.PutLineWidth, ...
+                "Color", obj.PutColor, ...
+                "Marker", obj.PutMarker, ...
+                "MarkerSize", obj.PutMarkerSize )
+            set( obj.AtTheMoneyLine, ...
+                "Label", obj.AtTheMoneyLabel, ...
+                "LineStyle", obj.AtTheMoneyLineStyle, ...
+                "Color", obj.AtTheMoneyColor, ...
+                "LineWidth", obj.AtTheMoneyLineWidth )
+
+        end % update
+
+    end % methods ( Access = protected )
+
+    methods ( Access = private )
+
+        function onToggleButtonPressed( obj, ~, ~ )
+            %ONTOGGLEBUTTONPRESSED Hide/show the chart controls.
+
+            toggleDown = obj.ToggleButton.Value;
+
+            if toggleDown
+                % Show the controls.
+                obj.LayoutGrid.ColumnWidth{2} = "fit";
+                obj.ToggleButton.Tooltip = "Hide chart controls";
+            else
+                % Hide the controls.
+                obj.LayoutGrid.ColumnWidth{2} = "0x";
+                obj.ToggleButton.Tooltip = "Show chart controls";
+            end % if
+
+        end % onToggleButtonPressed
+
+        function onUpdateButtonPushed( obj, ~, ~ )
+            %ONUPDATEBUTTONPUSHED Take the user-entered data from the
+            %control interface and update the chart.
+
+            % Issue an alert if the strike price parameters are invalid.
+            kMin = obj.StrikeEditFields(1).Value;
+            kStep = obj.StrikeEditFields(2).Value;
+            kMax = obj.StrikeEditFields(3).Value;
+            try
+                obj.Strike = kMin:kStep:kMax;
+            catch
+                f = ancestor( obj, "figure" );
+                if ~isempty( f )
+                    uialert( f, ...
+                        "Please check the strike price parameters " + ...
+                        "(minimum, step size and maximum).", ...
+                        "Invalid strike price parameters" )
+                    return
+                end % if
+            end % try/catch
+
+            % Update the chart with the remaining parameter values taken
+            % from the user-facing controls.
+            set( obj, "Price", obj.PriceSpinner.Value, ...
+                "Rate", obj.RateSpinner.Value, ...
+                "Time", obj.TimeSpinner.Value, ...
+                "Volatility", obj.VolatilitySpinner.Value, ...
+                "Yield", obj.YieldSpinner.Value )
+
+        end % onUpdateButtonPushed
+
+        function onDefaultButtonPushed( obj, ~, ~ )
+            %ONDEFAULTBUTTONPUSHED Revert to the default chart data values.
+
+            reset( obj )
+
+        end % onDefaultButtonPushed
+
+    end % methods ( Access = private )
+
+end % classdef
+##### SOURCE END #####
+-->
+</body>
+</html>

@@ -1,0 +1,591 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      -->
+<title>PolarChart</title>
+<meta name="generator" content="MATLAB 25.1">
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+<meta name="DC.date" content="2025-01-11">
+<meta name="DC.source" content="PolarChart.m">
+<style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style>
+</head>
+<body>
+<div class="content">
+<pre class="codeinput">
+<span class="keyword">classdef</span> PolarChart &lt; Chart
+    <span class="comment">%POLARCHART Chart displaying a line graph of dependent numeric</span>
+    <span class="comment">%variables plotted against independent circular data.</span>
+
+    <span class="comment">% Copyright 2018-2025 The MathWorks, Inc.</span>
+
+    <span class="keyword">properties</span> ( Dependent )
+        <span class="comment">% Chart angular data.</span>
+        AngularData<span class="typesection">(:, 1) double {mustBeReal, mustBeNonDecreasing}</span>
+        <span class="comment">% Chart radial data.</span>
+        RadialData<span class="typesection">(:, 2) double {mustBeReal}</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Dependent )</span>
+
+    <span class="keyword">properties</span>
+        <span class="comment">% Width of the lines.</span>
+        LineWidth<span class="typesection">(1, 1) double {mustBePositive, mustBeFinite}</span> = 1.5
+        <span class="comment">% Marker size.</span>
+        MarkerSize<span class="typesection">(1, 1) double {mustBePositive, mustBeFinite}</span> = 6
+    <span class="keyword">end</span> <span class="comment">% properties</span>
+
+    <span class="keyword">properties</span> ( Access = private )
+        <span class="comment">% Internal storage for the AngularData property.</span>
+        AngularData_<span class="typesection">(:, 1) double {mustBeReal, mustBeNonDecreasing}</span> = 0
+        <span class="comment">% Internal storage for the RadialData property.</span>
+        RadialData_<span class="typesection">(:, 2) double {mustBeReal}</span> = NaN( 1, 2 )
+        <span class="comment">% Logical scalar specifying whether a computation is required.</span>
+        ComputationRequired<span class="typesection">(1, 1) logical </span>= false
+    <span class="keyword">end</span> <span class="comment">% properties ( Access = private )</span>
+
+    <span class="keyword">properties</span> ( Access = private )
+        <span class="comment">% Chart axes.</span>
+        Axes<span class="typesection">(:, 1) matlab.graphics.axis.PolarAxes {mustBeScalarOrEmpty}</span>
+        <span class="comment">% Circular line plots.</span>
+        PolarLines<span class="typesection">(2, 1) matlab.graphics.chart.primitive.Line</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Access = private )</span>
+
+    <span class="keyword">properties</span> ( Constant, Hidden )
+        <span class="comment">% Product dependencies.</span>
+        Dependencies<span class="typesection">(1, :) string </span>= <span class="string">"MATLAB"</span>
+        <span class="comment">% Description.</span>
+        ShortDescription<span class="typesection">(1, 1) string </span>= <span class="string">"Polar line graph of "</span> + <span class="keyword">...</span>
+            <span class="string">"dependent numeric variables plotted against independent"</span> + <span class="keyword">...</span>
+            <span class="string">" circular data"</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Constant, Hidden )</span>
+
+    <span class="keyword">methods</span>
+
+        <span class="keyword">function</span> value = get.AngularData( obj )
+
+            value = obj.AngularData_;
+
+        <span class="keyword">end</span> <span class="comment">% get.AngularData</span>
+
+        <span class="keyword">function</span> set.AngularData( obj, value )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Set the internal data property.</span>
+            obj.AngularData_ = value;
+
+            <span class="comment">% Update the radial data.</span>
+            nTheta = numel( value );
+            nRadial = size( obj.RadialData_, 1 );
+            <span class="keyword">if</span> nTheta &lt; nRadial
+                obj.RadialData_ = obj.RadialData_(1:nTheta, :);
+            <span class="keyword">else</span>
+                obj.RadialData_(end+1:nTheta, :) = NaN;
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+        <span class="keyword">end</span> <span class="comment">% set.AngularData</span>
+
+        <span class="keyword">function</span> value = get.RadialData( obj )
+
+            value = obj.RadialData_;
+
+        <span class="keyword">end</span> <span class="comment">% get.RadialData</span>
+
+        <span class="keyword">function</span> set.RadialData( obj, value )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Update the internal data property.</span>
+            obj.RadialData_ = value;
+
+            <span class="comment">% Update the angular data.</span>
+            nTheta = numel( obj.AngularData_ );
+            nRadial = size( obj.RadialData_, 1 );
+            <span class="keyword">if</span> nRadial &lt; nTheta
+                obj.AngularData_ = obj.AngularData_(1:nRadial);
+            <span class="keyword">else</span>
+                obj.AngularData_(end+1:nRadial, 1) = NaN();
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+        <span class="keyword">end</span> <span class="comment">% set.RadialData</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods</span>
+
+    <span class="keyword">methods</span>
+
+        <span class="keyword">function</span> obj = PolarChart( namedArgs )
+            <span class="comment">%POLARCHART Construct a PolarChart object, given optional</span>
+            <span class="comment">%name-value arguments.</span>
+
+            <span class="keyword">arguments</span> ( Input )
+                namedArgs.?PolarChart
+            <span class="keyword">end</span> <span class="comment">% arguments ( Input )</span>
+
+            <span class="comment">% Set any user-defined properties.</span>
+            set( obj, namedArgs )
+
+        <span class="keyword">end</span> <span class="comment">% constructor</span>
+
+        <span class="keyword">function</span> varargout = title( obj, varargin )
+
+            [varargout{1:nargout}] = title( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% title</span>
+
+        <span class="keyword">function</span> varargout = legend( obj, varargin )
+
+            [varargout{1:nargout}] = legend( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% legend</span>
+
+        <span class="keyword">function</span> varargout = rticks( obj, varargin )
+
+            [varargout{1:nargout}] = rticks( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% rticks</span>
+
+        <span class="keyword">function</span> varargout = rticklabels( obj, varargin )
+
+            [varargout{1:nargout}] = rticklabels( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% rticklabels</span>
+
+        <span class="keyword">function</span> varargout = rtickformat( obj, varargin )
+
+            [varargout{1:nargout}] = rtickformat( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% rticklabels</span>
+
+        <span class="keyword">function</span> varargout = rtickangle( obj, varargin )
+
+            [varargout{1:nargout}] = rtickangle( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% rtickangle</span>
+
+        <span class="keyword">function</span> varargout = thetaticks( obj, varargin )
+
+            [varargout{1:nargout}] = thetaticks( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% thetaticks</span>
+
+        <span class="keyword">function</span> varargout = thetaticklabels( obj, varargin )
+
+            [varargout{1:nargout}] = <span class="keyword">...</span>
+                thetaticklabels( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% thetaticklabels</span>
+
+        <span class="keyword">function</span> varargout = thetatickformat( obj, varargin )
+
+            [varargout{1:nargout}] = <span class="keyword">...</span>
+                thetatickformat( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% thetatickformat</span>
+
+        <span class="keyword">function</span> varargout = axis( obj, varargin )
+
+            [varargout{1:nargout}] = axis( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% axis</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods</span>
+
+    <span class="keyword">methods</span> ( Access = protected )
+
+        <span class="keyword">function</span> setup( obj )
+            <span class="comment">%SETUP Initialize the chart graphics.</span>
+
+            <span class="comment">% Create the polar axes.</span>
+            obj.Axes = polaraxes( <span class="string">"Parent"</span>, obj.getLayout(), <span class="keyword">...</span>
+                <span class="string">"ThetaZeroLocation"</span>, <span class="string">"top"</span>, <span class="keyword">...</span>
+                <span class="string">"ThetaAxisUnits"</span>, <span class="string">"radians"</span>, <span class="keyword">...</span>
+                <span class="string">"ThetaDir"</span>, <span class="string">"clockwise"</span> );
+
+            <span class="comment">% Create the polar lines.</span>
+            hold( obj.Axes, <span class="string">"on"</span> )
+            obj.PolarLines = polarplot( obj.Axes, obj.AngularData_, <span class="keyword">...</span>
+                obj.RadialData_, <span class="keyword">...</span>
+                <span class="string">"Marker"</span>, <span class="string">"."</span>, <span class="keyword">...</span>
+                <span class="string">"MarkerSize"</span>, 10, <span class="keyword">...</span>
+                <span class="string">"LineStyle"</span>, <span class="string">"-"</span>, <span class="keyword">...</span>
+                <span class="string">"LineWidth"</span>, 1.5 );
+            hold( obj.Axes, <span class="string">"off"</span> )
+
+        <span class="keyword">end</span> <span class="comment">% setup</span>
+
+        <span class="keyword">function</span> update( obj )
+            <span class="comment">%UPDATE Refresh the chart graphics.</span>
+
+            <span class="keyword">if</span> obj.ComputationRequired
+
+                <span class="comment">% Update the lines.</span>
+                x = obj.AngularData_;
+                theta = x2theta( x );
+                set( obj.PolarLines(1), <span class="string">"ThetaData"</span>, theta, <span class="keyword">...</span>
+                    <span class="string">"RData"</span>, obj.RadialData_(:, 1) );
+                set( obj.PolarLines(2), <span class="string">"ThetaData"</span>, theta, <span class="keyword">...</span>
+                    <span class="string">"RData"</span>, obj.RadialData_(:, 2) );
+
+                <span class="comment">% Update the angular ticks and tick labels.</span>
+                nx = numel( x );
+                thetaTicks = linspace( 0, theta(end), nx );
+                thetaTickLabels = min( x ) + (max( x ) - min( x )) * <span class="keyword">...</span>
+                    thetaTicks / theta(end);
+                thetaticks( obj, thetaTicks )
+                thetaticklabels( obj, thetaTickLabels )
+
+                <span class="comment">% Mark the chart clean.</span>
+                obj.ComputationRequired = false;
+
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+            <span class="comment">% Refresh the chart's decorative properties.</span>
+            set( obj.PolarLines, <span class="string">"LineWidth"</span>, obj.LineWidth, <span class="keyword">...</span>
+                <span class="string">"MarkerSize"</span>, obj.MarkerSize )
+
+        <span class="keyword">end</span> <span class="comment">% update</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods ( Access = protected )</span>
+
+<span class="keyword">end</span> <span class="comment">% classdef</span>
+
+<span class="keyword">function</span> theta = x2theta( x )
+<span class="comment">%X2THETA Convert an increasing x-data vector to the corresponding angular</span>
+<span class="comment">%values in radians.</span>
+
+nx = numel( x );
+theta = (2 * pi * (1 - 1 / nx))* (x - min( x )) / (max( x ) - min( x ));
+
+<span class="keyword">end</span> <span class="comment">% x2theta</span>
+
+<span class="keyword">function</span> mustBeNonDecreasing( v )
+<span class="comment">%MUSTBENONDECREASING Validate that the input vector is nondecreasing.</span>
+
+validateattributes( v, <span class="string">"double"</span>, <span class="string">"nondecreasing"</span> )
+
+<span class="keyword">end</span> <span class="comment">% mustBeNonDecreasing</span>
+</pre>
+</div>
+<!--
+##### SOURCE BEGIN #####
+classdef PolarChart < Chart
+    %POLARCHART Chart displaying a line graph of dependent numeric 
+    %variables plotted against independent circular data.
+
+    % Copyright 2018-2025 The MathWorks, Inc.
+
+    properties ( Dependent )
+        % Chart angular data.
+        AngularData(:, 1) double {mustBeReal, mustBeNonDecreasing}
+        % Chart radial data.
+        RadialData(:, 2) double {mustBeReal}
+    end % properties ( Dependent )
+
+    properties
+        % Width of the lines.
+        LineWidth(1, 1) double {mustBePositive, mustBeFinite} = 1.5
+        % Marker size.
+        MarkerSize(1, 1) double {mustBePositive, mustBeFinite} = 6
+    end % properties
+
+    properties ( Access = private )
+        % Internal storage for the AngularData property.
+        AngularData_(:, 1) double {mustBeReal, mustBeNonDecreasing} = 0
+        % Internal storage for the RadialData property.
+        RadialData_(:, 2) double {mustBeReal} = NaN( 1, 2 )
+        % Logical scalar specifying whether a computation is required.
+        ComputationRequired(1, 1) logical = false
+    end % properties ( Access = private )
+
+    properties ( Access = private )
+        % Chart axes.
+        Axes(:, 1) matlab.graphics.axis.PolarAxes {mustBeScalarOrEmpty}
+        % Circular line plots.
+        PolarLines(2, 1) matlab.graphics.chart.primitive.Line
+    end % properties ( Access = private )
+
+    properties ( Constant, Hidden )
+        % Product dependencies.
+        Dependencies(1, :) string = "MATLAB"
+        % Description.
+        ShortDescription(1, 1) string = "Polar line graph of " + ...
+            "dependent numeric variables plotted against independent" + ...
+            " circular data"
+    end % properties ( Constant, Hidden )
+
+    methods
+
+        function value = get.AngularData( obj )
+
+            value = obj.AngularData_;
+
+        end % get.AngularData
+
+        function set.AngularData( obj, value )
+
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+
+            % Set the internal data property.
+            obj.AngularData_ = value;
+
+            % Update the radial data.
+            nTheta = numel( value );
+            nRadial = size( obj.RadialData_, 1 );
+            if nTheta < nRadial
+                obj.RadialData_ = obj.RadialData_(1:nTheta, :);
+            else
+                obj.RadialData_(end+1:nTheta, :) = NaN;
+            end % if
+
+        end % set.AngularData
+
+        function value = get.RadialData( obj )
+
+            value = obj.RadialData_;
+
+        end % get.RadialData
+
+        function set.RadialData( obj, value )
+
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+
+            % Update the internal data property.
+            obj.RadialData_ = value;
+
+            % Update the angular data.
+            nTheta = numel( obj.AngularData_ );
+            nRadial = size( obj.RadialData_, 1 );
+            if nRadial < nTheta
+                obj.AngularData_ = obj.AngularData_(1:nRadial);
+            else
+                obj.AngularData_(end+1:nRadial, 1) = NaN();
+            end % if
+
+        end % set.RadialData
+
+    end % methods
+
+    methods
+
+        function obj = PolarChart( namedArgs )
+            %POLARCHART Construct a PolarChart object, given optional
+            %name-value arguments.
+
+            arguments ( Input )
+                namedArgs.?PolarChart
+            end % arguments ( Input )
+
+            % Set any user-defined properties.
+            set( obj, namedArgs )
+
+        end % constructor
+
+        function varargout = title( obj, varargin )
+
+            [varargout{1:nargout}] = title( obj.Axes, varargin{:} );
+
+        end % title
+
+        function varargout = legend( obj, varargin )
+
+            [varargout{1:nargout}] = legend( obj.Axes, varargin{:} );
+
+        end % legend
+
+        function varargout = rticks( obj, varargin )
+
+            [varargout{1:nargout}] = rticks( obj.Axes, varargin{:} );
+
+        end % rticks
+
+        function varargout = rticklabels( obj, varargin )
+
+            [varargout{1:nargout}] = rticklabels( obj.Axes, varargin{:} );
+
+        end % rticklabels
+
+        function varargout = rtickformat( obj, varargin )
+
+            [varargout{1:nargout}] = rtickformat( obj.Axes, varargin{:} );
+
+        end % rticklabels
+
+        function varargout = rtickangle( obj, varargin )
+
+            [varargout{1:nargout}] = rtickangle( obj.Axes, varargin{:} );
+
+        end % rtickangle
+
+        function varargout = thetaticks( obj, varargin )
+
+            [varargout{1:nargout}] = thetaticks( obj.Axes, varargin{:} );
+
+        end % thetaticks
+
+        function varargout = thetaticklabels( obj, varargin )
+
+            [varargout{1:nargout}] = ...
+                thetaticklabels( obj.Axes, varargin{:} );
+
+        end % thetaticklabels
+
+        function varargout = thetatickformat( obj, varargin )
+
+            [varargout{1:nargout}] = ...
+                thetatickformat( obj.Axes, varargin{:} );
+
+        end % thetatickformat
+
+        function varargout = axis( obj, varargin )
+
+            [varargout{1:nargout}] = axis( obj.Axes, varargin{:} );
+
+        end % axis
+
+    end % methods
+
+    methods ( Access = protected )
+
+        function setup( obj )
+            %SETUP Initialize the chart graphics.
+
+            % Create the polar axes.
+            obj.Axes = polaraxes( "Parent", obj.getLayout(), ...
+                "ThetaZeroLocation", "top", ...
+                "ThetaAxisUnits", "radians", ...
+                "ThetaDir", "clockwise" );
+
+            % Create the polar lines.
+            hold( obj.Axes, "on" )
+            obj.PolarLines = polarplot( obj.Axes, obj.AngularData_, ...
+                obj.RadialData_, ...
+                "Marker", ".", ...
+                "MarkerSize", 10, ...
+                "LineStyle", "-", ...
+                "LineWidth", 1.5 );
+            hold( obj.Axes, "off" )
+
+        end % setup
+
+        function update( obj )
+            %UPDATE Refresh the chart graphics.
+
+            if obj.ComputationRequired
+
+                % Update the lines.
+                x = obj.AngularData_;
+                theta = x2theta( x );
+                set( obj.PolarLines(1), "ThetaData", theta, ...
+                    "RData", obj.RadialData_(:, 1) );
+                set( obj.PolarLines(2), "ThetaData", theta, ...
+                    "RData", obj.RadialData_(:, 2) );
+
+                % Update the angular ticks and tick labels.
+                nx = numel( x );
+                thetaTicks = linspace( 0, theta(end), nx );
+                thetaTickLabels = min( x ) + (max( x ) - min( x )) * ...
+                    thetaTicks / theta(end);
+                thetaticks( obj, thetaTicks )
+                thetaticklabels( obj, thetaTickLabels )
+
+                % Mark the chart clean.
+                obj.ComputationRequired = false;
+
+            end % if
+
+            % Refresh the chart's decorative properties.
+            set( obj.PolarLines, "LineWidth", obj.LineWidth, ...
+                "MarkerSize", obj.MarkerSize )
+
+        end % update
+
+    end % methods ( Access = protected )
+
+end % classdef
+
+function theta = x2theta( x )
+%X2THETA Convert an increasing x-data vector to the corresponding angular
+%values in radians.
+
+nx = numel( x );
+theta = (2 * pi * (1 - 1 / nx))* (x - min( x )) / (max( x ) - min( x ));
+
+end % x2theta
+
+function mustBeNonDecreasing( v )
+%MUSTBENONDECREASING Validate that the input vector is nondecreasing.
+
+validateattributes( v, "double", "nondecreasing" )
+
+end % mustBeNonDecreasing
+##### SOURCE END #####
+-->
+</body>
+</html>

@@ -1,0 +1,1617 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      -->
+<title>ValueAtRiskChart</title>
+<meta name="generator" content="MATLAB 25.1">
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+<meta name="DC.date" content="2025-01-11">
+<meta name="DC.source" content="ValueAtRiskChart.m">
+<style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style>
+</head>
+<body>
+<div class="content">
+<pre class="codeinput">
+<span class="keyword">classdef</span> ValueAtRiskChart &lt; Component
+    <span class="comment">%VALUEATRISKCHART Chart displaying the distribution of a return series</span>
+    <span class="comment">%together with value at risk metrics and a distribution fit.</span>
+
+    <span class="comment">% Copyright 2018-2025 The MathWorks, Inc.</span>
+
+   <span class="keyword">properties</span> ( Dependent )
+        <span class="comment">% Underlying data for the chart, typically a series of returns.</span>
+        Data<span class="typesection">(:, 1) double {mustBeReal, mustBeNonempty, mustBeFinite}</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Dependent )</span>
+
+    <span class="keyword">properties</span> ( Dependent, AbortSet )
+        <span class="comment">% Value at risk level, used for both the VaR and CVaR metrics.</span>
+        VaRLevel<span class="typesection">(1, 1) double {mustBeReal, </span><span class="keyword">...</span>
+            <span class="typesection">mustBeInRange( VaRLevel, 0.90, 1.00, "exclude-upper" )}</span>
+        <span class="comment">% Probability distribution name.</span>
+        DistributionName<span class="typesection">(1, 1) string </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeMember( DistributionName, ["Kernel", "Normal", </span><span class="keyword">...</span>
+            <span class="typesection">"Logistic", "tLocationScale"] )}</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Dependent, AbortSet )</span>
+
+    <span class="keyword">properties</span>
+        <span class="comment">% Axes x-grid.</span>
+        XGrid<span class="typesection">(1, 1) matlab.lang.OnOffSwitchState </span>= <span class="string">"on"</span>
+        <span class="comment">% Axes y-grid.</span>
+        YGrid<span class="typesection">(1, 1) matlab.lang.OnOffSwitchState </span>= <span class="string">"on"</span>
+    <span class="keyword">end</span> <span class="comment">% properties</span>
+
+    <span class="keyword">properties</span> ( Dependent )
+        <span class="comment">% Visibility of the PDF of the distribution fit.</span>
+        FittedPDFVisible<span class="typesection">(1, 1) matlab.lang.OnOffSwitchState</span>
+        <span class="comment">% Visibility of the VaR line.</span>
+        VaRLineVisible<span class="typesection">(1, 1) matlab.lang.OnOffSwitchState</span>
+        <span class="comment">% Visibility of the CVaR line.</span>
+        CVaRLineVisible<span class="typesection">(1, 1) matlab.lang.OnOffSwitchState</span>
+        <span class="comment">% Visibility of the VaR label.</span>
+        VaRLabelVisible<span class="typesection">(1, 1) matlab.lang.OnOffSwitchState</span>
+        <span class="comment">% Visibility of the CVaR label.</span>
+        CVaRLabelVisible<span class="typesection">(1, 1) matlab.lang.OnOffSwitchState</span>
+        <span class="comment">% Width of distribution fit curve and risk lines.</span>
+        LineWidth<span class="typesection">(1, 1) double {mustBePositive, mustBeFinite}</span> = 2
+        <span class="comment">% Histogram edge transparency.</span>
+        EdgeAlpha<span class="typesection">(1, 1) double {mustBeInRange( EdgeAlpha, 0, 1 )}</span>
+        <span class="comment">% Histogram edge color.</span>
+        EdgeColor
+        <span class="comment">% Histogram bar face transparency.</span>
+        FaceAlpha<span class="typesection">(1, 1) double {mustBeInRange( FaceAlpha, 0, 1 )}</span>
+        <span class="comment">% Histogram bar face color.</span>
+        FaceColor
+        <span class="comment">% Visibility of the chart controls.</span>
+        Controls<span class="typesection">(1, 1) matlab.lang.OnOffSwitchState</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Dependent )</span>
+
+    <span class="keyword">properties</span> ( SetAccess = private )
+        <span class="comment">% VaR and CVaR risk metrics.</span>
+        RiskMetrics<span class="typesection">(1, 2) double {mustBeReal, mustBeFinite}</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( SetAccess = private )</span>
+
+    <span class="keyword">properties</span> ( Access = private )
+        <span class="comment">% Internal storage for the chart's data.</span>
+        Data_<span class="typesection">(:, 1) double {mustBeReal, mustBeNonempty, mustBeFinite}</span> = 0
+        <span class="comment">% Internal storage for the VaR level.</span>
+        VaRLevel_<span class="typesection">(1, 1) double {mustBeReal, </span><span class="keyword">...</span>
+            <span class="typesection">mustBeInRange( VaRLevel_, 0.90, 1.00, "exclude-upper" )}</span> = 0.95
+        <span class="comment">% Internal storage for the distribution name.</span>
+        DistributionName_<span class="typesection">(1, 1) string </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeMember( DistributionName_, ["Kernel", "Normal", </span><span class="keyword">...</span>
+            <span class="typesection">"Logistic", "tLocationScale"] )}</span> = <span class="string">"Kernel"</span>
+        <span class="comment">% Logical vector specifying whether computations are required.</span>
+        ComputationRequired<span class="typesection">(1, 2) logical </span>= false( 1, 2 )
+    <span class="keyword">end</span> <span class="comment">% properties ( Access = private )</span>
+
+    <span class="keyword">properties</span> ( Access = private, Transient, NonCopyable )
+        <span class="comment">% Chart layout.</span>
+        LayoutGrid<span class="typesection">(:, 1) matlab.ui.container.GridLayout </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Chart axes.</span>
+        Axes<span class="typesection">(:, 1) matlab.graphics.axis.Axes {mustBeScalarOrEmpty}</span>
+        <span class="comment">% Toggle button for the chart controls.</span>
+        ToggleButton<span class="typesection">(:, 1) matlab.ui.controls.ToolbarStateButton </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Chart histogram to display the data.</span>
+        Histogram<span class="typesection">(:, 1) matlab.graphics.chart.primitive.Histogram </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Line object for the distribution fit.</span>
+        FittedPDF<span class="typesection">(:, 1) matlab.graphics.primitive.Line </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Vertical constant line for the value at risk.</span>
+        VaRLine<span class="typesection">(:, 1) matlab.graphics.chart.decoration.ConstantLine </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Vertical constant line for the conditional value at risk.</span>
+        CVaRLine<span class="typesection">(:, 1) matlab.graphics.chart.decoration.ConstantLine </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Dropdown menu for the probability distribution.</span>
+        DistributionDropDown<span class="typesection">(:, 1) matlab.ui.control.DropDown </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Check box for the fitted PDF.</span>
+        FittedPDFCheckBox<span class="typesection">(:, 1) matlab.ui.control.CheckBox </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Check box for the VaR line.</span>
+        VaRLineCheckBox<span class="typesection">(:, 1) matlab.ui.control.CheckBox </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Check box for the CVaR line.</span>
+        CVaRLineCheckBox<span class="typesection">(:, 1) matlab.ui.control.CheckBox </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Check box for the VaR label visibility.</span>
+        VaRLabelCheckBox<span class="typesection">(:, 1) matlab.ui.control.CheckBox </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Check box for the CVaR label visibility.</span>
+        CVaRLabelCheckBox<span class="typesection">(:, 1) matlab.ui.control.CheckBox </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Edit field for the line width.</span>
+        LineWidthEditField<span class="typesection">(:, 1) matlab.ui.control.NumericEditField </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Spinner to control the histogram's EdgeAlpha property.</span>
+        EdgeAlphaSpinner<span class="typesection">(:, 1) matlab.ui.control.Spinner </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Color picker for selecting the histogram EdgeColor.</span>
+        EdgeColorPicker<span class="typesection">(:, 1) matlab.ui.control.ColorPicker </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Spinner to control the histogram's FaceAlpha property.</span>
+        FaceAlphaSpinner<span class="typesection">(:, 1) matlab.ui.control.Spinner </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Color picker for selecting the histogram FaceColor.</span>
+        FaceColorPicker<span class="typesection">(:, 1) matlab.ui.control.ColorPicker </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Access = private, Transient, NonCopyable )</span>
+
+    <span class="keyword">properties</span> ( Constant, Hidden )
+        <span class="comment">% Product dependencies.</span>
+        Dependencies<span class="typesection">(1, :) string </span>= [<span class="string">"MATLAB"</span>, <span class="keyword">...</span>
+            <span class="string">"Statistics and Machine Learning Toolbox"</span>]
+        <span class="comment">% Description.</span>
+        ShortDescription<span class="typesection">(1, 1) string </span>= <span class="string">"Plot the distribution"</span> + <span class="keyword">...</span>
+            <span class="string">" of a return series together with its value at risk"</span> + <span class="keyword">...</span>
+            <span class="string">" metrics and a distribution fit"</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Constant, Hidden )</span>
+
+    <span class="keyword">methods</span>
+
+        <span class="keyword">function</span> value = get.Data( obj )
+
+            value = obj.Data_;
+
+        <span class="keyword">end</span> <span class="comment">% get.Data</span>
+
+        <span class="keyword">function</span> set.Data( obj, value )
+
+            <span class="comment">% Use fitdist to validate that the proposed data is acceptable.</span>
+            <span class="comment">% Exit without updating if anything is wrong with the data</span>
+            <span class="comment">% (this is distribution-dependent).</span>
+            <span class="keyword">try</span>
+                fitdist( value, obj.DistributionName_ );
+            <span class="keyword">catch</span> e
+                throw( e )
+            <span class="keyword">end</span> <span class="comment">% try/catch</span>
+
+            obj.Data_ = value;
+            obj.ComputationRequired(1) = true;
+
+        <span class="keyword">end</span> <span class="comment">% set.Data</span>
+
+        <span class="keyword">function</span> value = get.VaRLevel( obj )
+
+            value = obj.VaRLevel_;
+
+        <span class="keyword">end</span> <span class="comment">% get.VaRLevel</span>
+
+        <span class="keyword">function</span> set.VaRLevel( obj, value )
+
+            obj.VaRLevel_ = value;
+            obj.ComputationRequired(2) = true;
+
+        <span class="keyword">end</span> <span class="comment">% set.VaRLevel</span>
+
+        <span class="keyword">function</span> value = get.DistributionName( obj )
+
+            value = obj.DistributionName_;
+
+        <span class="keyword">end</span> <span class="comment">% get.DistributionName</span>
+
+        <span class="keyword">function</span> set.DistributionName( obj, value )
+
+            <span class="comment">% Update the stored property and the dropdown control.</span>
+            obj.DistributionName_ = value;
+            obj.DistributionDropDown.Value = value;
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired(1) = true;
+
+        <span class="keyword">end</span> <span class="comment">% set.DistributionName</span>
+
+        <span class="keyword">function</span> value = get.FittedPDFVisible( obj )
+
+            value = obj.FittedPDF.Visible;
+
+        <span class="keyword">end</span> <span class="comment">% get.FittedPDFVisible</span>
+
+        <span class="keyword">function</span> set.FittedPDFVisible( obj, value )
+
+            obj.FittedPDF.Visible = value;
+            obj.FittedPDFCheckBox.Value = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.FittedPDFVisible</span>
+
+        <span class="keyword">function</span> value = get.VaRLineVisible( obj )
+
+            value = obj.VaRLine.Visible;
+
+        <span class="keyword">end</span> <span class="comment">% get.VaRLineVisible</span>
+
+        <span class="keyword">function</span> set.VaRLineVisible( obj, value )
+
+            obj.VaRLine.Visible = value;
+            obj.VaRLineCheckBox.Value = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.VaRLineVisible</span>
+
+        <span class="keyword">function</span> value = get.CVaRLineVisible( obj )
+
+            value = obj.CVaRLine.Visible;
+
+        <span class="keyword">end</span> <span class="comment">% get.CVaRLineVisible</span>
+
+        <span class="keyword">function</span> set.CVaRLineVisible( obj, value )
+
+            obj.CVaRLine.Visible = value;
+            obj.CVaRLineCheckBox.Value = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.CVaRLineVisible</span>
+
+        <span class="keyword">function</span> value = get.VaRLabelVisible( obj )
+
+            value = obj.VaRLabelCheckBox.Value;
+
+        <span class="keyword">end</span> <span class="comment">% get.VaRLabelVisible</span>
+
+        <span class="keyword">function</span> set.VaRLabelVisible( obj, value )
+
+            obj.VaRLabelCheckBox.Value = value;
+            obj.onVaRLabelToggled()
+
+        <span class="keyword">end</span> <span class="comment">% set.VaRLabelVisible</span>
+
+        <span class="keyword">function</span> value = get.CVaRLabelVisible( obj )
+
+            value = obj.CVaRLabelCheckBox.Value;
+
+        <span class="keyword">end</span> <span class="comment">% get.CVaRLabelVisible</span>
+
+        <span class="keyword">function</span> set.CVaRLabelVisible( obj, value )
+
+            obj.CVaRLabelCheckBox.Value = value;
+            obj.onCVaRLabelToggled()
+
+        <span class="keyword">end</span> <span class="comment">% set.CVaRLabelVisible</span>
+
+        <span class="keyword">function</span> value = get.LineWidth( obj )
+
+            value = obj.LineWidthEditField.Value;
+
+        <span class="keyword">end</span> <span class="comment">% get.LineWidth</span>
+
+        <span class="keyword">function</span> set.LineWidth( obj, value )
+
+            obj.LineWidthEditField.Value = value;
+            obj.onLineWidthEdited()
+
+        <span class="keyword">end</span> <span class="comment">% set.LineWidth</span>
+
+        <span class="keyword">function</span> value = get.EdgeAlpha( obj )
+
+            value = obj.Histogram.EdgeAlpha;
+
+        <span class="keyword">end</span> <span class="comment">% get.EdgeAlpha</span>
+
+        <span class="keyword">function</span> set.EdgeAlpha( obj, value )
+
+            <span class="comment">% Update the spinner control.</span>
+            obj.EdgeAlphaSpinner.Value = value;
+
+            <span class="comment">% Update the histogram.</span>
+            obj.Histogram.EdgeAlpha = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.EdgeAlpha</span>
+
+        <span class="keyword">function</span> value = get.EdgeColor( obj )
+
+            value = obj.Histogram.EdgeColor;
+
+        <span class="keyword">end</span> <span class="comment">% get.EdgeColor</span>
+
+        <span class="keyword">function</span> set.EdgeColor( obj, value )
+
+            <span class="comment">% Update the histogram.</span>
+            value = validatecolor( value );
+            obj.Histogram.EdgeColor = value;
+
+            <span class="comment">% Update the color picker.</span>
+            obj.EdgeColorPicker.Value = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.EdgeColor</span>
+
+        <span class="keyword">function</span> value = get.FaceAlpha( obj )
+
+            value = obj.Histogram.FaceAlpha;
+
+        <span class="keyword">end</span> <span class="comment">% get.FaceAlpha</span>
+
+        <span class="keyword">function</span> set.FaceAlpha( obj, value )
+
+            <span class="comment">% Update the spinner control.</span>
+            obj.FaceAlphaSpinner.Value = value;
+
+            <span class="comment">% Update the histogram.</span>
+            obj.Histogram.FaceAlpha = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.FaceAlpha</span>
+
+        <span class="keyword">function</span> value = get.FaceColor( obj )
+
+            value = obj.Histogram.FaceColor;
+
+        <span class="keyword">end</span> <span class="comment">% get.FaceColor</span>
+
+        <span class="keyword">function</span> set.FaceColor( obj, value )
+
+            <span class="comment">% Update the histogram.</span>
+            value = validatecolor( value );
+            obj.Histogram.FaceColor = value;
+
+            <span class="comment">% Update the color picker.</span>
+            obj.FaceColorPicker.Value = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.FaceColor</span>
+
+        <span class="keyword">function</span> value = get.Controls( obj )
+
+            value = obj.ToggleButton.Value;
+
+        <span class="keyword">end</span> <span class="comment">% get.Controls</span>
+
+        <span class="keyword">function</span> set.Controls( obj, value )
+
+            <span class="comment">% Update the toggle button.</span>
+            obj.ToggleButton.Value = value;
+
+            <span class="comment">% Invoke the toggle button callback.</span>
+            obj.onToggleButtonPressed()
+
+        <span class="keyword">end</span> <span class="comment">% set.Controls</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods</span>
+
+    <span class="keyword">methods</span>
+
+        <span class="keyword">function</span> obj = ValueAtRiskChart( namedArgs )
+            <span class="comment">%VALUEATRISKCHART Construct a ValueAtRiskChart object, given</span>
+            <span class="comment">%optional name-value arguments.</span>
+
+            <span class="keyword">arguments</span> ( Input )
+                namedArgs.?ValueAtRiskChart
+            <span class="keyword">end</span> <span class="comment">% arguments ( Input )</span>
+
+            <span class="comment">% Set any user-defined properties.</span>
+            set( obj, namedArgs )
+
+        <span class="keyword">end</span> <span class="comment">% constructor</span>
+
+        <span class="keyword">function</span> varargout = xlabel( obj, varargin )
+
+            [varargout{1:nargout}] = xlabel( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% xlabel</span>
+
+        <span class="keyword">function</span> varargout = ylabel( obj, varargin )
+
+            [varargout{1:nargout}] = ylabel( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% ylabel</span>
+
+        <span class="keyword">function</span> varargout = title( obj, varargin )
+
+            [varargout{1:nargout}] = title( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% title</span>
+
+        <span class="keyword">function</span> grid( obj, varargin )
+
+            <span class="comment">% Invoke grid on the axes.</span>
+            grid( obj.Axes, varargin{:} )
+
+            <span class="comment">% Update the chart's grid properties.</span>
+            obj.XGrid = obj.Axes.XGrid;
+            obj.YGrid = obj.Axes.YGrid;
+
+        <span class="keyword">end</span> <span class="comment">% grid</span>
+
+        <span class="keyword">function</span> varargout = legend( obj, varargin )
+
+            [varargout{1:nargout}] = legend( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% legend</span>
+
+        <span class="keyword">function</span> varargout = axis( obj, varargin )
+
+            [varargout{1:nargout}] = axis( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% axis</span>
+
+        <span class="keyword">function</span> exportgraphics( obj, varargin )
+
+            exportgraphics( obj.Axes, varargin{:} )
+
+        <span class="keyword">end</span> <span class="comment">% exportgraphics</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods</span>
+
+    <span class="keyword">methods</span> ( Access = protected )
+
+        <span class="keyword">function</span> setup( obj )
+            <span class="comment">%SETUP Initialize the chart graphics.</span>
+
+            <span class="comment">% Define the layout grid.</span>
+            obj.LayoutGrid = uigridlayout( obj, [1, 2], <span class="keyword">...</span>
+                <span class="string">"ColumnWidth"</span>, [<span class="string">"1x"</span>, <span class="string">"0x"</span>] );
+
+            <span class="comment">% Create the chart's axes.</span>
+            obj.Axes = axes( <span class="string">"Parent"</span>, obj.LayoutGrid );
+
+            <span class="comment">% Add a state button to show/hide the chart's controls.</span>
+            tb = axtoolbar( obj.Axes, <span class="string">"default"</span> );
+            iconPath = fullfile( chartsRoot(), <span class="string">"charts"</span>, <span class="string">"images"</span>, <span class="keyword">...</span>
+                <span class="string">"Cog.png"</span> );
+            obj.ToggleButton = axtoolbarbtn( tb, <span class="string">"state"</span>, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, <span class="string">"off"</span>, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Show chart controls"</span>, <span class="keyword">...</span>
+                <span class="string">"Icon"</span>, iconPath, <span class="keyword">...</span>
+                <span class="string">"ValueChangedFcn"</span>, @obj.onToggleButtonPressed );
+
+            <span class="comment">% Create the histogram.</span>
+            hold( obj.Axes, <span class="string">"on"</span> )
+            obj.Histogram = histogram( obj.Axes, NaN, <span class="keyword">...</span>
+                <span class="string">"FaceColor"</span>, obj.Axes.ColorOrder(1, :), <span class="keyword">...</span>
+                <span class="string">"Normalization"</span>, <span class="string">"pdf"</span> );
+
+            <span class="comment">% Overlay the density on the histogram.</span>
+            c = obj.Axes.ColorOrder;
+            obj.FittedPDF = line( <span class="string">"Parent"</span>, obj.Axes, <span class="keyword">...</span>
+                <span class="string">"XData"</span>, NaN, <span class="keyword">...</span>
+                <span class="string">"YData"</span>, NaN, <span class="keyword">...</span>
+                <span class="string">"LineWidth"</span>, 2, <span class="keyword">...</span>
+                <span class="string">"Color"</span>, c(2, :) );
+
+            <span class="comment">% Overlay the VaR lines.</span>
+            obj.VaRLine = xline( obj.Axes, 0, <span class="string">"Color"</span>, c(3, :), <span class="keyword">...</span>
+                <span class="string">"Alpha"</span>, 1, <span class="keyword">...</span>
+                <span class="string">"LineWidth"</span>, 2, <span class="keyword">...</span>
+                <span class="string">"LabelHorizontalAlignment"</span>, <span class="string">"left"</span> );
+            obj.CVaRLine = xline( obj.Axes, 0, <span class="string">"Color"</span>, c(4, :), <span class="keyword">...</span>
+                <span class="string">"Alpha"</span>, 1, <span class="keyword">...</span>
+                <span class="string">"LineWidth"</span>, 2, <span class="keyword">...</span>
+                <span class="string">"LabelHorizontalAlignment"</span>, <span class="string">"left"</span> );
+
+            <span class="comment">% Annotate the axes and add the legend.</span>
+            xlabel( obj.Axes, <span class="string">"Data"</span> )
+            ylabel( obj.Axes, <span class="string">"Probability density"</span> )
+            title( obj.Axes, <span class="string">"ValueAtRisk Chart"</span> )
+            legend( obj.Axes, [<span class="string">"Data"</span>, <span class="string">"Fit"</span>, <span class="string">"VaR"</span>, <span class="string">"CVaR"</span>] )
+            hold( obj.Axes, <span class="string">"off"</span> )
+
+            <span class="comment">% Add the chart controls. Start with the control panel and its</span>
+            <span class="comment">% main layout grid.</span>
+            p = uipanel( <span class="string">"Parent"</span>, obj.LayoutGrid, <span class="keyword">...</span>
+                <span class="string">"Title"</span>, <span class="string">"Chart Controls"</span>, <span class="keyword">...</span>
+                <span class="string">"FontWeight"</span>, <span class="string">"bold"</span> );
+            p.Layout.Column = 2;
+            g = uigridlayout( p, [8, 2], <span class="keyword">...</span>
+                <span class="string">"RowHeight"</span>, repelem( <span class="string">"fit"</span>, 8 ), <span class="keyword">...</span>
+                <span class="string">"ColumnWidth"</span>, [<span class="string">"fit"</span>, <span class="string">"1x"</span>] );
+
+            <span class="comment">% Add the distribution selection dropdown.</span>
+            uilabel( g, <span class="string">"Text"</span>, <span class="string">"Distribution fit: "</span>, <span class="keyword">...</span>
+                <span class="string">"HorizontalAlignment"</span>, <span class="string">"right"</span> );
+            obj.DistributionDropDown = uidropdown( g, <span class="keyword">...</span>
+                <span class="string">"Items"</span>, <span class="keyword">...</span>
+                [<span class="string">"Kernel"</span>, <span class="string">"Normal"</span>, <span class="string">"Logistic"</span>, <span class="string">"tLocationScale"</span>], <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="keyword">...</span>
+                <span class="string">"Select the probability distribution to fit to the data"</span>, <span class="keyword">...</span>
+                <span class="string">"ValueChangedFcn"</span>, @obj.onDistributionSelected );
+
+            <span class="comment">% Add checkboxes to control visibility of the PDF and value at</span>
+            <span class="comment">% risk lines.</span>
+            obj.FittedPDFCheckBox = uicheckbox( g, <span class="keyword">...</span>
+                <span class="string">"Text"</span>, <span class="string">"Show fitted PDF"</span>, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, <span class="keyword">...</span>
+                matlab.lang.OnOffSwitchState( obj.FittedPDFVisible ), <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Hide or show the fitted PDF"</span>, <span class="keyword">...</span>
+                <span class="string">"ValueChangedFcn"</span>, @obj.toggleFittedPDFVisibility );
+            obj.FittedPDFCheckBox.Layout.Column = [1, 2];
+            obj.VaRLineCheckBox = uicheckbox( g, <span class="keyword">...</span>
+                <span class="string">"Text"</span>, <span class="string">"Show VaR line"</span>, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, <span class="keyword">...</span>
+                matlab.lang.OnOffSwitchState( obj.VaRLineVisible ), <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Hide or show the VaR line"</span>, <span class="keyword">...</span>
+                <span class="string">"ValueChangedFcn"</span>, @obj.toggleVaRLineVisibility );
+            obj.VaRLineCheckBox.Layout.Column = [1, 2];
+            obj.CVaRLineCheckBox = uicheckbox( g, <span class="keyword">...</span>
+                <span class="string">"Text"</span>, <span class="string">"Show CVaR line"</span>, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, <span class="keyword">...</span>
+                matlab.lang.OnOffSwitchState( obj.CVaRLineVisible ), <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Hide or show the CVaR line"</span>, <span class="keyword">...</span>
+                <span class="string">"ValueChangedFcn"</span>, @obj.toggleCVaRLineVisibility );
+            obj.CVaRLineCheckBox.Layout.Column = [1, 2];
+
+            <span class="comment">% Add checkboxes to control visibility of the risk line labels.</span>
+            obj.VaRLabelCheckBox = uicheckbox( g, <span class="keyword">...</span>
+                <span class="string">"Text"</span>, <span class="string">"Show VaR label"</span>, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, true, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Hide or show the VaR label"</span>, <span class="keyword">...</span>
+                <span class="string">"ValueChangedFcn"</span>, @obj.onVaRLabelToggled );
+            obj.VaRLabelCheckBox.Layout.Column = [1, 2];
+            obj.CVaRLabelCheckBox = uicheckbox( g, <span class="keyword">...</span>
+                <span class="string">"Text"</span>, <span class="string">"Show CVaR label"</span>, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, true, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, true, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Hide or show the CVaR label"</span>, <span class="keyword">...</span>
+                <span class="string">"ValueChangedFcn"</span>, @obj.onCVaRLabelToggled );
+            obj.CVaRLabelCheckBox.Layout.Column = [1, 2];
+
+            <span class="comment">% Add an edit field for the line width.</span>
+            uilabel( g, <span class="string">"Text"</span>, <span class="string">"Line width:"</span>, <span class="keyword">...</span>
+                <span class="string">"HorizontalAlignment"</span>, <span class="string">"right"</span> );
+            obj.LineWidthEditField = uieditfield( g, <span class="string">"numeric"</span>, <span class="keyword">...</span>
+                <span class="string">"Limits"</span>, [0, Inf], <span class="keyword">...</span>
+                <span class="string">"LowerLimitInclusive"</span>, <span class="string">"off"</span>, <span class="keyword">...</span>
+                <span class="string">"UpperLimitInclusive"</span>, <span class="string">"off"</span>, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, 2, <span class="keyword">...</span>
+                <span class="string">"ValueChangedFcn"</span>, @obj.onLineWidthEdited );
+
+            <span class="comment">% Place the histogram controls in a separate panel.</span>
+            p = uipanel( g, <span class="string">"Title"</span>, <span class="string">"Histogram Appearance"</span>, <span class="keyword">...</span>
+                <span class="string">"FontWeight"</span>, <span class="string">"bold"</span> );
+            p.Layout.Column = [1, 2];
+            g = uigridlayout( p, [4, 2], <span class="keyword">...</span>
+                <span class="string">"RowHeight"</span>, repmat( <span class="string">"fit"</span>, 4, 1 ), <span class="keyword">...</span>
+                <span class="string">"ColumnWidth"</span>, [<span class="string">"fit"</span>, <span class="string">"1x"</span>] );
+
+            <span class="comment">% Add controls for the edge and face transparency and color.</span>
+            uilabel( g, <span class="string">"Text"</span>, <span class="string">"Edge color:"</span>, <span class="keyword">...</span>
+                <span class="string">"HorizontalAlignment"</span>, <span class="string">"right"</span> );
+            obj.EdgeColorPicker = uicolorpicker( <span class="string">"Parent"</span>, g, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Select the histogram edge color"</span>, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, obj.EdgeColor, <span class="keyword">...</span>
+                <span class="string">"ValueChangedFcn"</span>, @obj.onEdgeColorPicked );
+            uilabel( g, <span class="string">"Text"</span>, <span class="string">"Edge alpha:"</span>, <span class="keyword">...</span>
+                <span class="string">"HorizontalAlignment"</span>, <span class="string">"right"</span> );
+            obj.EdgeAlphaSpinner = uispinner( g, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, obj.EdgeAlpha, <span class="keyword">...</span>
+                <span class="string">"ValueDisplayFormat"</span>, <span class="string">"%.1f"</span>, <span class="keyword">...</span>
+                <span class="string">"Limits"</span>, [0, 1], <span class="keyword">...</span>
+                <span class="string">"Step"</span>, 0.1, <span class="keyword">...</span>
+                <span class="string">"ValueChangedFcn"</span>, @obj.onEdgeAlphaSelected );
+            uilabel( g, <span class="string">"Text"</span>, <span class="string">"Face color:"</span>, <span class="keyword">...</span>
+                <span class="string">"HorizontalAlignment"</span>, <span class="string">"right"</span> );
+            obj.FaceColorPicker = uicolorpicker( <span class="string">"Parent"</span>, g, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, obj.FaceColor, <span class="keyword">...</span>
+                <span class="string">"Tooltip"</span>, <span class="string">"Select the histogram face color"</span>, <span class="keyword">...</span>
+                <span class="string">"ValueChangedFcn"</span>, @obj.onFaceColorPicked );
+            uilabel( g, <span class="string">"Text"</span>, <span class="string">"Face alpha:"</span>, <span class="keyword">...</span>
+                <span class="string">"HorizontalAlignment"</span>, <span class="string">"right"</span> );
+            obj.FaceAlphaSpinner = uispinner( g, <span class="keyword">...</span>
+                <span class="string">"Value"</span>, obj.FaceAlpha, <span class="keyword">...</span>
+                <span class="string">"ValueDisplayFormat"</span>, <span class="string">"%.1f"</span>, <span class="keyword">...</span>
+                <span class="string">"Limits"</span>, [0, 1], <span class="keyword">...</span>
+                <span class="string">"Step"</span>, 0.1, <span class="keyword">...</span>
+                <span class="string">"ValueChangedFcn"</span>, @obj.onFaceAlphaSelected );
+
+        <span class="keyword">end</span> <span class="comment">% setup</span>
+
+        <span class="keyword">function</span> update( obj )
+            <span class="comment">%UPDATE Refresh the chart graphics.</span>
+
+            <span class="keyword">if</span> obj.ComputationRequired(1)
+
+                <span class="comment">% Update the non-parametric distribution fit.</span>
+                mdl = fitdist( obj.Data, obj.DistributionName_ );
+
+                <span class="comment">% Evaluate it on the sample range.</span>
+                sampleVals = linspace( <span class="keyword">...</span>
+                    min( obj.Data ), max( obj.Data ), 1000 );
+                pdfVals = pdf( mdl, sampleVals );
+
+                <span class="comment">% Update the density plot.</span>
+                set( obj.FittedPDF, <span class="string">"XData"</span>, sampleVals, <span class="string">"YData"</span>, pdfVals )
+
+                <span class="comment">% Update the histogram with the new data.</span>
+                set( obj.Histogram, <span class="string">"Data"</span>, obj.Data, <span class="string">"BinMethod"</span>, <span class="string">"auto"</span> )
+
+                <span class="comment">% Update the VaR lines.</span>
+                obj.updateVaRLines()
+
+                <span class="comment">% Mark the chart clean.</span>
+                obj.ComputationRequired = false( 1, 2 );
+
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+            <span class="keyword">if</span> obj.ComputationRequired(2)
+
+                <span class="comment">% Update the VaR lines only.</span>
+                obj.updateVaRLines()
+
+                <span class="comment">% Mark the chart clean.</span>
+                obj.ComputationRequired(2) = false;
+
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+            <span class="comment">% Refresh the chart's decorative properties.</span>
+            obj.FittedPDF.LineWidth = obj.LineWidth;
+            obj.VaRLine.LineWidth = obj.LineWidth;
+            obj.CVaRLine.LineWidth = obj.LineWidth;
+            set( obj.Axes, <span class="string">"XGrid"</span>, obj.XGrid, <span class="string">"YGrid"</span>, obj.YGrid )
+
+        <span class="keyword">end</span> <span class="comment">% update</span>
+
+        <span class="keyword">function</span> updateVaRLines( obj )
+            <span class="comment">%UPDATEVARLINES Update the VaR lines if the VaR level has been</span>
+            <span class="comment">%changed.</span>
+
+            <span class="comment">% Compute the new VaR and CVaR.</span>
+            VaR = quantile( obj.Data, 1 - obj.VaRLevel );
+            CVaR = mean( obj.Data(obj.Data &lt; VaR) );
+            obj.RiskMetrics = [VaR, CVaR];
+            obj.VaRLine.Value = VaR;
+            obj.CVaRLine.Value = CVaR;
+            obj.onVaRLabelToggled()
+            obj.onCVaRLabelToggled()
+
+        <span class="keyword">end</span> <span class="comment">% updateVaRLines</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods ( Access = protected )</span>
+
+    <span class="keyword">methods</span> ( Access = private )
+
+        <span class="keyword">function</span> onToggleButtonPressed( obj, ~, ~ )
+            <span class="comment">%ONTOGGLEBUTTONPRESSED Hide/show the chart controls.</span>
+
+            toggleDown = obj.ToggleButton.Value;
+
+            <span class="keyword">if</span> toggleDown
+                <span class="comment">% Show the controls.</span>
+                obj.LayoutGrid.ColumnWidth{2} = <span class="string">"fit"</span>;
+                obj.ToggleButton.Tooltip = <span class="string">"Hide chart controls"</span>;
+            <span class="keyword">else</span>
+                <span class="comment">% Hide the controls.</span>
+                obj.LayoutGrid.ColumnWidth{2} = <span class="string">"0x"</span>;
+                obj.ToggleButton.Tooltip = <span class="string">"Show chart controls"</span>;
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+        <span class="keyword">end</span> <span class="comment">% onToggleButtonPressed</span>
+
+        <span class="keyword">function</span> onDistributionSelected( obj, ~, ~ )
+            <span class="comment">%ONDISTRIBUTIONSELECTED Update the chart when the user selects</span>
+            <span class="comment">%a probability distribution from the dropdown menu.</span>
+
+            obj.DistributionName = obj.DistributionDropDown.Value;
+
+        <span class="keyword">end</span> <span class="comment">% onDistributionSelected</span>
+
+        <span class="keyword">function</span> toggleFittedPDFVisibility( obj, s, ~ )
+            <span class="comment">%TOGGLEFITTEDPDFVISIBILITY Toggle the visibility of the fitted</span>
+            <span class="comment">%PDF.</span>
+
+            obj.FittedPDF.Visible = s.Value;
+
+        <span class="keyword">end</span> <span class="comment">% toggleFittedPDFVisibility</span>
+
+        <span class="keyword">function</span> toggleVaRLineVisibility( obj, s, ~ )
+            <span class="comment">%TOGGLEVARLINEVISIBILITY Toggle the visibility of the VaR line.</span>
+
+            obj.VaRLine.Visible = s.Value;
+
+        <span class="keyword">end</span> <span class="comment">% toggleVaRLineVisibility</span>
+
+        <span class="keyword">function</span> toggleCVaRLineVisibility( obj, s, ~ )
+            <span class="comment">%TOGGLECVARLINEVISIBILITY Toggle the visibility of the CVaR</span>
+            <span class="comment">%line.</span>
+
+            obj.CVaRLine.Visible = s.Value;
+
+        <span class="keyword">end</span> <span class="comment">% toggleCVaRLineVisibility</span>
+
+        <span class="keyword">function</span> onVaRLabelToggled( obj, ~, ~ )
+            <span class="comment">%ONVARLABELTOGGLED Toggle the visibility of the VaR label.</span>
+
+            checked = obj.VaRLabelCheckBox.Value;
+            <span class="keyword">if</span> checked
+                obj.VaRLine.Label = <span class="string">"VaR ("</span> + 100 * obj.VaRLevel + <span class="keyword">...</span>
+                    <span class="string">") = "</span> + obj.RiskMetrics(1);
+            <span class="keyword">else</span>
+                obj.VaRLine.Label = <span class="string">""</span>;
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+        <span class="keyword">end</span> <span class="comment">% onVaRLabelToggled</span>
+
+        <span class="keyword">function</span> onCVaRLabelToggled( obj, ~, ~ )
+            <span class="comment">%ONCVARLABELTOGGLED Toggle the visibility of the CVaR label.</span>
+
+            checked = obj.CVaRLabelCheckBox.Value;
+            <span class="keyword">if</span> checked
+                obj.CVaRLine.Label = <span class="string">"CVaR ("</span> + 100 * obj.VaRLevel + <span class="keyword">...</span>
+                    <span class="string">") = "</span> + obj.RiskMetrics(2);
+            <span class="keyword">else</span>
+                obj.CVaRLine.Label = <span class="string">""</span>;
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+        <span class="keyword">end</span> <span class="comment">% onCVaRLabelToggled</span>
+
+        <span class="keyword">function</span> onLineWidthEdited( obj, ~, ~ )
+            <span class="comment">%ONLINEWIDTHEDITED Update the line width of the distribution</span>
+            <span class="comment">%fit and risk lines.</span>
+
+            lw = obj.LineWidthEditField.Value;
+            set( [obj.FittedPDF, obj.VaRLine, obj.CVaRLine], <span class="keyword">...</span>
+                <span class="string">"LineWidth"</span>, lw )
+
+        <span class="keyword">end</span> <span class="comment">% onLineWidthEdited</span>
+
+        <span class="keyword">function</span> onEdgeAlphaSelected( obj, s, ~ )
+            <span class="comment">%ONEDGEALPHASELECTED Update the histogram's EdgeAlpha when the</span>
+            <span class="comment">%user modifies the spinner.</span>
+
+            obj.EdgeAlpha = s.Value;
+
+        <span class="keyword">end</span> <span class="comment">% onEdgeAlphaSelected</span>
+
+        <span class="keyword">function</span> onEdgeColorPicked( obj, ~, ~ )
+            <span class="comment">%ONEDGECOLORPICKED Update the histogram's EdgeColor when the</span>
+            <span class="comment">%user selects a color.</span>
+
+            <span class="comment">% Update the edge color.</span>
+            obj.EdgeColor = obj.EdgeColorPicker.Value;
+
+        <span class="keyword">end</span> <span class="comment">% onEdgeColorPicked</span>
+
+        <span class="keyword">function</span> onFaceAlphaSelected( obj, s, ~ )
+            <span class="comment">%ONEDGEALPHASELECTED Update the histogram's EdgeAlpha when the</span>
+            <span class="comment">%user modifies the spinner.</span>
+
+            obj.FaceAlpha = s.Value;
+
+        <span class="keyword">end</span> <span class="comment">% onFaceAlphaSelected</span>
+
+        <span class="keyword">function</span> onFaceColorPicked( obj, ~, ~ )
+            <span class="comment">%ONFACECOLORPICKED Update the histogram's FaceColor when the</span>
+            <span class="comment">%user selects a color.</span>
+
+            <span class="comment">% Update the face color.</span>
+            obj.FaceColor = obj.FaceColorPicker.Value;
+
+        <span class="keyword">end</span> <span class="comment">% onFaceColorPicked</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods ( Access = private )</span>
+
+<span class="keyword">end</span> <span class="comment">% classdef</span>
+</pre>
+</div>
+<!--
+##### SOURCE BEGIN #####
+classdef ValueAtRiskChart < Component
+    %VALUEATRISKCHART Chart displaying the distribution of a return series
+    %together with value at risk metrics and a distribution fit.
+
+    % Copyright 2018-2025 The MathWorks, Inc.
+
+   properties ( Dependent )
+        % Underlying data for the chart, typically a series of returns.
+        Data(:, 1) double {mustBeReal, mustBeNonempty, mustBeFinite}
+    end % properties ( Dependent )
+
+    properties ( Dependent, AbortSet )
+        % Value at risk level, used for both the VaR and CVaR metrics.
+        VaRLevel(1, 1) double {mustBeReal, ...
+            mustBeInRange( VaRLevel, 0.90, 1.00, "exclude-upper" )}
+        % Probability distribution name.
+        DistributionName(1, 1) string ...
+            {mustBeMember( DistributionName, ["Kernel", "Normal", ...
+            "Logistic", "tLocationScale"] )}
+    end % properties ( Dependent, AbortSet )
+
+    properties
+        % Axes x-grid.
+        XGrid(1, 1) matlab.lang.OnOffSwitchState = "on"
+        % Axes y-grid.
+        YGrid(1, 1) matlab.lang.OnOffSwitchState = "on"
+    end % properties
+
+    properties ( Dependent )
+        % Visibility of the PDF of the distribution fit.
+        FittedPDFVisible(1, 1) matlab.lang.OnOffSwitchState
+        % Visibility of the VaR line.
+        VaRLineVisible(1, 1) matlab.lang.OnOffSwitchState
+        % Visibility of the CVaR line.
+        CVaRLineVisible(1, 1) matlab.lang.OnOffSwitchState
+        % Visibility of the VaR label.
+        VaRLabelVisible(1, 1) matlab.lang.OnOffSwitchState
+        % Visibility of the CVaR label.
+        CVaRLabelVisible(1, 1) matlab.lang.OnOffSwitchState
+        % Width of distribution fit curve and risk lines.
+        LineWidth(1, 1) double {mustBePositive, mustBeFinite} = 2
+        % Histogram edge transparency.
+        EdgeAlpha(1, 1) double {mustBeInRange( EdgeAlpha, 0, 1 )}
+        % Histogram edge color.
+        EdgeColor
+        % Histogram bar face transparency.
+        FaceAlpha(1, 1) double {mustBeInRange( FaceAlpha, 0, 1 )}
+        % Histogram bar face color.
+        FaceColor
+        % Visibility of the chart controls.
+        Controls(1, 1) matlab.lang.OnOffSwitchState
+    end % properties ( Dependent )
+
+    properties ( SetAccess = private )
+        % VaR and CVaR risk metrics.
+        RiskMetrics(1, 2) double {mustBeReal, mustBeFinite}
+    end % properties ( SetAccess = private )
+
+    properties ( Access = private )
+        % Internal storage for the chart's data.
+        Data_(:, 1) double {mustBeReal, mustBeNonempty, mustBeFinite} = 0
+        % Internal storage for the VaR level.
+        VaRLevel_(1, 1) double {mustBeReal, ...
+            mustBeInRange( VaRLevel_, 0.90, 1.00, "exclude-upper" )} = 0.95
+        % Internal storage for the distribution name.
+        DistributionName_(1, 1) string ...
+            {mustBeMember( DistributionName_, ["Kernel", "Normal", ...
+            "Logistic", "tLocationScale"] )} = "Kernel"
+        % Logical vector specifying whether computations are required.
+        ComputationRequired(1, 2) logical = false( 1, 2 )
+    end % properties ( Access = private )
+
+    properties ( Access = private, Transient, NonCopyable )
+        % Chart layout.
+        LayoutGrid(:, 1) matlab.ui.container.GridLayout ...
+            {mustBeScalarOrEmpty}
+        % Chart axes.
+        Axes(:, 1) matlab.graphics.axis.Axes {mustBeScalarOrEmpty}
+        % Toggle button for the chart controls.
+        ToggleButton(:, 1) matlab.ui.controls.ToolbarStateButton ...
+            {mustBeScalarOrEmpty}
+        % Chart histogram to display the data.
+        Histogram(:, 1) matlab.graphics.chart.primitive.Histogram ...
+            {mustBeScalarOrEmpty}
+        % Line object for the distribution fit.
+        FittedPDF(:, 1) matlab.graphics.primitive.Line ...
+            {mustBeScalarOrEmpty}
+        % Vertical constant line for the value at risk.
+        VaRLine(:, 1) matlab.graphics.chart.decoration.ConstantLine ...
+            {mustBeScalarOrEmpty}
+        % Vertical constant line for the conditional value at risk.
+        CVaRLine(:, 1) matlab.graphics.chart.decoration.ConstantLine ...
+            {mustBeScalarOrEmpty}
+        % Dropdown menu for the probability distribution.
+        DistributionDropDown(:, 1) matlab.ui.control.DropDown ...
+            {mustBeScalarOrEmpty}
+        % Check box for the fitted PDF.
+        FittedPDFCheckBox(:, 1) matlab.ui.control.CheckBox ...
+            {mustBeScalarOrEmpty}
+        % Check box for the VaR line.
+        VaRLineCheckBox(:, 1) matlab.ui.control.CheckBox ...
+            {mustBeScalarOrEmpty}
+        % Check box for the CVaR line.
+        CVaRLineCheckBox(:, 1) matlab.ui.control.CheckBox ...
+            {mustBeScalarOrEmpty}
+        % Check box for the VaR label visibility.
+        VaRLabelCheckBox(:, 1) matlab.ui.control.CheckBox ...
+            {mustBeScalarOrEmpty}
+        % Check box for the CVaR label visibility.
+        CVaRLabelCheckBox(:, 1) matlab.ui.control.CheckBox ...
+            {mustBeScalarOrEmpty}
+        % Edit field for the line width.
+        LineWidthEditField(:, 1) matlab.ui.control.NumericEditField ...
+            {mustBeScalarOrEmpty}
+        % Spinner to control the histogram's EdgeAlpha property.
+        EdgeAlphaSpinner(:, 1) matlab.ui.control.Spinner ...
+            {mustBeScalarOrEmpty}
+        % Color picker for selecting the histogram EdgeColor.
+        EdgeColorPicker(:, 1) matlab.ui.control.ColorPicker ...
+            {mustBeScalarOrEmpty}
+        % Spinner to control the histogram's FaceAlpha property.
+        FaceAlphaSpinner(:, 1) matlab.ui.control.Spinner ...
+            {mustBeScalarOrEmpty}
+        % Color picker for selecting the histogram FaceColor.
+        FaceColorPicker(:, 1) matlab.ui.control.ColorPicker ...
+            {mustBeScalarOrEmpty}
+    end % properties ( Access = private, Transient, NonCopyable )
+
+    properties ( Constant, Hidden )
+        % Product dependencies.
+        Dependencies(1, :) string = ["MATLAB", ...
+            "Statistics and Machine Learning Toolbox"]
+        % Description.
+        ShortDescription(1, 1) string = "Plot the distribution" + ...
+            " of a return series together with its value at risk" + ...
+            " metrics and a distribution fit"
+    end % properties ( Constant, Hidden )
+
+    methods
+
+        function value = get.Data( obj )
+
+            value = obj.Data_;
+
+        end % get.Data
+
+        function set.Data( obj, value )
+
+            % Use fitdist to validate that the proposed data is acceptable.
+            % Exit without updating if anything is wrong with the data
+            % (this is distribution-dependent).
+            try
+                fitdist( value, obj.DistributionName_ );
+            catch e
+                throw( e )
+            end % try/catch
+
+            obj.Data_ = value;
+            obj.ComputationRequired(1) = true;
+
+        end % set.Data
+
+        function value = get.VaRLevel( obj )
+
+            value = obj.VaRLevel_;
+
+        end % get.VaRLevel
+
+        function set.VaRLevel( obj, value )
+
+            obj.VaRLevel_ = value;
+            obj.ComputationRequired(2) = true;
+
+        end % set.VaRLevel
+
+        function value = get.DistributionName( obj )
+
+            value = obj.DistributionName_;
+
+        end % get.DistributionName
+
+        function set.DistributionName( obj, value )
+
+            % Update the stored property and the dropdown control.
+            obj.DistributionName_ = value;
+            obj.DistributionDropDown.Value = value;
+
+            % Mark the chart for an update.
+            obj.ComputationRequired(1) = true;
+
+        end % set.DistributionName
+
+        function value = get.FittedPDFVisible( obj )
+
+            value = obj.FittedPDF.Visible;
+
+        end % get.FittedPDFVisible
+
+        function set.FittedPDFVisible( obj, value )
+
+            obj.FittedPDF.Visible = value;
+            obj.FittedPDFCheckBox.Value = value;
+
+        end % set.FittedPDFVisible
+
+        function value = get.VaRLineVisible( obj )
+
+            value = obj.VaRLine.Visible;
+
+        end % get.VaRLineVisible
+
+        function set.VaRLineVisible( obj, value )
+
+            obj.VaRLine.Visible = value;
+            obj.VaRLineCheckBox.Value = value;
+
+        end % set.VaRLineVisible
+
+        function value = get.CVaRLineVisible( obj )
+
+            value = obj.CVaRLine.Visible;
+
+        end % get.CVaRLineVisible
+
+        function set.CVaRLineVisible( obj, value )
+
+            obj.CVaRLine.Visible = value;
+            obj.CVaRLineCheckBox.Value = value;
+
+        end % set.CVaRLineVisible
+
+        function value = get.VaRLabelVisible( obj )
+
+            value = obj.VaRLabelCheckBox.Value;
+
+        end % get.VaRLabelVisible
+        
+        function set.VaRLabelVisible( obj, value )
+
+            obj.VaRLabelCheckBox.Value = value;
+            obj.onVaRLabelToggled()
+
+        end % set.VaRLabelVisible
+
+        function value = get.CVaRLabelVisible( obj )
+
+            value = obj.CVaRLabelCheckBox.Value;
+
+        end % get.CVaRLabelVisible
+
+        function set.CVaRLabelVisible( obj, value )
+
+            obj.CVaRLabelCheckBox.Value = value;
+            obj.onCVaRLabelToggled()
+
+        end % set.CVaRLabelVisible
+
+        function value = get.LineWidth( obj )
+
+            value = obj.LineWidthEditField.Value;
+
+        end % get.LineWidth
+
+        function set.LineWidth( obj, value )
+
+            obj.LineWidthEditField.Value = value;
+            obj.onLineWidthEdited()
+
+        end % set.LineWidth
+
+        function value = get.EdgeAlpha( obj )
+
+            value = obj.Histogram.EdgeAlpha;
+
+        end % get.EdgeAlpha
+
+        function set.EdgeAlpha( obj, value )
+
+            % Update the spinner control.
+            obj.EdgeAlphaSpinner.Value = value;
+            
+            % Update the histogram.
+            obj.Histogram.EdgeAlpha = value;
+
+        end % set.EdgeAlpha
+
+        function value = get.EdgeColor( obj )
+
+            value = obj.Histogram.EdgeColor;
+
+        end % get.EdgeColor
+
+        function set.EdgeColor( obj, value )
+
+            % Update the histogram.
+            value = validatecolor( value );            
+            obj.Histogram.EdgeColor = value;
+
+            % Update the color picker.
+            obj.EdgeColorPicker.Value = value;
+
+        end % set.EdgeColor
+
+        function value = get.FaceAlpha( obj )
+
+            value = obj.Histogram.FaceAlpha;
+
+        end % get.FaceAlpha
+
+        function set.FaceAlpha( obj, value )
+
+            % Update the spinner control.
+            obj.FaceAlphaSpinner.Value = value;
+
+            % Update the histogram.
+            obj.Histogram.FaceAlpha = value;
+
+        end % set.FaceAlpha
+
+        function value = get.FaceColor( obj )
+
+            value = obj.Histogram.FaceColor;
+
+        end % get.FaceColor
+
+        function set.FaceColor( obj, value )
+
+            % Update the histogram.
+            value = validatecolor( value );
+            obj.Histogram.FaceColor = value;
+
+            % Update the color picker.
+            obj.FaceColorPicker.Value = value;
+
+        end % set.FaceColor
+
+        function value = get.Controls( obj )
+
+            value = obj.ToggleButton.Value;
+
+        end % get.Controls
+
+        function set.Controls( obj, value )
+
+            % Update the toggle button.
+            obj.ToggleButton.Value = value;
+            
+            % Invoke the toggle button callback.
+            obj.onToggleButtonPressed()
+
+        end % set.Controls
+
+    end % methods
+
+    methods
+
+        function obj = ValueAtRiskChart( namedArgs )
+            %VALUEATRISKCHART Construct a ValueAtRiskChart object, given
+            %optional name-value arguments.
+
+            arguments ( Input )
+                namedArgs.?ValueAtRiskChart
+            end % arguments ( Input )
+
+            % Set any user-defined properties.
+            set( obj, namedArgs )
+
+        end % constructor
+
+        function varargout = xlabel( obj, varargin )
+
+            [varargout{1:nargout}] = xlabel( obj.Axes, varargin{:} );
+
+        end % xlabel
+
+        function varargout = ylabel( obj, varargin )
+
+            [varargout{1:nargout}] = ylabel( obj.Axes, varargin{:} );
+
+        end % ylabel
+
+        function varargout = title( obj, varargin )
+
+            [varargout{1:nargout}] = title( obj.Axes, varargin{:} );
+
+        end % title
+
+        function grid( obj, varargin )
+
+            % Invoke grid on the axes.
+            grid( obj.Axes, varargin{:} )
+            
+            % Update the chart's grid properties.
+            obj.XGrid = obj.Axes.XGrid;
+            obj.YGrid = obj.Axes.YGrid;
+
+        end % grid
+
+        function varargout = legend( obj, varargin )
+
+            [varargout{1:nargout}] = legend( obj.Axes, varargin{:} );
+
+        end % legend
+
+        function varargout = axis( obj, varargin )
+
+            [varargout{1:nargout}] = axis( obj.Axes, varargin{:} );
+
+        end % axis
+
+        function exportgraphics( obj, varargin )
+
+            exportgraphics( obj.Axes, varargin{:} )
+
+        end % exportgraphics
+
+    end % methods
+
+    methods ( Access = protected )
+
+        function setup( obj )
+            %SETUP Initialize the chart graphics.
+
+            % Define the layout grid.
+            obj.LayoutGrid = uigridlayout( obj, [1, 2], ...
+                "ColumnWidth", ["1x", "0x"] );
+
+            % Create the chart's axes.
+            obj.Axes = axes( "Parent", obj.LayoutGrid );
+
+            % Add a state button to show/hide the chart's controls.
+            tb = axtoolbar( obj.Axes, "default" );
+            iconPath = fullfile( chartsRoot(), "charts", "images", ...
+                "Cog.png" );
+            obj.ToggleButton = axtoolbarbtn( tb, "state", ...
+                "Value", "off", ...
+                "Tooltip", "Show chart controls", ...
+                "Icon", iconPath, ...
+                "ValueChangedFcn", @obj.onToggleButtonPressed );
+
+            % Create the histogram.
+            hold( obj.Axes, "on" )
+            obj.Histogram = histogram( obj.Axes, NaN, ...
+                "FaceColor", obj.Axes.ColorOrder(1, :), ...
+                "Normalization", "pdf" );
+
+            % Overlay the density on the histogram.
+            c = obj.Axes.ColorOrder;
+            obj.FittedPDF = line( "Parent", obj.Axes, ...
+                "XData", NaN, ...
+                "YData", NaN, ...
+                "LineWidth", 2, ...
+                "Color", c(2, :) );
+
+            % Overlay the VaR lines.
+            obj.VaRLine = xline( obj.Axes, 0, "Color", c(3, :), ...
+                "Alpha", 1, ...
+                "LineWidth", 2, ...
+                "LabelHorizontalAlignment", "left" );
+            obj.CVaRLine = xline( obj.Axes, 0, "Color", c(4, :), ...
+                "Alpha", 1, ...
+                "LineWidth", 2, ...
+                "LabelHorizontalAlignment", "left" );
+
+            % Annotate the axes and add the legend.
+            xlabel( obj.Axes, "Data" )
+            ylabel( obj.Axes, "Probability density" )
+            title( obj.Axes, "ValueAtRisk Chart" )
+            legend( obj.Axes, ["Data", "Fit", "VaR", "CVaR"] )
+            hold( obj.Axes, "off" )
+
+            % Add the chart controls. Start with the control panel and its
+            % main layout grid.
+            p = uipanel( "Parent", obj.LayoutGrid, ...
+                "Title", "Chart Controls", ...
+                "FontWeight", "bold" );
+            p.Layout.Column = 2;
+            g = uigridlayout( p, [8, 2], ...
+                "RowHeight", repelem( "fit", 8 ), ...
+                "ColumnWidth", ["fit", "1x"] );
+            
+            % Add the distribution selection dropdown.
+            uilabel( g, "Text", "Distribution fit: ", ...
+                "HorizontalAlignment", "right" );
+            obj.DistributionDropDown = uidropdown( g, ...
+                "Items", ...
+                ["Kernel", "Normal", "Logistic", "tLocationScale"], ...
+                "Tooltip", ...
+                "Select the probability distribution to fit to the data", ...
+                "ValueChangedFcn", @obj.onDistributionSelected );
+            
+            % Add checkboxes to control visibility of the PDF and value at
+            % risk lines.
+            obj.FittedPDFCheckBox = uicheckbox( g, ...
+                "Text", "Show fitted PDF", ...
+                "Value", ...
+                matlab.lang.OnOffSwitchState( obj.FittedPDFVisible ), ...
+                "Tooltip", "Hide or show the fitted PDF", ...
+                "ValueChangedFcn", @obj.toggleFittedPDFVisibility );
+            obj.FittedPDFCheckBox.Layout.Column = [1, 2];
+            obj.VaRLineCheckBox = uicheckbox( g, ...
+                "Text", "Show VaR line", ...
+                "Value", ...
+                matlab.lang.OnOffSwitchState( obj.VaRLineVisible ), ...
+                "Tooltip", "Hide or show the VaR line", ...
+                "ValueChangedFcn", @obj.toggleVaRLineVisibility );
+            obj.VaRLineCheckBox.Layout.Column = [1, 2];
+            obj.CVaRLineCheckBox = uicheckbox( g, ...
+                "Text", "Show CVaR line", ...
+                "Value", ...
+                matlab.lang.OnOffSwitchState( obj.CVaRLineVisible ), ...
+                "Tooltip", "Hide or show the CVaR line", ...
+                "ValueChangedFcn", @obj.toggleCVaRLineVisibility );
+            obj.CVaRLineCheckBox.Layout.Column = [1, 2];
+
+            % Add checkboxes to control visibility of the risk line labels.
+            obj.VaRLabelCheckBox = uicheckbox( g, ...
+                "Text", "Show VaR label", ...
+                "Value", true, ...
+                "Tooltip", "Hide or show the VaR label", ...
+                "ValueChangedFcn", @obj.onVaRLabelToggled );
+            obj.VaRLabelCheckBox.Layout.Column = [1, 2];
+            obj.CVaRLabelCheckBox = uicheckbox( g, ...
+                "Text", "Show CVaR label", ...
+                "Value", true, ...
+                "Value", true, ...
+                "Tooltip", "Hide or show the CVaR label", ...
+                "ValueChangedFcn", @obj.onCVaRLabelToggled );
+            obj.CVaRLabelCheckBox.Layout.Column = [1, 2];
+
+            % Add an edit field for the line width.
+            uilabel( g, "Text", "Line width:", ...
+                "HorizontalAlignment", "right" );
+            obj.LineWidthEditField = uieditfield( g, "numeric", ...
+                "Limits", [0, Inf], ...
+                "LowerLimitInclusive", "off", ...
+                "UpperLimitInclusive", "off", ...
+                "Value", 2, ...
+                "ValueChangedFcn", @obj.onLineWidthEdited );
+                        
+            % Place the histogram controls in a separate panel.
+            p = uipanel( g, "Title", "Histogram Appearance", ...
+                "FontWeight", "bold" );
+            p.Layout.Column = [1, 2];
+            g = uigridlayout( p, [4, 2], ...
+                "RowHeight", repmat( "fit", 4, 1 ), ...
+                "ColumnWidth", ["fit", "1x"] );
+            
+            % Add controls for the edge and face transparency and color.
+            uilabel( g, "Text", "Edge color:", ...
+                "HorizontalAlignment", "right" );
+            obj.EdgeColorPicker = uicolorpicker( "Parent", g, ...
+                "Tooltip", "Select the histogram edge color", ...
+                "Value", obj.EdgeColor, ...
+                "ValueChangedFcn", @obj.onEdgeColorPicked );            
+            uilabel( g, "Text", "Edge alpha:", ...
+                "HorizontalAlignment", "right" );
+            obj.EdgeAlphaSpinner = uispinner( g, ...
+                "Value", obj.EdgeAlpha, ...
+                "ValueDisplayFormat", "%.1f", ...
+                "Limits", [0, 1], ...
+                "Step", 0.1, ...
+                "ValueChangedFcn", @obj.onEdgeAlphaSelected );
+            uilabel( g, "Text", "Face color:", ...
+                "HorizontalAlignment", "right" );
+            obj.FaceColorPicker = uicolorpicker( "Parent", g, ...
+                "Value", obj.FaceColor, ...
+                "Tooltip", "Select the histogram face color", ...
+                "ValueChangedFcn", @obj.onFaceColorPicked );            
+            uilabel( g, "Text", "Face alpha:", ...
+                "HorizontalAlignment", "right" );
+            obj.FaceAlphaSpinner = uispinner( g, ...
+                "Value", obj.FaceAlpha, ...
+                "ValueDisplayFormat", "%.1f", ...
+                "Limits", [0, 1], ...
+                "Step", 0.1, ...
+                "ValueChangedFcn", @obj.onFaceAlphaSelected );
+
+        end % setup
+
+        function update( obj )
+            %UPDATE Refresh the chart graphics.
+
+            if obj.ComputationRequired(1)
+
+                % Update the non-parametric distribution fit.
+                mdl = fitdist( obj.Data, obj.DistributionName_ );
+
+                % Evaluate it on the sample range.
+                sampleVals = linspace( ...
+                    min( obj.Data ), max( obj.Data ), 1000 );
+                pdfVals = pdf( mdl, sampleVals );
+
+                % Update the density plot.
+                set( obj.FittedPDF, "XData", sampleVals, "YData", pdfVals )
+
+                % Update the histogram with the new data.
+                set( obj.Histogram, "Data", obj.Data, "BinMethod", "auto" )
+
+                % Update the VaR lines.
+                obj.updateVaRLines()
+
+                % Mark the chart clean.
+                obj.ComputationRequired = false( 1, 2 );
+
+            end % if
+
+            if obj.ComputationRequired(2)
+
+                % Update the VaR lines only.
+                obj.updateVaRLines()
+                
+                % Mark the chart clean.
+                obj.ComputationRequired(2) = false;
+
+            end % if
+
+            % Refresh the chart's decorative properties.
+            obj.FittedPDF.LineWidth = obj.LineWidth;
+            obj.VaRLine.LineWidth = obj.LineWidth;
+            obj.CVaRLine.LineWidth = obj.LineWidth;
+            set( obj.Axes, "XGrid", obj.XGrid, "YGrid", obj.YGrid )
+
+        end % update
+
+        function updateVaRLines( obj )
+            %UPDATEVARLINES Update the VaR lines if the VaR level has been
+            %changed.
+
+            % Compute the new VaR and CVaR.
+            VaR = quantile( obj.Data, 1 - obj.VaRLevel );
+            CVaR = mean( obj.Data(obj.Data < VaR) );
+            obj.RiskMetrics = [VaR, CVaR];
+            obj.VaRLine.Value = VaR;
+            obj.CVaRLine.Value = CVaR;
+            obj.onVaRLabelToggled()
+            obj.onCVaRLabelToggled()
+
+        end % updateVaRLines
+
+    end % methods ( Access = protected )
+
+    methods ( Access = private )
+
+        function onToggleButtonPressed( obj, ~, ~ )
+            %ONTOGGLEBUTTONPRESSED Hide/show the chart controls.
+
+            toggleDown = obj.ToggleButton.Value;
+
+            if toggleDown
+                % Show the controls.
+                obj.LayoutGrid.ColumnWidth{2} = "fit";
+                obj.ToggleButton.Tooltip = "Hide chart controls";
+            else
+                % Hide the controls.
+                obj.LayoutGrid.ColumnWidth{2} = "0x";
+                obj.ToggleButton.Tooltip = "Show chart controls";
+            end % if
+
+        end % onToggleButtonPressed
+
+        function onDistributionSelected( obj, ~, ~ )
+            %ONDISTRIBUTIONSELECTED Update the chart when the user selects
+            %a probability distribution from the dropdown menu.
+
+            obj.DistributionName = obj.DistributionDropDown.Value;
+
+        end % onDistributionSelected
+
+        function toggleFittedPDFVisibility( obj, s, ~ )
+            %TOGGLEFITTEDPDFVISIBILITY Toggle the visibility of the fitted
+            %PDF.
+
+            obj.FittedPDF.Visible = s.Value;
+
+        end % toggleFittedPDFVisibility
+
+        function toggleVaRLineVisibility( obj, s, ~ )
+            %TOGGLEVARLINEVISIBILITY Toggle the visibility of the VaR line.
+
+            obj.VaRLine.Visible = s.Value;
+
+        end % toggleVaRLineVisibility
+
+        function toggleCVaRLineVisibility( obj, s, ~ )
+            %TOGGLECVARLINEVISIBILITY Toggle the visibility of the CVaR
+            %line.
+
+            obj.CVaRLine.Visible = s.Value;
+
+        end % toggleCVaRLineVisibility
+
+        function onVaRLabelToggled( obj, ~, ~ )
+            %ONVARLABELTOGGLED Toggle the visibility of the VaR label.
+
+            checked = obj.VaRLabelCheckBox.Value;
+            if checked
+                obj.VaRLine.Label = "VaR (" + 100 * obj.VaRLevel + ...
+                    ") = " + obj.RiskMetrics(1);
+            else
+                obj.VaRLine.Label = "";
+            end % if
+
+        end % onVaRLabelToggled
+
+        function onCVaRLabelToggled( obj, ~, ~ )
+            %ONCVARLABELTOGGLED Toggle the visibility of the CVaR label.
+
+            checked = obj.CVaRLabelCheckBox.Value;
+            if checked
+                obj.CVaRLine.Label = "CVaR (" + 100 * obj.VaRLevel + ...
+                    ") = " + obj.RiskMetrics(2);
+            else
+                obj.CVaRLine.Label = "";
+            end % if
+
+        end % onCVaRLabelToggled
+
+        function onLineWidthEdited( obj, ~, ~ )
+            %ONLINEWIDTHEDITED Update the line width of the distribution
+            %fit and risk lines.
+
+            lw = obj.LineWidthEditField.Value;
+            set( [obj.FittedPDF, obj.VaRLine, obj.CVaRLine], ...
+                "LineWidth", lw )
+
+        end % onLineWidthEdited
+
+        function onEdgeAlphaSelected( obj, s, ~ )
+            %ONEDGEALPHASELECTED Update the histogram's EdgeAlpha when the
+            %user modifies the spinner.
+
+            obj.EdgeAlpha = s.Value;
+
+        end % onEdgeAlphaSelected
+
+        function onEdgeColorPicked( obj, ~, ~ )
+            %ONEDGECOLORPICKED Update the histogram's EdgeColor when the
+            %user selects a color.
+
+            % Update the edge color.
+            obj.EdgeColor = obj.EdgeColorPicker.Value;
+
+        end % onEdgeColorPicked
+
+        function onFaceAlphaSelected( obj, s, ~ )
+            %ONEDGEALPHASELECTED Update the histogram's EdgeAlpha when the
+            %user modifies the spinner.
+
+            obj.FaceAlpha = s.Value;
+
+        end % onFaceAlphaSelected
+
+        function onFaceColorPicked( obj, ~, ~ )
+            %ONFACECOLORPICKED Update the histogram's FaceColor when the
+            %user selects a color.
+
+            % Update the face color.
+            obj.FaceColor = obj.FaceColorPicker.Value;
+
+        end % onFaceColorPicked
+
+    end % methods ( Access = private )
+
+end % classdef
+##### SOURCE END #####
+-->
+</body>
+</html>

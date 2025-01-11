@@ -1,0 +1,1187 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      -->
+<title>CircularNetFlowChart</title>
+<meta name="generator" content="MATLAB 25.1">
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+<meta name="DC.date" content="2025-01-11">
+<meta name="DC.source" content="CircularNetFlowChart.m">
+<style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style>
+</head>
+<body>
+<div class="content">
+<pre class="codeinput">
+<span class="keyword">classdef</span> CircularNetFlowChart &lt; Chart
+    <span class="comment">%CIRCULARNETFLOWCHART Illustrates the directed to/from relationships</span>
+    <span class="comment">%between pairs of categories.</span>
+
+    <span class="comment">% Copyright 2018-2025 The MathWorks, Inc.</span>
+
+    <span class="keyword">properties</span> ( Dependent )
+        <span class="comment">% Chart data table.</span>
+        LinkData<span class="typesection">(:, :) table {mustBeLinkData}</span>
+        <span class="comment">% Offset for the outer labels.</span>
+        OuterLabelOffset<span class="typesection">(1, 1) double {mustBeFinite, mustBePositive}</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Dependent )</span>
+
+    <span class="keyword">properties</span>
+        <span class="comment">% Transparency of the link patches.</span>
+        FaceAlpha<span class="typesection">(1, 1) double {mustBeInRange( FaceAlpha, 0, 1 )}</span> = 0.5
+        <span class="comment">% Visibility of the text labels.</span>
+        ShowLabels<span class="typesection">(1, 1) matlab.lang.OnOffSwitchState </span>= <span class="string">"on"</span>
+    <span class="keyword">end</span> <span class="comment">% properties</span>
+
+    <span class="keyword">properties</span> ( Dependent, SetAccess = private )
+        <span class="comment">% Derived net flow, presented as a table.</span>
+        NetFlow<span class="typesection">(:, :) table</span>
+        <span class="comment">% Net amounts sent.</span>
+        NetSent<span class="typesection">(:, :) table</span>
+        <span class="comment">% Net amounts received.</span>
+        NetReceived<span class="typesection">(:, :) table</span>
+        <span class="comment">% Chart data labels.</span>
+        Labels<span class="typesection">(1, :) string</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Dependent, SetAccess = private )</span>
+
+    <span class="keyword">properties</span> ( Dependent, Access = private )
+        <span class="comment">% Number of sources/sinks.</span>
+        NumSources<span class="typesection">(1, 1) double {mustBeInteger, mustBePositive}</span>
+        <span class="comment">% Row/column indices and values of the positive net flow.</span>
+        PositiveNetFlow<span class="typesection">(:, 3) double {mustBePositive, mustBeFinite}</span>
+        <span class="comment">% List of colors used for the various graphics objects.</span>
+        Colors<span class="typesection">(:, 3) double {mustBeInRange( Colors, 0, 1 )}</span>
+        <span class="comment">% Colormap used for the patch objects.</span>
+        PatchColormap<span class="typesection">(:, 3) double {mustBeInRange( PatchColormap, 0, 1 )}</span>
+        <span class="comment">% Angular positions of the arc endpoints, measured in radians</span>
+        <span class="comment">% anticlockwise from the easterly direction.</span>
+        AngularPositions<span class="typesection">(:, 1) double {mustBeReal, mustBeFinite}</span>
+        <span class="comment">% Sizes of the interior, receiving nodes. These are proportional to</span>
+        <span class="comment">% the total amount received by each node.</span>
+        NodeSizes<span class="typesection">(:, 1) double {mustBeNonnegative, mustBeFinite}</span>
+        <span class="comment">% Angular positions of the nodes.</span>
+        NodePositions<span class="typesection">(:, 1) double {mustBeReal, mustBeFinite}</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Dependent, Access = private )</span>
+
+    <span class="keyword">properties</span> ( Access = private, Transient, NonCopyable )
+        <span class="comment">% Chart axes.</span>
+        Axes<span class="typesection">(:, 1) matlab.graphics.axis.Axes {mustBeScalarOrEmpty}</span>
+        <span class="comment">% Circumferential arcs.</span>
+        Arcs<span class="typesection">(:, 1) matlab.graphics.primitive.Line</span>
+        <span class="comment">% Receiving nodes in the interior of the disk.</span>
+        ReceivingNodes<span class="typesection">(:, 1) matlab.graphics.primitive.Line</span>
+        <span class="comment">% Link patches.</span>
+        LinkPatches<span class="typesection">(:, 1) matlab.graphics.primitive.Patch</span>
+        <span class="comment">% Link patch text labels.</span>
+        PatchLabels<span class="typesection">(:, 1) matlab.graphics.primitive.Text</span>
+        <span class="comment">% Outer labels for each source.</span>
+        OuterLabels<span class="typesection">(:, 1) matlab.graphics.primitive.Text</span>
+        <span class="comment">% Inner labels for each node.</span>
+        NodeLabels<span class="typesection">(:, 1) matlab.graphics.primitive.Text</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Access = private, Transient, NonCopyable )</span>
+
+    <span class="keyword">properties</span> ( Access = private )
+        <span class="comment">% Backing property for the chart data table.</span>
+        LinkData_<span class="typesection">(:, :) table {mustBeLinkData}</span> = defaultLinkData()
+        <span class="comment">% Logical scalar specifying whether a computation is required.</span>
+        ComputationRequired<span class="typesection">(1, 1) logical </span>= false
+        <span class="comment">% Backing property for the outer label offset.</span>
+        OuterLabelOffset_<span class="typesection">(1, 1) double {mustBePositive, mustBeFinite}</span> = 35
+    <span class="keyword">end</span> <span class="comment">% properties ( Access = private )</span>
+
+    <span class="keyword">properties</span> ( Constant, GetAccess = private )
+        <span class="comment">% Outer radius.</span>
+        OuterRadius<span class="typesection">(1, 1) double {mustBePositive, mustBeFinite}</span> = 100
+        <span class="comment">% Inner radius.</span>
+        InnerRadius<span class="typesection">(1, 1) double {mustBePositive, mustBeFinite}</span> = 30
+        <span class="comment">% Scale factor for the inner node sizes.</span>
+        NodeScaleFactor<span class="typesection">(1, 1) double {mustBePositive, mustBeFinite}</span> = 200
+        <span class="comment">% Number of transition points for interpolated patch shading.</span>
+        NumTransitionPoints<span class="typesection">(1, 1) double </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeInteger, mustBePositive}</span> = 100
+        <span class="comment">% Angular gap size between the outer circular arcs.</span>
+        AngularGap<span class="typesection">(1, 1) double {mustBePositive, mustBeFinite}</span> = pi / 400
+        <span class="comment">% Offset for the circumferential patch labels.</span>
+        PatchLabelOffset<span class="typesection">(1, 1) double {mustBePositive, mustBeFinite}</span> = 10
+        <span class="comment">% Patch label font size.</span>
+        PatchLabelFontSize<span class="typesection">(1, 1) double </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeInRange( PatchLabelFontSize, 0, 1 )}</span> = 0.03
+        <span class="comment">% Outer label font size.</span>
+        OuterLabelFontSize<span class="typesection">(1, 1) double </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeInRange( OuterLabelFontSize, 0, 1 )}</span> = 0.04
+    <span class="keyword">end</span> <span class="comment">% properties ( Constant, GetAccess = private )</span>
+
+    <span class="keyword">properties</span> ( Constant, Hidden )
+        <span class="comment">% Product dependencies.</span>
+        Dependencies<span class="typesection">(1, :) string </span>= <span class="string">"MATLAB"</span>
+        <span class="comment">% Description.</span>
+        ShortDescription<span class="typesection">(1, 1) string </span>= <span class="string">"Show directed "</span> + <span class="keyword">...</span>
+            <span class="string">"to/from relationships between pairs of categories"</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Constant, Hidden )</span>
+
+    <span class="keyword">methods</span>
+
+        <span class="keyword">function</span> obj = CircularNetFlowChart( namedArgs )
+            <span class="comment">%CIRCULARNETFLOWCHART Construct a CircularNetFlowChart, given</span>
+            <span class="comment">%optional name-value arguments.</span>
+
+            <span class="keyword">arguments</span> ( Input )
+                namedArgs.?CircularNetFlowChart
+            <span class="keyword">end</span> <span class="comment">% arguments ( Input )</span>
+
+            <span class="comment">% Set any user-defined properties.</span>
+            set( obj, namedArgs )
+
+        <span class="keyword">end</span> <span class="comment">% constructor</span>
+
+        <span class="keyword">function</span> value = get.LinkData( obj )
+
+            value = obj.LinkData_;
+
+        <span class="keyword">end</span> <span class="comment">% get.LinkData</span>
+
+        <span class="keyword">function</span> set.LinkData( obj, value )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Set the internal data property.</span>
+            obj.LinkData_ = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.LinkData</span>
+
+        <span class="keyword">function</span> value = get.Labels( obj )
+
+            value = string( obj.LinkData_.Properties.VariableNames );
+
+        <span class="keyword">end</span> <span class="comment">% get.Labels</span>
+
+        <span class="keyword">function</span> value = get.OuterLabelOffset( obj )
+
+            value = obj.OuterLabelOffset_;
+
+        <span class="keyword">end</span> <span class="comment">% get.OuterLabelOffset</span>
+
+        <span class="keyword">function</span> set.OuterLabelOffset( obj, value )
+
+            <span class="comment">% Update the internal property.</span>
+            obj.OuterLabelOffset_ = value;
+
+            <span class="comment">% Reposition the outer labels.</span>
+            [outerLabelX, outerLabelY] = pol2cart( obj.NodePositions, <span class="keyword">...</span>
+                obj.OuterRadius + obj.OuterLabelOffset );
+            <span class="keyword">for</span> k = 1 : obj.NumSources
+                set( obj.OuterLabels(k), <span class="string">"Position"</span>, <span class="keyword">...</span>
+                    [outerLabelX(k), outerLabelY(k), 0] )
+            <span class="keyword">end</span> <span class="comment">% for</span>
+
+        <span class="keyword">end</span> <span class="comment">% set.OuterLabelOffset</span>
+
+        <span class="keyword">function</span> value = get.NetFlow( obj )
+
+            <span class="comment">% Compute the net flow from each source (row) to every sink</span>
+            <span class="comment">% (column). The set of sources is the same as the set of sinks.</span>
+            d = obj.LinkData{:, :};
+            flowFromSource = tril( d );
+            flowFromSink = triu( d );
+
+            <span class="comment">% Compute the net flow, as an upper triangular matrix.</span>
+            netflow = flowFromSink - flowFromSource.';
+
+            <span class="comment">% Ensure the net flow matrix is skew-symmetric, i.e., populate</span>
+            <span class="comment">% the lower triangular part.</span>
+            netflow = netflow - triu( netflow ).';
+
+            <span class="comment">% Tabulate the result.</span>
+            value = array2table( netflow, <span class="string">"VariableNames"</span>, obj.Labels, <span class="keyword">...</span>
+                <span class="string">"RowNames"</span>, obj.Labels );
+
+        <span class="keyword">end</span> <span class="comment">% get.NetFlow</span>
+
+        <span class="keyword">function</span> value = get.NetSent( obj )
+
+            <span class="comment">% Sum the positive values in each row.</span>
+            nf = obj.NetFlow{:, :};
+            nf(nf &lt; 0) = 0;
+            value = sum( nf, 2 );
+
+        <span class="keyword">end</span> <span class="comment">% get.NetSent</span>
+
+        <span class="keyword">function</span> value = get.NetReceived( obj )
+
+            <span class="comment">% Sum the positive values in each column, returning the results</span>
+            <span class="comment">% as a column vector.</span>
+            nf = obj.NetFlow{:, :};
+            nf(nf &lt; 0) = 0;
+            value = sum( nf ).';
+
+        <span class="keyword">end</span> <span class="comment">% get.NetReceived</span>
+
+        <span class="keyword">function</span> value = get.NumSources( obj )
+
+            value = height( obj.LinkData );
+
+        <span class="keyword">end</span> <span class="comment">% get.NumSources</span>
+
+        <span class="keyword">function</span> value = get.PositiveNetFlow( obj )
+
+            <span class="comment">% Return a three-column matrix containing the row and column</span>
+            <span class="comment">% indices of the positive net flow values (1st and 2nd</span>
+            <span class="comment">% columns), together with the positive net flow values.</span>
+            nf = obj.NetFlow{:, :};
+            posIdx = nf &gt; 0;
+            [value(:, 1), value(:, 2)] = find( posIdx );
+            value(:, 3) = nf(posIdx);
+
+        <span class="keyword">end</span> <span class="comment">% get.PositiveNetFlow</span>
+
+        <span class="keyword">function</span> value = get.Colors( obj )
+
+            <span class="comment">% Default list of colors used for plotting.</span>
+            value = obj.Axes.ColorOrder;
+
+            <span class="comment">% Interpolate this list to produce the required number of</span>
+            <span class="comment">% colors.</span>
+            colIdx = 1 : height( value );
+            colQueryIdx = linspace( 1, colIdx(end), obj.NumSources );
+            value = interp1( colIdx, value, colQueryIdx );
+
+        <span class="keyword">end</span> <span class="comment">% get.Colors</span>
+
+        <span class="keyword">function</span> value = get.PatchColormap( obj )
+
+            <span class="comment">% Preallocate for the patch colormap. The number of patches is</span>
+            <span class="comment">% equal to the number of positive net flow values. Each patch</span>
+            <span class="comment">% contributes NumTransitionPoints rows to the overall patch</span>
+            <span class="comment">% colormap.</span>
+            N = obj.NumTransitionPoints;
+            numPosFlow = height( obj.PositiveNetFlow );
+            value = NaN( N * numPosFlow, 3 );
+            <span class="keyword">for</span> k = 1 : numPosFlow
+                <span class="comment">% For each patch, create a smooth transition from the</span>
+                <span class="comment">% source color to the sink color. Vertically concatenate</span>
+                <span class="comment">% the results in the overall patch colormap.</span>
+                sourceColor = obj.Colors(obj.PositiveNetFlow(k, 1), :);
+                sinkColor = obj.Colors(obj.PositiveNetFlow(k, 2), :);
+                transitionMap = <span class="keyword">...</span>
+                    [linspace( sourceColor(1), sinkColor(1), N ).', <span class="keyword">...</span>
+                    linspace( sourceColor(2), sinkColor(2), N ).', <span class="keyword">...</span>
+                    linspace( sourceColor(3), sinkColor(3), N ).'];
+                value((N * (k-1) + 1) : N * k, :) = transitionMap;
+            <span class="keyword">end</span> <span class="comment">% for</span>
+
+        <span class="keyword">end</span> <span class="comment">% get.PatchColormap</span>
+
+        <span class="keyword">function</span> value = get.AngularPositions( obj )
+
+            <span class="comment">% Convert the cumulative net sent amounts to radians.</span>
+            cumulativeSourceFlows = cumsum( [0; obj.NetSent] );
+            value = 2 * pi * cumulativeSourceFlows / <span class="keyword">...</span>
+                cumulativeSourceFlows(end);
+
+        <span class="keyword">end</span> <span class="comment">% get.AngularSizes</span>
+
+        <span class="keyword">function</span> value = get.NodeSizes( obj )
+
+            <span class="comment">% Scale the net amounts received by each sink.</span>
+            value = obj.NodeScaleFactor * <span class="keyword">...</span>
+                obj.NetReceived / sum( obj.NetReceived );
+
+        <span class="keyword">end</span> <span class="comment">% get.NodeSizes</span>
+
+        <span class="keyword">function</span> value = get.NodePositions( obj )
+
+            <span class="comment">% The angular node positions are the midpoints of the angular</span>
+            <span class="comment">% arc positions.</span>
+            value = (obj.AngularPositions(1:end-1) + <span class="keyword">...</span>
+                obj.AngularPositions(2:end)) / 2;
+
+        <span class="keyword">end</span> <span class="comment">% get.NodePositions</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods</span>
+
+    <span class="keyword">methods</span>
+
+        <span class="keyword">function</span> varargout = title( obj, varargin )
+
+            [varargout{1:nargout}] = title( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% title</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods</span>
+
+    <span class="keyword">methods</span> ( Access = protected )
+
+        <span class="keyword">function</span> setup( obj )
+            <span class="comment">%SETUP Initialize the chart graphics.</span>
+
+            <span class="comment">% Create the axes.</span>
+            obj.Axes = axes( <span class="string">"Parent"</span>, obj.getLayout(), <span class="keyword">...</span>
+                <span class="string">"Visible"</span>, <span class="string">"off"</span>, <span class="keyword">...</span>
+                <span class="string">"DataAspectRatio"</span>, [1, 1, 1] );
+            obj.Axes.Toolbar = [];
+            disableDefaultInteractivity( obj.Axes )
+
+        <span class="keyword">end</span> <span class="comment">% setup</span>
+
+        <span class="keyword">function</span> update( obj )
+            <span class="comment">%UPDATE Refresh the chart graphics.</span>
+
+            <span class="keyword">if</span> obj.ComputationRequired
+
+                <span class="comment">% Create the chart graphics.</span>
+                <span class="comment">% First, draw the circumferential arcs.</span>
+                hold( obj.Axes, <span class="string">"on"</span> )
+                <span class="keyword">for</span> k = obj.NumSources : -1 : 1
+                    theta(:, k) = linspace( <span class="keyword">...</span>
+                        obj.AngularPositions(k) + obj.AngularGap, <span class="keyword">...</span>
+                        obj.AngularPositions(k+1) - obj.AngularGap );
+                <span class="keyword">end</span> <span class="comment">% for</span>
+                rho = obj.OuterRadius * ones( size( theta ) );
+                [X, Y] = pol2cart( theta, rho );
+                delete( obj.Arcs )
+                obj.Arcs = matlab.graphics.primitive.Line.empty( 0, 1 );
+                <span class="keyword">for</span> k = 1 : obj.NumSources
+                    obj.Arcs(k) = line( <span class="string">"Parent"</span>, obj.Axes, <span class="keyword">...</span>
+                        <span class="string">"XData"</span>, X(:, k), <span class="keyword">...</span>
+                        <span class="string">"YData"</span>, Y(:, k), <span class="keyword">...</span>
+                        <span class="string">"LineWidth"</span>, 10, <span class="keyword">...</span>
+                        <span class="string">"Color"</span>, obj.Colors(k, :) );
+                <span class="keyword">end</span> <span class="comment">% for</span>
+
+                <span class="comment">% Next, draw the receiving nodes in the interior of the</span>
+                <span class="comment">% disk.</span>
+                [nodeX, nodeY] = <span class="keyword">...</span>
+                    pol2cart( obj.NodePositions, obj.InnerRadius );
+                delete( obj.ReceivingNodes )
+                obj.ReceivingNodes = <span class="keyword">...</span>
+                    matlab.graphics.primitive.Line.empty( 0, 1 );
+                <span class="keyword">for</span> k = 1 : obj.NumSources
+                    obj.ReceivingNodes(k) = line( <span class="string">"Parent"</span>, obj.Axes, <span class="keyword">...</span>
+                        <span class="string">"XData"</span>, nodeX(k), <span class="keyword">...</span>
+                        <span class="string">"YData"</span>, nodeY(k), <span class="keyword">...</span>
+                        <span class="string">"Marker"</span>, <span class="string">"o"</span>, <span class="keyword">...</span>
+                        <span class="string">"MarkerEdgeColor"</span>, obj.Colors(k, :), <span class="keyword">...</span>
+                        <span class="string">"MarkerFaceColor"</span>, obj.Colors(k, :), <span class="keyword">...</span>
+                        <span class="string">"MarkerSize"</span>, obj.NodeSizes(k) );
+                <span class="keyword">end</span> <span class="comment">% for</span>
+
+                <span class="comment">% Draw the patches and their labels. To create the color</span>
+                <span class="comment">% transitions for each patch, we need to set the axes</span>
+                <span class="comment">% colormap.</span>
+                colormap( obj.Axes, obj.PatchColormap )
+
+                <span class="comment">% Compute the angular differences, including the gap sizes.</span>
+                dtheta = diff( obj.AngularPositions ) - 2 * obj.AngularGap;
+
+                <span class="comment">% Compute the angular starting positions.</span>
+                thetaStart = <span class="keyword">...</span>
+                    obj.AngularPositions(1:end-1) + obj.AngularGap;
+
+                <span class="comment">% Extract parameters required for the loop.</span>
+                pnf = obj.PositiveNetFlow;
+                N = obj.NumTransitionPoints;
+                numPosFlow = height( pnf );
+
+                <span class="comment">% Prepare the patches and labels.</span>
+                delete( obj.LinkPatches )
+                obj.LinkPatches = <span class="keyword">...</span>
+                    matlab.graphics.primitive.Patch.empty( 0, 1 );
+                delete( obj.PatchLabels )
+                obj.PatchLabels = <span class="keyword">...</span>
+                    matlab.graphics.primitive.Text.empty( 0, 1 );
+                <span class="keyword">for</span> k = 1 : numPosFlow
+                    <span class="comment">% Compute the proportion of each circumferential arc to</span>
+                    <span class="comment">% use as the base of the patch.</span>
+                    sourceIdx = pnf(k, 1);
+                    sinkIdx = pnf(k, 2);
+                    flowValue = obj.NetFlow{sourceIdx, sinkIdx};
+                    arcProp = flowValue / obj.NetSent(sourceIdx);
+                    <span class="comment">% Starting and finishing angles for the patch base.</span>
+                    localThetaStart = thetaStart(sourceIdx);
+                    thetaEnd = localThetaStart + <span class="keyword">...</span>
+                        arcProp * dtheta(sourceIdx);
+                    <span class="comment">% Update the starting angle for the current source.</span>
+                    thetaStart(sourceIdx) = thetaEnd;
+                    <span class="comment">% Compute the patch coordinates.</span>
+                    thetaPatch = <span class="keyword">...</span>
+                        [linspace( localThetaStart, thetaEnd, N ), <span class="keyword">...</span>
+                        linspace( thetaEnd, <span class="keyword">...</span>
+                        obj.NodePositions(sinkIdx), N ), <span class="keyword">...</span>
+                        linspace( obj.NodePositions(sinkIdx), <span class="keyword">...</span>
+                        localThetaStart, N )];
+                    rhoPatch = [obj.OuterRadius * ones( 1, N ), <span class="keyword">...</span>
+                        linspace( <span class="keyword">...</span>
+                        obj.OuterRadius, obj.InnerRadius, N ), <span class="keyword">...</span>
+                        linspace( obj.InnerRadius, obj.OuterRadius, N )];
+                    [X, Y] = pol2cart( thetaPatch, rhoPatch );
+                    <span class="comment">% Compute the current patch color indices into the</span>
+                    <span class="comment">% overall axes colormap.</span>
+                    colorIdx = [(N * (k-1) + 1) * ones( N, 1 ); <span class="keyword">...</span>
+                        ((N * (k-1) + 1) : N * k).'; <span class="keyword">...</span>
+                        (N * k : -1 : (N * (k-1) + 1)).'];
+                    <span class="comment">% Draw the patches.</span>
+                    obj.LinkPatches(k) = patch( <span class="string">"Parent"</span>, obj.Axes, <span class="keyword">...</span>
+                        <span class="string">"XData"</span>, X, <span class="keyword">...</span>
+                        <span class="string">"YData"</span>, Y, <span class="keyword">...</span>
+                        <span class="string">"CData"</span>, colorIdx, <span class="keyword">...</span>
+                        <span class="string">"FaceColor"</span>, <span class="string">"interp"</span>, <span class="keyword">...</span>
+                        <span class="string">"EdgeColor"</span>, <span class="string">"interp"</span>, <span class="keyword">...</span>
+                        <span class="string">"LineWidth"</span>, 1, <span class="keyword">...</span>
+                        <span class="string">"FaceAlpha"</span>, 0.85 );
+                    <span class="comment">% Compute the coordinates for the patch labels.</span>
+                    [patchLabelX, patchLabelY] = pol2cart( <span class="keyword">...</span>
+                        (localThetaStart + thetaEnd)/2, <span class="keyword">...</span>
+                        obj.OuterRadius + obj.PatchLabelOffset );
+                    <span class="comment">% Construct the text for the patch label, using the</span>
+                    <span class="comment">% color of the sink.</span>
+                    sinkColor = num2cell( obj.Colors(sinkIdx, :) );
+                    patchLabelText = <span class="string">"\"</span> + <span class="keyword">...</span>
+                        sprintf( <span class="string">"color[rgb]{%f,%f,%f}%g"</span>, <span class="keyword">...</span>
+                        sinkColor{:}, pnf(k, 3) );
+                    <span class="comment">% Create the patch labels.</span>
+                    obj.PatchLabels(k) = text( obj.Axes, <span class="keyword">...</span>
+                        patchLabelX, <span class="keyword">...</span>
+                        patchLabelY, <span class="keyword">...</span>
+                        patchLabelText, <span class="keyword">...</span>
+                        <span class="string">"FontUnits"</span>, <span class="string">"normalized"</span>, <span class="keyword">...</span>
+                        <span class="string">"FontWeight"</span>, <span class="string">"bold"</span>, <span class="keyword">...</span>
+                        <span class="string">"FontSize"</span>, obj.PatchLabelFontSize, <span class="keyword">...</span>
+                        <span class="string">"VerticalAlignment"</span>, <span class="string">"middle"</span>, <span class="keyword">...</span>
+                        <span class="string">"HorizontalAlignment"</span>, <span class="string">"center"</span> );
+                <span class="keyword">end</span> <span class="comment">% for</span>
+
+                <span class="comment">% Create the outer labels.</span>
+                [outerLabelX, outerLabelY] = <span class="keyword">...</span>
+                    pol2cart( obj.NodePositions, <span class="keyword">...</span>
+                    obj.OuterRadius + obj.OuterLabelOffset );
+                delete( obj.OuterLabels )
+                obj.OuterLabels = <span class="keyword">...</span>
+                    matlab.graphics.primitive.Text.empty( 0, 1 );
+                <span class="keyword">for</span> k = 1 : obj.NumSources
+                    <span class="comment">% Form the outer label text from the user-provided text</span>
+                    <span class="comment">% label and the net sent amounts.</span>
+                    s = obj.Labels{k} + <span class="string">" ("</span> + <span class="keyword">...</span>
+                        num2str( obj.NetSent(k) ) + <span class="string">")"</span>;
+                    c = num2cell( obj.Colors(k, :) );
+                    formattedLabel = <span class="string">"\"</span> + <span class="keyword">...</span>
+                        sprintf( <span class="string">"color[rgb]{%f,%f,%f} %s"</span>, c{:}, s );
+                    obj.OuterLabels(k) = text( obj.Axes, <span class="keyword">...</span>
+                        outerLabelX(k), <span class="keyword">...</span>
+                        outerLabelY(k), <span class="keyword">...</span>
+                        formattedLabel, <span class="keyword">...</span>
+                        <span class="string">"FontWeight"</span>, <span class="string">"bold"</span>, <span class="keyword">...</span>
+                        <span class="string">"HorizontalAlignment"</span>, <span class="string">"center"</span>, <span class="keyword">...</span>
+                        <span class="string">"VerticalAlignment"</span>, <span class="string">"middle"</span>, <span class="keyword">...</span>
+                        <span class="string">"FontUnits"</span>, <span class="string">"normalized"</span>, <span class="keyword">...</span>
+                        <span class="string">"FontSize"</span>, obj.OuterLabelFontSize );
+                <span class="keyword">end</span> <span class="comment">% for</span>
+
+                <span class="comment">% Draw the node labels.</span>
+                netReceivedText = num2str( obj.NetReceived );
+                nodeLabelFontSize = 0.03 + 0.02 * <span class="keyword">...</span>
+                    (obj.NodeSizes - min( obj.NodeSizes )) / <span class="keyword">...</span>
+                    (max( obj.NodeSizes ) - min( obj.NodeSizes ));
+                delete( obj.NodeLabels )
+                obj.NodeLabels = <span class="keyword">...</span>
+                    matlab.graphics.primitive.Text.empty( 0, 1 );
+                <span class="keyword">for</span> k = 1 : obj.NumSources
+                    obj.NodeLabels(k) = text( obj.Axes, <span class="keyword">...</span>
+                        nodeX(k), <span class="keyword">...</span>
+                        nodeY(k), <span class="keyword">...</span>
+                        netReceivedText(k, :), <span class="keyword">...</span>
+                        <span class="string">"FontWeight"</span>, <span class="string">"bold"</span>, <span class="keyword">...</span>
+                        <span class="string">"HorizontalAlignment"</span>, <span class="string">"center"</span>, <span class="keyword">...</span>
+                        <span class="string">"VerticalAlignment"</span>, <span class="string">"middle"</span>, <span class="keyword">...</span>
+                        <span class="string">"FontUnits"</span>, <span class="string">"normalized"</span>, <span class="keyword">...</span>
+                        <span class="string">"FontSize"</span>, nodeLabelFontSize(k) );
+                <span class="keyword">end</span> <span class="comment">% for</span>
+
+                <span class="comment">% Add the title.</span>
+                t = title( obj.Axes, <span class="string">"CircularNetFlow Chart"</span>, <span class="keyword">...</span>
+                    <span class="string">"FontUnits"</span>, <span class="string">"normalized"</span>, <span class="keyword">...</span>
+                    <span class="string">"FontSize"</span>, 0.05, <span class="keyword">...</span>
+                    <span class="string">"Visible"</span>, <span class="string">"on"</span> );
+                t.Position(1) = t.Position(1) - obj.OuterRadius;
+
+                <span class="comment">% Ensure all graphics objects are visible.</span>
+                p = vertcat( obj.OuterLabels.Position );
+                p = [p; obj.Axes.Title.Position];
+                set( obj.Axes, <span class="keyword">...</span>
+                    <span class="string">"XLim"</span>, [min( p(:, 1) ), max( p(:, 1) )], <span class="keyword">...</span>
+                    <span class="string">"YLim"</span>, [min( p(:, 2) ), max( p(:, 2) )] )
+                hold( obj.Axes, <span class="string">"off"</span> )
+
+                <span class="comment">% Mark the chart clean.</span>
+                obj.ComputationRequired = false;
+
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+            <span class="comment">% Refresh the chart's decorative properties.</span>
+            set( obj.LinkPatches, <span class="string">"FaceAlpha"</span>, obj.FaceAlpha )
+            set( [obj.NodeLabels; obj.PatchLabels; obj.OuterLabels ], <span class="keyword">...</span>
+                <span class="string">"Visible"</span>, obj.ShowLabels )
+
+        <span class="keyword">end</span> <span class="comment">% update</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods ( Access = protected )</span>
+
+<span class="keyword">end</span> <span class="comment">% classdef</span>
+
+<span class="keyword">function</span> mustBeLinkData( t )
+<span class="comment">%MUSTBELINKDATA Validate that the given table, t, contains link data.</span>
+
+<span class="comment">% Check that the table is nonempty and square.</span>
+mustBeNonempty( t )
+assert( height( t ) == width( t ), <span class="keyword">...</span>
+    <span class="string">"CircularNetFlowChart:NonSquareData"</span>, <span class="keyword">...</span>
+    <span class="string">"The link data table must be square."</span> )
+
+<span class="comment">% Check that the variables are of type double.</span>
+variableTypes = varfun( @class, t, <span class="string">"OutputFormat"</span>,  <span class="string">"cell"</span> );
+assert( all( variableTypes == <span class="string">"double"</span> ), <span class="keyword">...</span>
+    <span class="string">"CircularNetFlowChart:NonDoubleData"</span>, <span class="keyword">...</span>
+    <span class="string">"All link data table variables must be of type double."</span> )
+
+<span class="comment">% Check that the values are nonnegative and finite.</span>
+linkData = t.Variables;
+mustBeNonnegative( linkData )
+mustBeFinite( linkData )
+
+<span class="comment">% Check that the diagonal elements are zero.</span>
+linkDiag = diag( linkData );
+assert( all( linkDiag == 0 ), <span class="keyword">...</span>
+    <span class="string">"CircularNetFlowChart:NonZeroDiagonal"</span>, <span class="keyword">...</span>
+    <span class="string">"All diagonal elements of the link data must be zero."</span> )
+
+<span class="keyword">end</span> <span class="comment">% mustBeLinkData</span>
+
+<span class="keyword">function</span> t = defaultLinkData()
+<span class="comment">%DEFAULTLINKDATA Create a default link data table, t.</span>
+
+X = 0;
+t = table( X );
+
+<span class="keyword">end</span> <span class="comment">% defaultLinkData</span>
+</pre>
+</div>
+<!--
+##### SOURCE BEGIN #####
+classdef CircularNetFlowChart < Chart
+    %CIRCULARNETFLOWCHART Illustrates the directed to/from relationships 
+    %between pairs of categories.
+
+    % Copyright 2018-2025 The MathWorks, Inc.
+    
+    properties ( Dependent )
+        % Chart data table.
+        LinkData(:, :) table {mustBeLinkData}
+        % Offset for the outer labels.
+        OuterLabelOffset(1, 1) double {mustBeFinite, mustBePositive}
+    end % properties ( Dependent )
+    
+    properties
+        % Transparency of the link patches.
+        FaceAlpha(1, 1) double {mustBeInRange( FaceAlpha, 0, 1 )} = 0.5
+        % Visibility of the text labels.
+        ShowLabels(1, 1) matlab.lang.OnOffSwitchState = "on"
+    end % properties
+    
+    properties ( Dependent, SetAccess = private )
+        % Derived net flow, presented as a table.
+        NetFlow(:, :) table
+        % Net amounts sent.
+        NetSent(:, :) table
+        % Net amounts received.
+        NetReceived(:, :) table
+        % Chart data labels.
+        Labels(1, :) string
+    end % properties ( Dependent, SetAccess = private )
+    
+    properties ( Dependent, Access = private )
+        % Number of sources/sinks.
+        NumSources(1, 1) double {mustBeInteger, mustBePositive}
+        % Row/column indices and values of the positive net flow.
+        PositiveNetFlow(:, 3) double {mustBePositive, mustBeFinite}
+        % List of colors used for the various graphics objects.
+        Colors(:, 3) double {mustBeInRange( Colors, 0, 1 )}
+        % Colormap used for the patch objects.
+        PatchColormap(:, 3) double {mustBeInRange( PatchColormap, 0, 1 )}
+        % Angular positions of the arc endpoints, measured in radians
+        % anticlockwise from the easterly direction.
+        AngularPositions(:, 1) double {mustBeReal, mustBeFinite}
+        % Sizes of the interior, receiving nodes. These are proportional to
+        % the total amount received by each node.
+        NodeSizes(:, 1) double {mustBeNonnegative, mustBeFinite}
+        % Angular positions of the nodes.
+        NodePositions(:, 1) double {mustBeReal, mustBeFinite}
+    end % properties ( Dependent, Access = private )
+    
+    properties ( Access = private, Transient, NonCopyable )
+        % Chart axes.
+        Axes(:, 1) matlab.graphics.axis.Axes {mustBeScalarOrEmpty}
+        % Circumferential arcs.
+        Arcs(:, 1) matlab.graphics.primitive.Line
+        % Receiving nodes in the interior of the disk.
+        ReceivingNodes(:, 1) matlab.graphics.primitive.Line
+        % Link patches.
+        LinkPatches(:, 1) matlab.graphics.primitive.Patch
+        % Link patch text labels.
+        PatchLabels(:, 1) matlab.graphics.primitive.Text
+        % Outer labels for each source.
+        OuterLabels(:, 1) matlab.graphics.primitive.Text
+        % Inner labels for each node.
+        NodeLabels(:, 1) matlab.graphics.primitive.Text
+    end % properties ( Access = private, Transient, NonCopyable )
+    
+    properties ( Access = private )
+        % Backing property for the chart data table.
+        LinkData_(:, :) table {mustBeLinkData} = defaultLinkData()
+        % Logical scalar specifying whether a computation is required.
+        ComputationRequired(1, 1) logical = false
+        % Backing property for the outer label offset.
+        OuterLabelOffset_(1, 1) double {mustBePositive, mustBeFinite} = 35
+    end % properties ( Access = private )
+
+    properties ( Constant, GetAccess = private )
+        % Outer radius.
+        OuterRadius(1, 1) double {mustBePositive, mustBeFinite} = 100
+        % Inner radius.
+        InnerRadius(1, 1) double {mustBePositive, mustBeFinite} = 30
+        % Scale factor for the inner node sizes.
+        NodeScaleFactor(1, 1) double {mustBePositive, mustBeFinite} = 200
+        % Number of transition points for interpolated patch shading.
+        NumTransitionPoints(1, 1) double ...
+            {mustBeInteger, mustBePositive} = 100
+        % Angular gap size between the outer circular arcs.
+        AngularGap(1, 1) double {mustBePositive, mustBeFinite} = pi / 400
+        % Offset for the circumferential patch labels.
+        PatchLabelOffset(1, 1) double {mustBePositive, mustBeFinite} = 10
+        % Patch label font size.
+        PatchLabelFontSize(1, 1) double ...
+            {mustBeInRange( PatchLabelFontSize, 0, 1 )} = 0.03        
+        % Outer label font size.
+        OuterLabelFontSize(1, 1) double ...
+            {mustBeInRange( OuterLabelFontSize, 0, 1 )} = 0.04
+    end % properties ( Constant, GetAccess = private )
+    
+    properties ( Constant, Hidden )
+        % Product dependencies.
+        Dependencies(1, :) string = "MATLAB"
+        % Description.
+        ShortDescription(1, 1) string = "Show directed " + ...
+            "to/from relationships between pairs of categories"
+    end % properties ( Constant, Hidden )
+    
+    methods
+
+        function obj = CircularNetFlowChart( namedArgs )
+            %CIRCULARNETFLOWCHART Construct a CircularNetFlowChart, given
+            %optional name-value arguments.
+
+            arguments ( Input )
+                namedArgs.?CircularNetFlowChart
+            end % arguments ( Input )
+            
+            % Set any user-defined properties.
+            set( obj, namedArgs )
+
+        end % constructor
+        
+        function value = get.LinkData( obj )
+            
+            value = obj.LinkData_;
+            
+        end % get.LinkData
+        
+        function set.LinkData( obj, value )
+            
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;            
+            
+            % Set the internal data property.
+            obj.LinkData_ = value;
+            
+        end % set.LinkData
+        
+        function value = get.Labels( obj )
+            
+            value = string( obj.LinkData_.Properties.VariableNames );
+            
+        end % get.Labels
+        
+        function value = get.OuterLabelOffset( obj )
+            
+            value = obj.OuterLabelOffset_;
+            
+        end % get.OuterLabelOffset
+        
+        function set.OuterLabelOffset( obj, value )
+            
+            % Update the internal property.
+            obj.OuterLabelOffset_ = value;
+
+            % Reposition the outer labels.
+            [outerLabelX, outerLabelY] = pol2cart( obj.NodePositions, ...
+                obj.OuterRadius + obj.OuterLabelOffset );
+            for k = 1 : obj.NumSources
+                set( obj.OuterLabels(k), "Position", ...
+                    [outerLabelX(k), outerLabelY(k), 0] )
+            end % for
+            
+        end % set.OuterLabelOffset
+        
+        function value = get.NetFlow( obj )
+            
+            % Compute the net flow from each source (row) to every sink
+            % (column). The set of sources is the same as the set of sinks.
+            d = obj.LinkData{:, :};
+            flowFromSource = tril( d );
+            flowFromSink = triu( d );
+
+            % Compute the net flow, as an upper triangular matrix.
+            netflow = flowFromSink - flowFromSource.';
+            
+            % Ensure the net flow matrix is skew-symmetric, i.e., populate
+            % the lower triangular part.
+            netflow = netflow - triu( netflow ).';
+            
+            % Tabulate the result.
+            value = array2table( netflow, "VariableNames", obj.Labels, ...
+                "RowNames", obj.Labels );
+            
+        end % get.NetFlow
+        
+        function value = get.NetSent( obj )
+            
+            % Sum the positive values in each row.
+            nf = obj.NetFlow{:, :};
+            nf(nf < 0) = 0;
+            value = sum( nf, 2 );
+            
+        end % get.NetSent
+        
+        function value = get.NetReceived( obj )
+            
+            % Sum the positive values in each column, returning the results
+            % as a column vector.
+            nf = obj.NetFlow{:, :};
+            nf(nf < 0) = 0;
+            value = sum( nf ).';
+            
+        end % get.NetReceived
+        
+        function value = get.NumSources( obj )
+            
+            value = height( obj.LinkData );
+            
+        end % get.NumSources
+        
+        function value = get.PositiveNetFlow( obj )
+            
+            % Return a three-column matrix containing the row and column
+            % indices of the positive net flow values (1st and 2nd
+            % columns), together with the positive net flow values.
+            nf = obj.NetFlow{:, :};
+            posIdx = nf > 0;
+            [value(:, 1), value(:, 2)] = find( posIdx );
+            value(:, 3) = nf(posIdx);
+            
+        end % get.PositiveNetFlow
+        
+        function value = get.Colors( obj )
+            
+            % Default list of colors used for plotting.
+            value = obj.Axes.ColorOrder;
+
+            % Interpolate this list to produce the required number of
+            % colors.
+            colIdx = 1 : height( value );
+            colQueryIdx = linspace( 1, colIdx(end), obj.NumSources );
+            value = interp1( colIdx, value, colQueryIdx );
+            
+        end % get.Colors
+        
+        function value = get.PatchColormap( obj )
+            
+            % Preallocate for the patch colormap. The number of patches is
+            % equal to the number of positive net flow values. Each patch
+            % contributes NumTransitionPoints rows to the overall patch
+            % colormap.
+            N = obj.NumTransitionPoints;
+            numPosFlow = height( obj.PositiveNetFlow );
+            value = NaN( N * numPosFlow, 3 );
+            for k = 1 : numPosFlow
+                % For each patch, create a smooth transition from the
+                % source color to the sink color. Vertically concatenate
+                % the results in the overall patch colormap.
+                sourceColor = obj.Colors(obj.PositiveNetFlow(k, 1), :);
+                sinkColor = obj.Colors(obj.PositiveNetFlow(k, 2), :);
+                transitionMap = ...
+                    [linspace( sourceColor(1), sinkColor(1), N ).', ...
+                    linspace( sourceColor(2), sinkColor(2), N ).', ...
+                    linspace( sourceColor(3), sinkColor(3), N ).'];
+                value((N * (k-1) + 1) : N * k, :) = transitionMap;
+            end % for
+            
+        end % get.PatchColormap
+        
+        function value = get.AngularPositions( obj )
+            
+            % Convert the cumulative net sent amounts to radians.
+            cumulativeSourceFlows = cumsum( [0; obj.NetSent] );
+            value = 2 * pi * cumulativeSourceFlows / ...
+                cumulativeSourceFlows(end);
+            
+        end % get.AngularSizes
+        
+        function value = get.NodeSizes( obj )
+            
+            % Scale the net amounts received by each sink.
+            value = obj.NodeScaleFactor * ...
+                obj.NetReceived / sum( obj.NetReceived );
+            
+        end % get.NodeSizes
+        
+        function value = get.NodePositions( obj )
+            
+            % The angular node positions are the midpoints of the angular
+            % arc positions.
+            value = (obj.AngularPositions(1:end-1) + ...
+                obj.AngularPositions(2:end)) / 2;
+            
+        end % get.NodePositions
+        
+    end % methods
+    
+    methods
+        
+        function varargout = title( obj, varargin )
+            
+            [varargout{1:nargout}] = title( obj.Axes, varargin{:} );
+            
+        end % title
+        
+    end % methods
+    
+    methods ( Access = protected )
+        
+        function setup( obj )
+            %SETUP Initialize the chart graphics.
+            
+            % Create the axes.
+            obj.Axes = axes( "Parent", obj.getLayout(), ...                
+                "Visible", "off", ...
+                "DataAspectRatio", [1, 1, 1] );
+            obj.Axes.Toolbar = [];
+            disableDefaultInteractivity( obj.Axes )
+            
+        end % setup
+        
+        function update( obj )
+            %UPDATE Refresh the chart graphics.
+            
+            if obj.ComputationRequired
+                
+                % Create the chart graphics.
+                % First, draw the circumferential arcs.
+                hold( obj.Axes, "on" )
+                for k = obj.NumSources : -1 : 1
+                    theta(:, k) = linspace( ...
+                        obj.AngularPositions(k) + obj.AngularGap, ...
+                        obj.AngularPositions(k+1) - obj.AngularGap );
+                end % for
+                rho = obj.OuterRadius * ones( size( theta ) );
+                [X, Y] = pol2cart( theta, rho );
+                delete( obj.Arcs )
+                obj.Arcs = matlab.graphics.primitive.Line.empty( 0, 1 );
+                for k = 1 : obj.NumSources
+                    obj.Arcs(k) = line( "Parent", obj.Axes, ...
+                        "XData", X(:, k), ...
+                        "YData", Y(:, k), ...
+                        "LineWidth", 10, ...
+                        "Color", obj.Colors(k, :) );
+                end % for
+                
+                % Next, draw the receiving nodes in the interior of the
+                % disk.
+                [nodeX, nodeY] = ...
+                    pol2cart( obj.NodePositions, obj.InnerRadius );
+                delete( obj.ReceivingNodes )
+                obj.ReceivingNodes = ...
+                    matlab.graphics.primitive.Line.empty( 0, 1 );
+                for k = 1 : obj.NumSources
+                    obj.ReceivingNodes(k) = line( "Parent", obj.Axes, ...
+                        "XData", nodeX(k), ...
+                        "YData", nodeY(k), ...
+                        "Marker", "o", ...
+                        "MarkerEdgeColor", obj.Colors(k, :), ...
+                        "MarkerFaceColor", obj.Colors(k, :), ...
+                        "MarkerSize", obj.NodeSizes(k) );
+                end % for
+                
+                % Draw the patches and their labels. To create the color
+                % transitions for each patch, we need to set the axes
+                % colormap.
+                colormap( obj.Axes, obj.PatchColormap )
+
+                % Compute the angular differences, including the gap sizes.
+                dtheta = diff( obj.AngularPositions ) - 2 * obj.AngularGap;
+                
+                % Compute the angular starting positions.
+                thetaStart = ...
+                    obj.AngularPositions(1:end-1) + obj.AngularGap;
+                
+                % Extract parameters required for the loop.
+                pnf = obj.PositiveNetFlow;
+                N = obj.NumTransitionPoints;
+                numPosFlow = height( pnf );
+                
+                % Prepare the patches and labels.
+                delete( obj.LinkPatches )
+                obj.LinkPatches = ...
+                    matlab.graphics.primitive.Patch.empty( 0, 1 );
+                delete( obj.PatchLabels )
+                obj.PatchLabels = ...
+                    matlab.graphics.primitive.Text.empty( 0, 1 );
+                for k = 1 : numPosFlow
+                    % Compute the proportion of each circumferential arc to
+                    % use as the base of the patch.
+                    sourceIdx = pnf(k, 1);
+                    sinkIdx = pnf(k, 2);
+                    flowValue = obj.NetFlow{sourceIdx, sinkIdx};
+                    arcProp = flowValue / obj.NetSent(sourceIdx);
+                    % Starting and finishing angles for the patch base.
+                    localThetaStart = thetaStart(sourceIdx);
+                    thetaEnd = localThetaStart + ...
+                        arcProp * dtheta(sourceIdx);
+                    % Update the starting angle for the current source.
+                    thetaStart(sourceIdx) = thetaEnd;
+                    % Compute the patch coordinates.
+                    thetaPatch = ...
+                        [linspace( localThetaStart, thetaEnd, N ), ...
+                        linspace( thetaEnd, ...
+                        obj.NodePositions(sinkIdx), N ), ...
+                        linspace( obj.NodePositions(sinkIdx), ...
+                        localThetaStart, N )];
+                    rhoPatch = [obj.OuterRadius * ones( 1, N ), ...
+                        linspace( ...
+                        obj.OuterRadius, obj.InnerRadius, N ), ...
+                        linspace( obj.InnerRadius, obj.OuterRadius, N )];
+                    [X, Y] = pol2cart( thetaPatch, rhoPatch );
+                    % Compute the current patch color indices into the
+                    % overall axes colormap.
+                    colorIdx = [(N * (k-1) + 1) * ones( N, 1 ); ...
+                        ((N * (k-1) + 1) : N * k).'; ...
+                        (N * k : -1 : (N * (k-1) + 1)).'];
+                    % Draw the patches.
+                    obj.LinkPatches(k) = patch( "Parent", obj.Axes, ...
+                        "XData", X, ...
+                        "YData", Y, ...
+                        "CData", colorIdx, ...
+                        "FaceColor", "interp", ...
+                        "EdgeColor", "interp", ...
+                        "LineWidth", 1, ...
+                        "FaceAlpha", 0.85 );
+                    % Compute the coordinates for the patch labels.
+                    [patchLabelX, patchLabelY] = pol2cart( ...
+                        (localThetaStart + thetaEnd)/2, ...
+                        obj.OuterRadius + obj.PatchLabelOffset );
+                    % Construct the text for the patch label, using the
+                    % color of the sink.
+                    sinkColor = num2cell( obj.Colors(sinkIdx, :) );
+                    patchLabelText = "\" + ...
+                        sprintf( "color[rgb]{%f,%f,%f}%g", ...
+                        sinkColor{:}, pnf(k, 3) );
+                    % Create the patch labels.
+                    obj.PatchLabels(k) = text( obj.Axes, ...
+                        patchLabelX, ...
+                        patchLabelY, ...
+                        patchLabelText, ...
+                        "FontUnits", "normalized", ...
+                        "FontWeight", "bold", ...
+                        "FontSize", obj.PatchLabelFontSize, ...
+                        "VerticalAlignment", "middle", ...
+                        "HorizontalAlignment", "center" );
+                end % for
+                
+                % Create the outer labels.
+                [outerLabelX, outerLabelY] = ...
+                    pol2cart( obj.NodePositions, ...
+                    obj.OuterRadius + obj.OuterLabelOffset );
+                delete( obj.OuterLabels )
+                obj.OuterLabels = ...
+                    matlab.graphics.primitive.Text.empty( 0, 1 );
+                for k = 1 : obj.NumSources
+                    % Form the outer label text from the user-provided text
+                    % label and the net sent amounts.
+                    s = obj.Labels{k} + " (" + ...
+                        num2str( obj.NetSent(k) ) + ")";
+                    c = num2cell( obj.Colors(k, :) );
+                    formattedLabel = "\" + ...
+                        sprintf( "color[rgb]{%f,%f,%f} %s", c{:}, s );
+                    obj.OuterLabels(k) = text( obj.Axes, ...
+                        outerLabelX(k), ...
+                        outerLabelY(k), ...
+                        formattedLabel, ...
+                        "FontWeight", "bold", ...
+                        "HorizontalAlignment", "center", ...
+                        "VerticalAlignment", "middle", ...
+                        "FontUnits", "normalized", ...
+                        "FontSize", obj.OuterLabelFontSize );
+                end % for
+                
+                % Draw the node labels.
+                netReceivedText = num2str( obj.NetReceived );
+                nodeLabelFontSize = 0.03 + 0.02 * ...
+                    (obj.NodeSizes - min( obj.NodeSizes )) / ...
+                    (max( obj.NodeSizes ) - min( obj.NodeSizes ));
+                delete( obj.NodeLabels )
+                obj.NodeLabels = ...
+                    matlab.graphics.primitive.Text.empty( 0, 1 );
+                for k = 1 : obj.NumSources
+                    obj.NodeLabels(k) = text( obj.Axes, ...
+                        nodeX(k), ...
+                        nodeY(k), ...
+                        netReceivedText(k, :), ...
+                        "FontWeight", "bold", ...                        
+                        "HorizontalAlignment", "center", ...
+                        "VerticalAlignment", "middle", ...
+                        "FontUnits", "normalized", ...
+                        "FontSize", nodeLabelFontSize(k) );
+                end % for
+                
+                % Add the title.
+                t = title( obj.Axes, "CircularNetFlow Chart", ...
+                    "FontUnits", "normalized", ...
+                    "FontSize", 0.05, ...
+                    "Visible", "on" );
+                t.Position(1) = t.Position(1) - obj.OuterRadius;                
+                
+                % Ensure all graphics objects are visible.
+                p = vertcat( obj.OuterLabels.Position );
+                p = [p; obj.Axes.Title.Position];
+                set( obj.Axes, ...
+                    "XLim", [min( p(:, 1) ), max( p(:, 1) )], ...
+                    "YLim", [min( p(:, 2) ), max( p(:, 2) )] )
+                hold( obj.Axes, "off" )
+                
+                % Mark the chart clean.
+                obj.ComputationRequired = false;
+                
+            end % if
+            
+            % Refresh the chart's decorative properties.
+            set( obj.LinkPatches, "FaceAlpha", obj.FaceAlpha )
+            set( [obj.NodeLabels; obj.PatchLabels; obj.OuterLabels ], ...
+                "Visible", obj.ShowLabels )
+            
+        end % update
+        
+    end % methods ( Access = protected )
+    
+end % classdef
+
+function mustBeLinkData( t )
+%MUSTBELINKDATA Validate that the given table, t, contains link data.
+
+% Check that the table is nonempty and square.
+mustBeNonempty( t )
+assert( height( t ) == width( t ), ...
+    "CircularNetFlowChart:NonSquareData", ...
+    "The link data table must be square." )
+
+% Check that the variables are of type double.
+variableTypes = varfun( @class, t, "OutputFormat",  "cell" );
+assert( all( variableTypes == "double" ), ...
+    "CircularNetFlowChart:NonDoubleData", ...
+    "All link data table variables must be of type double." )
+
+% Check that the values are nonnegative and finite.
+linkData = t.Variables;
+mustBeNonnegative( linkData )
+mustBeFinite( linkData )
+
+% Check that the diagonal elements are zero.
+linkDiag = diag( linkData );
+assert( all( linkDiag == 0 ), ...
+    "CircularNetFlowChart:NonZeroDiagonal", ...
+    "All diagonal elements of the link data must be zero." )
+
+end % mustBeLinkData
+
+function t = defaultLinkData()
+%DEFAULTLINKDATA Create a default link data table, t.
+
+X = 0;
+t = table( X );
+
+end % defaultLinkData
+##### SOURCE END #####
+-->
+</body>
+</html>

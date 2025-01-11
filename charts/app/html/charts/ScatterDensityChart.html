@@ -1,0 +1,1003 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      -->
+<title>ScatterDensityChart</title>
+<meta name="generator" content="MATLAB 25.1">
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+<meta name="DC.date" content="2025-01-11">
+<meta name="DC.source" content="ScatterDensityChart.m">
+<style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style>
+</head>
+<body>
+<div class="content">
+<pre class="codeinput">
+<span class="keyword">classdef</span> ScatterDensityChart &lt; Chart
+    <span class="comment">%SCATTERDENSITYCHART Bivariate scatter plot using color to indicate</span>
+    <span class="comment">%relative density of the data points.</span>
+
+    <span class="comment">% Copyright 2019-2025 The MathWorks, Inc.</span>
+
+    <span class="keyword">properties</span> ( Dependent )
+        <span class="comment">% Chart x-data.</span>
+        XData<span class="typesection">(:, 1) double {mustBeReal}</span>
+        <span class="comment">% Chart y-data.</span>
+        YData<span class="typesection">(:, 1) double {mustBeReal}</span>
+        <span class="comment">% Radius of the density circle.</span>
+        Radius<span class="typesection">(1, 1) double {mustBeNonnegative, mustBeFinite}</span>
+        <span class="comment">% Density calculation method.</span>
+        DensityMethod<span class="typesection">(1, 1) string </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeMember( DensityMethod, ["boundary", "noboundary"] ) }</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Dependent )</span>
+
+    <span class="keyword">properties</span>
+        <span class="comment">% Marker for the scatter series.</span>
+        Marker<span class="typesection">(1, 1) string {mustBeMarker}</span> = <span class="string">"."</span>
+        <span class="comment">% Size data for the scatter series.</span>
+        SizeData<span class="typesection">(:, 1) double {mustBePositive, mustBeFinite}</span> = 36
+        <span class="comment">% Axes x-grid.</span>
+        XGrid<span class="typesection">(1, 1) matlab.lang.OnOffSwitchState </span>= <span class="string">"on"</span>
+        <span class="comment">% Axes y-grid.</span>
+        YGrid<span class="typesection">(1, 1) matlab.lang.OnOffSwitchState </span>= <span class="string">"on"</span>
+    <span class="keyword">end</span> <span class="comment">% properties</span>
+
+    <span class="keyword">properties</span> ( Dependent )
+        <span class="comment">% Axes color limits.</span>
+        CLim<span class="typesection">(1, 2) double {mustBeReal, mustBeIncreasing}</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Dependent )</span>
+
+    <span class="keyword">properties</span> ( Access = private )
+        <span class="comment">% Internal storage for the XData property.</span>
+        XData_<span class="typesection">(:, 1) double {mustBeReal}</span> = double.empty( 0, 1 )
+        <span class="comment">% Internal storage for the YData property.</span>
+        YData_<span class="typesection">(:, 1) double {mustBeReal}</span> = double.empty( 0, 1 )
+        <span class="comment">% Internal storage for the Radius property.</span>
+        Radius_<span class="typesection">(1, 1) double {mustBeNonnegative, mustBeFinite}</span> = 0.25
+        <span class="comment">% Internal storage for the DensityMethod property.</span>
+        DensityMethod_<span class="typesection">(1, 1) string {mustBeMember( DensityMethod_, </span><span class="keyword">...</span>
+            <span class="typesection">["boundary", "noboundary"] ) }</span> = <span class="string">"noboundary"</span>
+        <span class="comment">% Logical scalar specifying whether a computation is required.</span>
+        ComputationRequired<span class="typesection">(1, 1) logical </span>= false
+    <span class="keyword">end</span> <span class="comment">% properties ( Access = private )</span>
+
+    <span class="keyword">properties</span> ( Access = private, Transient, NonCopyable )
+        <span class="comment">% Chart axes.</span>
+        Axes<span class="typesection">(:, 1) matlab.graphics.axis.Axes {mustBeScalarOrEmpty}</span>
+        <span class="comment">% Scatter series for the (x, y) data.</span>
+        ScatterSeries<span class="typesection">(:, 1) matlab.graphics.chart.primitive.Scatter </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+        <span class="comment">% Rectangle object drawn to show the domain boundary.</span>
+        BoundingBox<span class="typesection">(:, 1) matlab.graphics.primitive.Rectangle </span><span class="keyword">...</span>
+            <span class="typesection">{mustBeScalarOrEmpty}</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Access = private, Transient, NonCopyable )</span>
+
+    <span class="keyword">properties</span> ( Constant, Hidden )
+        <span class="comment">% Product dependencies.</span>
+        Dependencies<span class="typesection">(1, :) string </span>= [<span class="string">"MATLAB"</span>, <span class="keyword">...</span>
+            <span class="string">"Statistics and Machine Learning Toolbox"</span>]
+        <span class="comment">% Description.</span>
+        ShortDescription<span class="typesection">(1, 1) string </span>= <span class="string">"Bivariate scatter plot "</span> + <span class="keyword">...</span>
+            <span class="string">"using color to indicate relative density of the data points"</span>
+    <span class="keyword">end</span> <span class="comment">% properties ( Constant, Hidden )</span>
+
+    <span class="keyword">methods</span>
+
+        <span class="keyword">function</span> value = get.XData( obj )
+
+            value = obj.XData_;
+
+        <span class="keyword">end</span> <span class="comment">% get.XData</span>
+
+        <span class="keyword">function</span> set.XData( obj, value )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Decide how to modify the chart data.</span>
+            nX = numel( value );
+            nY = numel( obj.YData_ );
+
+            <span class="keyword">if</span> nX &lt; nY <span class="comment">% If the new x-data is too short ...</span>
+                <span class="comment">% ... then chop the chart y-data.</span>
+                obj.YData_ = obj.YData_(1:nX);
+            <span class="keyword">else</span>
+                <span class="comment">% Otherwise, if nX &gt;= nY, then pad the y-data.</span>
+                obj.YData_(end+1:nX, 1) = NaN;
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+            <span class="comment">% Set the internal x-data.</span>
+            obj.XData_ = value;
+
+            <span class="comment">% Reset the scatter series' size data if necessary.</span>
+            nS = numel( obj.SizeData );
+            <span class="keyword">if</span> nS &gt; 1 &amp;&amp; nX ~= nS
+                obj.SizeData = 36;
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+        <span class="keyword">end</span> <span class="comment">% set.XData</span>
+
+        <span class="keyword">function</span> value = get.YData( obj )
+
+            value = obj.YData_;
+
+        <span class="keyword">end</span> <span class="comment">% get.YData</span>
+
+        <span class="keyword">function</span> set.YData( obj, value )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Decide how to modify the chart data.</span>
+            nY = numel( value );
+            nX = numel( obj.XData_ );
+
+            <span class="keyword">if</span> nY &lt; nX <span class="comment">% If the new y-data is too short ...</span>
+                <span class="comment">% ... then chop the chart x-data.</span>
+                obj.XData_ = obj.XData_(1:nY);
+            <span class="keyword">else</span>
+                <span class="comment">% Otherwise, if nY &gt;= nX, then pad the x-data.</span>
+                obj.XData_(end+1:nY, 1) = NaN;
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+            <span class="comment">% Set the internal y-data.</span>
+            obj.YData_ = value(:);
+
+            <span class="comment">% Reset the scatter series' size data if necessary.</span>
+            nS = numel( obj.SizeData );
+            <span class="keyword">if</span> nS &gt; 1 &amp;&amp; nY ~= nS
+                obj.SizeData = 36;
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+        <span class="keyword">end</span> <span class="comment">% set.YData</span>
+
+        <span class="keyword">function</span> value = get.Radius( obj )
+
+            value = obj.Radius_;
+
+        <span class="keyword">end</span> <span class="comment">% get.Radius</span>
+
+        <span class="keyword">function</span> set.Radius( obj, value )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Set the internal value.</span>
+            obj.Radius_ = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.Radius</span>
+
+        <span class="keyword">function</span> value = get.DensityMethod( obj )
+
+            value = obj.DensityMethod_;
+
+        <span class="keyword">end</span> <span class="comment">% get.DensityMethod</span>
+
+        <span class="keyword">function</span> set.DensityMethod( obj, value )
+
+            <span class="comment">% Mark the chart for an update.</span>
+            obj.ComputationRequired = true;
+
+            <span class="comment">% Set the internal value.</span>
+            obj.DensityMethod_ = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.DensityMethod</span>
+
+        <span class="keyword">function</span> value = get.CLim( obj )
+
+            value = obj.Axes.CLim;
+
+        <span class="keyword">end</span> <span class="comment">% get.CLim</span>
+
+        <span class="keyword">function</span> set.CLim( obj, value )
+
+            obj.Axes.CLim = value;
+
+        <span class="keyword">end</span> <span class="comment">% set.CLim</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods</span>
+
+    <span class="keyword">methods</span>
+
+        <span class="keyword">function</span> obj = ScatterDensityChart( namedArgs )
+            <span class="comment">%SCATTERDENSITYCHART Construct a ScatterDensityChart object,</span>
+            <span class="comment">%given optional name-value arguments.</span>
+
+            <span class="keyword">arguments</span> ( Input )
+                namedArgs.?ScatterDensityChart
+            <span class="keyword">end</span> <span class="comment">% arguments ( Input )</span>
+
+            <span class="comment">% Set any user-defined properties.</span>
+            set( obj, namedArgs )
+
+        <span class="keyword">end</span> <span class="comment">% constructor</span>
+
+        <span class="keyword">function</span> varargout = xlabel( obj, varargin )
+
+            [varargout{1:nargout}] = xlabel( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% xlabel</span>
+
+        <span class="keyword">function</span> varargout = ylabel( obj, varargin )
+
+            [varargout{1:nargout}] = ylabel( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% ylabel</span>
+
+        <span class="keyword">function</span> varargout = title( obj, varargin )
+
+            [varargout{1:nargout}] = title( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% title</span>
+
+        <span class="keyword">function</span> grid( obj, varargin )
+
+            <span class="comment">% Invoke grid on the axes.</span>
+            grid( obj.Axes, varargin{:} )
+
+            <span class="comment">% Update the chart's decorative properties.</span>
+            obj.XGrid = obj.Axes.XGrid;
+            obj.YGrid = obj.Axes.YGrid;
+
+        <span class="keyword">end</span> <span class="comment">% grid</span>
+
+        <span class="keyword">function</span> varargout = legend( obj, varargin )
+
+            [varargout{1:nargout}] = legend( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% legend</span>
+
+        <span class="keyword">function</span> varargout = colorbar( obj, varargin )
+
+            [varargout{1:nargout}] = colorbar( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% colorbar</span>
+
+        <span class="keyword">function</span> varargout = colormap( obj, varargin )
+
+            [varargout{1:nargout}] = colormap( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% colormap</span>
+
+        <span class="keyword">function</span> varargout = axis( obj, varargin )
+
+            [varargout{1:nargout}] = axis( obj.Axes, varargin{:} );
+
+        <span class="keyword">end</span> <span class="comment">% axis</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods</span>
+
+    <span class="keyword">methods</span> ( Access = protected )
+
+        <span class="keyword">function</span> setup( obj )
+            <span class="comment">%SETUP Initialize the chart graphics.</span>
+
+            <span class="comment">% Create the chart's axes.</span>
+            obj.Axes = axes( <span class="string">"Parent"</span>, obj.getLayout(), <span class="keyword">...</span>
+                <span class="string">"Colormap"</span>, parula() );
+            <span class="comment">% Add the colorbar.</span>
+            colorbar( obj )
+
+            <span class="comment">% Create the scatter plot.</span>
+            hold( obj.Axes, <span class="string">"on"</span> )
+            obj.ScatterSeries = scatter( obj.Axes, NaN, NaN, <span class="string">"."</span> );
+
+            <span class="comment">% Create the bounding box.</span>
+            obj.BoundingBox = rectangle( obj.Axes, <span class="keyword">...</span>
+                <span class="string">"Visible"</span>, <span class="string">"off"</span>, <span class="keyword">...</span>
+                <span class="string">"Position"</span>, zeros( 1, 4 ), <span class="keyword">...</span>
+                <span class="string">"LineWidth"</span>, 3 );
+            hold( obj.Axes, <span class="string">"off"</span> )
+
+        <span class="keyword">end</span> <span class="comment">% setup</span>
+
+        <span class="keyword">function</span> update( obj )
+            <span class="comment">%UPDATE Refresh the chart graphics.</span>
+
+            <span class="keyword">if</span> obj.ComputationRequired
+
+                <span class="comment">% Evaluate the new color data for the scatter series.</span>
+
+                <span class="comment">% First, extract the chart data.</span>
+                x = obj.XData_;
+                y = obj.YData_;
+
+                <span class="comment">% Deal with the case where all the x-data or all the y-data</span>
+                <span class="comment">% is missing.</span>
+                <span class="keyword">if</span> all( isnan( x ) ) || all( isnan( y ) )
+                    newCData = NaN;
+                <span class="keyword">else</span>
+                    <span class="comment">% Otherwise we can evaluate point densities.</span>
+                    [xmin, xmax] = bounds( x );
+                    [ymin, ymax] = bounds( y );
+                    <span class="comment">% Compute the pairwise distances between the scattered</span>
+                    <span class="comment">% data points.</span>
+                    pointDistances = pdist2( [x, y], [x, y] );
+                    <span class="comment">% Estimate the maximum possible radius based on the</span>
+                    <span class="comment">% diagonal of the data span.</span>
+                    maxRad = sqrt( (xmax-xmin)^2 + (ymax-ymin)^2 );
+                    <span class="comment">% Update the internal radius value.</span>
+                    obj.Radius_ = min( obj.Radius_, maxRad );
+
+                    <span class="comment">% Compute the density at each data point, excluding the</span>
+                    <span class="comment">% point itself.</span>
+                    pointCounts = <span class="keyword">...</span>
+                        sum( pointDistances &lt;= obj.Radius_, 2 ) - 1;
+
+                    <span class="comment">% Depending on the selected density method, compute the</span>
+                    <span class="comment">% intersection area.</span>
+                    <span class="keyword">switch</span> obj.DensityMethod_
+                        <span class="keyword">case</span> <span class="string">"boundary"</span>
+                            <span class="comment">% Compute the intersection area for each data</span>
+                            <span class="comment">% point.</span>
+                            normArea = NaN( size( x ) );
+                            <span class="keyword">for</span> k = 1:numel( x )
+                                normArea(k) = intersectionArea( <span class="keyword">...</span>
+                                    x(k), y(k), obj.Radius_, <span class="keyword">...</span><span class="comment">.</span>
+                                    xmin, xmax, ymin, ymax );
+                            <span class="keyword">end</span> <span class="comment">% for</span>
+                            <span class="comment">% Update the bounding box.</span>
+                            set( obj.BoundingBox, <span class="string">"Visible"</span>, <span class="string">"on"</span>, <span class="keyword">...</span>
+                                <span class="string">"Position"</span>, <span class="keyword">...</span>
+                                [xmin, ymin, xmax-xmin, ymax-ymin] )
+                        <span class="keyword">case</span> <span class="string">"noboundary"</span>
+                            <span class="comment">% This is the simpler case when the point</span>
+                            <span class="comment">% counts are normalized by the circular area.</span>
+                            normArea = 2 * pi * obj.Radius_^2;
+                            obj.BoundingBox.Visible = <span class="string">"off"</span>;
+                    <span class="keyword">end</span> <span class="comment">% switch/case</span>
+
+                    <span class="comment">% Normalize the point counts by the area.</span>
+                    newCData = pointCounts ./ normArea;
+
+                <span class="keyword">end</span> <span class="comment">% if</span>
+
+                <span class="comment">% Update the scatter series with the new chart data and</span>
+                <span class="comment">% color data.</span>
+                set( obj.ScatterSeries, <span class="string">"XData"</span>, obj.XData_, <span class="keyword">...</span>
+                    <span class="string">"YData"</span>, obj.YData_, <span class="string">"CData"</span>, newCData )
+                obj.Axes.CLimMode = <span class="string">"auto"</span>;
+
+                <span class="comment">% Mark the chart clean.</span>
+                obj.ComputationRequired = false;
+
+            <span class="keyword">end</span> <span class="comment">% if</span>
+
+            <span class="comment">% Refresh the chart's decorative properties.</span>
+            set( obj.ScatterSeries, <span class="string">"Marker"</span>, obj.Marker, <span class="keyword">...</span>
+                <span class="string">"SizeData"</span>, obj.SizeData )
+            set( obj.Axes, <span class="string">"XGrid"</span>, obj.XGrid, <span class="string">"YGrid"</span>, obj.YGrid, <span class="keyword">...</span>
+                <span class="string">"CLim"</span>, obj.CLim )
+
+        <span class="keyword">end</span> <span class="comment">% update</span>
+
+    <span class="keyword">end</span> <span class="comment">% methods ( Access = protected )</span>
+
+<span class="keyword">end</span> <span class="comment">% classdef</span>
+
+<span class="keyword">function</span> A = intersectionArea( xc, yc, r, xmin, xmax, ymin, ymax )
+<span class="comment">%INTERSECTIONAREA Compute the area of the intersection of a circle of</span>
+<span class="comment">%radius r centered around the point (xc, yc) within the rectangle (xmin,</span>
+<span class="comment">%ymin), (xmax, ymin), (xmax, ymax), (xmin, ymax).</span>
+
+<span class="comment">% If the circle is within the rectangle, return the area of the circle.</span>
+<span class="keyword">if</span> (xc + r &lt; xmax) &amp;&amp; (xc - r &gt; xmin) &amp;&amp; <span class="keyword">...</span>
+        (yc + r &lt; ymax) &amp;&amp; (yc - r &gt; ymin)
+    A = pi * r^2;
+<span class="keyword">else</span>
+    <span class="comment">% Compute the distances from the center of the circle to each of the</span>
+    <span class="comment">% four vertices of the rectangle.</span>
+    c(1) = sqrt( (xc - xmin)^2 + (yc - ymin)^2 ); <span class="comment">% Bottom left vertex</span>
+    c(2) = sqrt( (xc - xmin)^2 + (yc - ymax)^2 ); <span class="comment">% Bottom right vertex</span>
+    c(3) = sqrt( (xc - xmax)^2 + (yc - ymax)^2 ); <span class="comment">% Top right vertex</span>
+    c(4) = sqrt( (xc - xmax)^2 + (yc - ymin)^2 ); <span class="comment">% Top left vertex</span>
+
+    <span class="keyword">if</span> r &gt;= max( c )
+        <span class="comment">% Return the area of the box.</span>
+        A = (xmax-xmin) * (ymax-ymin);
+    <span class="keyword">else</span>
+        <span class="comment">% Subtract the area of the circle lying outside the rectangle.</span>
+        A = pi * r^2;
+        <span class="keyword">if</span> xc + r &gt; xmax
+            d = xmax - xc;
+            A = subtractExternalArea( r, d, A );
+        <span class="keyword">end</span> <span class="comment">% if</span>
+        <span class="keyword">if</span> xc - r &lt; xmin
+            d = xc - xmin;
+            A = subtractExternalArea( r, d, A );
+        <span class="keyword">end</span> <span class="comment">% if</span>
+        <span class="keyword">if</span> yc + r &gt; ymax
+            d = ymax - yc;
+            A = subtractExternalArea( r, d, A );
+        <span class="keyword">end</span> <span class="comment">% if</span>
+        <span class="keyword">if</span> yc - r &lt; ymin
+            d = yc - ymin;
+            A = subtractExternalArea( r, d, A );
+        <span class="keyword">end</span> <span class="comment">% if</span>
+        <span class="comment">% If necessary, add back the intersection of the external areas.</span>
+        <span class="keyword">if</span> r &gt; c(1)
+            dx = xc - xmin;
+            dy = yc - ymin;
+            A = addExternalIntersectionArea( dx, dy, r, A );
+        <span class="keyword">end</span> <span class="comment">% if</span>
+        <span class="keyword">if</span> r &gt; c(2)
+            dx = xc - xmin;
+            dy = ymax - yc;
+            A = addExternalIntersectionArea( dx, dy, r, A );
+        <span class="keyword">end</span> <span class="comment">% if</span>
+        <span class="keyword">if</span> r &gt; c(3)
+            dx = xmax - xc;
+            dy = ymax - yc;
+            A = addExternalIntersectionArea( dx, dy, r, A );
+        <span class="keyword">end</span> <span class="comment">% if</span>
+        <span class="keyword">if</span> r &gt; c(4)
+            dx = xmax - xc;
+            dy = yc - ymin;
+            A = addExternalIntersectionArea( dx, dy, r, A );
+        <span class="keyword">end</span> <span class="comment">% if</span>
+
+    <span class="keyword">end</span> <span class="comment">% if</span>
+
+<span class="keyword">end</span> <span class="comment">% if</span>
+
+    <span class="keyword">function</span> newArea = subtractExternalArea( r, d, oldArea )
+
+        <span class="comment">% Compute the area outside the rectangle and inside the circle in</span>
+        <span class="comment">% either the x or y direction (a "half-moon").</span>
+        theta = acos( d/r );
+        sectorArea = 0.5 * theta * r^2;
+        triangleArea = 0.5 * r * sin( theta ) * d;
+        externalArea = sectorArea - triangleArea;
+        <span class="comment">% Subtract this area from the input area.</span>
+        newArea = oldArea - externalArea;
+
+    <span class="keyword">end</span> <span class="comment">% subtractExternalArea</span>
+
+    <span class="keyword">function</span> newArea = addExternalIntersectionArea( dx, dy, r, oldArea )
+
+        <span class="comment">% Evaluate the area of the "quarter-moon".</span>
+        thetax = asin( dy/r );
+        thetay = asin( dx/r );
+        b1 = r * cos( thetax ) - dx;
+        b2 = r * cos( thetay ) - dy;
+        sectorAngle = pi/2 - thetax - thetay;
+        sectorArea = 0.5 * sectorAngle * r^2;
+        triangleArea1 = 0.5 * b1 * dy;
+        triangleArea2 = 0.5 * b2 * dx;
+        externalArea = sectorArea - triangleArea1 - triangleArea2;
+        <span class="comment">% Add this area to the input area.</span>
+        newArea = oldArea + externalArea;
+
+    <span class="keyword">end</span> <span class="comment">% addExternalIntersectionArea</span>
+
+<span class="keyword">end</span> <span class="comment">% intersectionArea</span>
+</pre>
+</div>
+<!--
+##### SOURCE BEGIN #####
+classdef ScatterDensityChart < Chart
+    %SCATTERDENSITYCHART Bivariate scatter plot using color to indicate
+    %relative density of the data points.
+    
+    % Copyright 2019-2025 The MathWorks, Inc.
+    
+    properties ( Dependent )
+        % Chart x-data.
+        XData(:, 1) double {mustBeReal}
+        % Chart y-data.
+        YData(:, 1) double {mustBeReal}
+        % Radius of the density circle.
+        Radius(1, 1) double {mustBeNonnegative, mustBeFinite}
+        % Density calculation method.
+        DensityMethod(1, 1) string ...
+            {mustBeMember( DensityMethod, ["boundary", "noboundary"] ) }
+    end % properties ( Dependent )
+    
+    properties
+        % Marker for the scatter series.
+        Marker(1, 1) string {mustBeMarker} = "."
+        % Size data for the scatter series.
+        SizeData(:, 1) double {mustBePositive, mustBeFinite} = 36
+        % Axes x-grid.
+        XGrid(1, 1) matlab.lang.OnOffSwitchState = "on"
+        % Axes y-grid.
+        YGrid(1, 1) matlab.lang.OnOffSwitchState = "on"        
+    end % properties
+    
+    properties ( Dependent )
+        % Axes color limits.
+        CLim(1, 2) double {mustBeReal, mustBeIncreasing}
+    end % properties ( Dependent )
+    
+    properties ( Access = private )
+        % Internal storage for the XData property.
+        XData_(:, 1) double {mustBeReal} = double.empty( 0, 1 )
+        % Internal storage for the YData property.
+        YData_(:, 1) double {mustBeReal} = double.empty( 0, 1 )
+        % Internal storage for the Radius property.
+        Radius_(1, 1) double {mustBeNonnegative, mustBeFinite} = 0.25
+        % Internal storage for the DensityMethod property.
+        DensityMethod_(1, 1) string {mustBeMember( DensityMethod_, ...
+            ["boundary", "noboundary"] ) } = "noboundary"
+        % Logical scalar specifying whether a computation is required.
+        ComputationRequired(1, 1) logical = false
+    end % properties ( Access = private )
+    
+    properties ( Access = private, Transient, NonCopyable )
+        % Chart axes.
+        Axes(:, 1) matlab.graphics.axis.Axes {mustBeScalarOrEmpty}
+        % Scatter series for the (x, y) data.
+        ScatterSeries(:, 1) matlab.graphics.chart.primitive.Scatter ...
+            {mustBeScalarOrEmpty}
+        % Rectangle object drawn to show the domain boundary.
+        BoundingBox(:, 1) matlab.graphics.primitive.Rectangle ...
+            {mustBeScalarOrEmpty}
+    end % properties ( Access = private, Transient, NonCopyable )
+    
+    properties ( Constant, Hidden )
+        % Product dependencies.
+        Dependencies(1, :) string = ["MATLAB", ...
+            "Statistics and Machine Learning Toolbox"]
+        % Description.
+        ShortDescription(1, 1) string = "Bivariate scatter plot " + ...
+            "using color to indicate relative density of the data points"
+    end % properties ( Constant, Hidden )
+    
+    methods
+        
+        function value = get.XData( obj )
+            
+            value = obj.XData_;
+            
+        end % get.XData
+        
+        function set.XData( obj, value )
+            
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+            
+            % Decide how to modify the chart data.
+            nX = numel( value );
+            nY = numel( obj.YData_ );
+            
+            if nX < nY % If the new x-data is too short ...
+                % ... then chop the chart y-data.
+                obj.YData_ = obj.YData_(1:nX);
+            else
+                % Otherwise, if nX >= nY, then pad the y-data.
+                obj.YData_(end+1:nX, 1) = NaN;
+            end % if
+            
+            % Set the internal x-data.
+            obj.XData_ = value;
+            
+            % Reset the scatter series' size data if necessary.
+            nS = numel( obj.SizeData );
+            if nS > 1 && nX ~= nS
+                obj.SizeData = 36;
+            end % if
+            
+        end % set.XData
+        
+        function value = get.YData( obj )
+            
+            value = obj.YData_;
+            
+        end % get.YData
+        
+        function set.YData( obj, value )
+            
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+            
+            % Decide how to modify the chart data.
+            nY = numel( value );
+            nX = numel( obj.XData_ );
+            
+            if nY < nX % If the new y-data is too short ...
+                % ... then chop the chart x-data.
+                obj.XData_ = obj.XData_(1:nY);
+            else
+                % Otherwise, if nY >= nX, then pad the x-data.
+                obj.XData_(end+1:nY, 1) = NaN;
+            end % if
+            
+            % Set the internal y-data.
+            obj.YData_ = value(:);
+            
+            % Reset the scatter series' size data if necessary.
+            nS = numel( obj.SizeData );
+            if nS > 1 && nY ~= nS
+                obj.SizeData = 36;
+            end % if
+            
+        end % set.YData
+        
+        function value = get.Radius( obj )
+            
+            value = obj.Radius_;
+            
+        end % get.Radius
+        
+        function set.Radius( obj, value )
+            
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+            
+            % Set the internal value.
+            obj.Radius_ = value;
+            
+        end % set.Radius
+        
+        function value = get.DensityMethod( obj )
+            
+            value = obj.DensityMethod_;
+            
+        end % get.DensityMethod
+        
+        function set.DensityMethod( obj, value )
+            
+            % Mark the chart for an update.
+            obj.ComputationRequired = true;
+            
+            % Set the internal value.
+            obj.DensityMethod_ = value;
+            
+        end % set.DensityMethod
+        
+        function value = get.CLim( obj )
+            
+            value = obj.Axes.CLim;
+            
+        end % get.CLim
+        
+        function set.CLim( obj, value )
+            
+            obj.Axes.CLim = value;
+            
+        end % set.CLim
+        
+    end % methods
+    
+    methods
+
+        function obj = ScatterDensityChart( namedArgs )
+            %SCATTERDENSITYCHART Construct a ScatterDensityChart object,
+            %given optional name-value arguments.
+
+            arguments ( Input )
+                namedArgs.?ScatterDensityChart
+            end % arguments ( Input )           
+
+            % Set any user-defined properties.
+            set( obj, namedArgs )
+
+        end % constructor
+        
+        function varargout = xlabel( obj, varargin )
+            
+            [varargout{1:nargout}] = xlabel( obj.Axes, varargin{:} );
+            
+        end % xlabel
+        
+        function varargout = ylabel( obj, varargin )
+            
+            [varargout{1:nargout}] = ylabel( obj.Axes, varargin{:} );
+            
+        end % ylabel
+        
+        function varargout = title( obj, varargin )
+            
+            [varargout{1:nargout}] = title( obj.Axes, varargin{:} );
+            
+        end % title
+        
+        function grid( obj, varargin )
+            
+            % Invoke grid on the axes.
+            grid( obj.Axes, varargin{:} )
+            
+            % Update the chart's decorative properties.
+            obj.XGrid = obj.Axes.XGrid;
+            obj.YGrid = obj.Axes.YGrid;
+            
+        end % grid
+        
+        function varargout = legend( obj, varargin )
+            
+            [varargout{1:nargout}] = legend( obj.Axes, varargin{:} );
+            
+        end % legend
+        
+        function varargout = colorbar( obj, varargin )
+            
+            [varargout{1:nargout}] = colorbar( obj.Axes, varargin{:} );
+            
+        end % colorbar
+        
+        function varargout = colormap( obj, varargin )
+            
+            [varargout{1:nargout}] = colormap( obj.Axes, varargin{:} );
+            
+        end % colormap
+
+        function varargout = axis( obj, varargin )
+
+            [varargout{1:nargout}] = axis( obj.Axes, varargin{:} );
+
+        end % axis
+        
+    end % methods
+    
+    methods ( Access = protected )
+        
+        function setup( obj )
+            %SETUP Initialize the chart graphics.
+            
+            % Create the chart's axes.
+            obj.Axes = axes( "Parent", obj.getLayout(), ...
+                "Colormap", parula() );
+            % Add the colorbar.
+            colorbar( obj )
+            
+            % Create the scatter plot.
+            hold( obj.Axes, "on" )
+            obj.ScatterSeries = scatter( obj.Axes, NaN, NaN, "." );
+            
+            % Create the bounding box.
+            obj.BoundingBox = rectangle( obj.Axes, ...
+                "Visible", "off", ...
+                "Position", zeros( 1, 4 ), ...
+                "LineWidth", 3 );
+            hold( obj.Axes, "off" )
+            
+        end % setup
+        
+        function update( obj )
+            %UPDATE Refresh the chart graphics.
+            
+            if obj.ComputationRequired
+                
+                % Evaluate the new color data for the scatter series.
+                
+                % First, extract the chart data.
+                x = obj.XData_;
+                y = obj.YData_;
+                
+                % Deal with the case where all the x-data or all the y-data
+                % is missing.
+                if all( isnan( x ) ) || all( isnan( y ) )
+                    newCData = NaN;
+                else
+                    % Otherwise we can evaluate point densities.
+                    [xmin, xmax] = bounds( x );
+                    [ymin, ymax] = bounds( y );
+                    % Compute the pairwise distances between the scattered
+                    % data points.
+                    pointDistances = pdist2( [x, y], [x, y] );
+                    % Estimate the maximum possible radius based on the
+                    % diagonal of the data span.
+                    maxRad = sqrt( (xmax-xmin)^2 + (ymax-ymin)^2 );
+                    % Update the internal radius value.
+                    obj.Radius_ = min( obj.Radius_, maxRad );
+                    
+                    % Compute the density at each data point, excluding the
+                    % point itself.
+                    pointCounts = ...
+                        sum( pointDistances <= obj.Radius_, 2 ) - 1;
+                    
+                    % Depending on the selected density method, compute the
+                    % intersection area.
+                    switch obj.DensityMethod_
+                        case "boundary"
+                            % Compute the intersection area for each data
+                            % point.
+                            normArea = NaN( size( x ) );
+                            for k = 1:numel( x )
+                                normArea(k) = intersectionArea( ...
+                                    x(k), y(k), obj.Radius_, ....
+                                    xmin, xmax, ymin, ymax );
+                            end % for
+                            % Update the bounding box.
+                            set( obj.BoundingBox, "Visible", "on", ...
+                                "Position", ...
+                                [xmin, ymin, xmax-xmin, ymax-ymin] )
+                        case "noboundary"
+                            % This is the simpler case when the point
+                            % counts are normalized by the circular area.
+                            normArea = 2 * pi * obj.Radius_^2;
+                            obj.BoundingBox.Visible = "off";
+                    end % switch/case
+                    
+                    % Normalize the point counts by the area.
+                    newCData = pointCounts ./ normArea;
+                    
+                end % if
+                
+                % Update the scatter series with the new chart data and
+                % color data.
+                set( obj.ScatterSeries, "XData", obj.XData_, ...
+                    "YData", obj.YData_, "CData", newCData )
+                obj.Axes.CLimMode = "auto";
+                
+                % Mark the chart clean.
+                obj.ComputationRequired = false;
+                
+            end % if
+            
+            % Refresh the chart's decorative properties.
+            set( obj.ScatterSeries, "Marker", obj.Marker, ...
+                "SizeData", obj.SizeData )
+            set( obj.Axes, "XGrid", obj.XGrid, "YGrid", obj.YGrid, ...
+                "CLim", obj.CLim )
+            
+        end % update
+        
+    end % methods ( Access = protected )
+    
+end % classdef
+
+function A = intersectionArea( xc, yc, r, xmin, xmax, ymin, ymax )
+%INTERSECTIONAREA Compute the area of the intersection of a circle of
+%radius r centered around the point (xc, yc) within the rectangle (xmin,
+%ymin), (xmax, ymin), (xmax, ymax), (xmin, ymax).
+
+% If the circle is within the rectangle, return the area of the circle.
+if (xc + r < xmax) && (xc - r > xmin) && ...
+        (yc + r < ymax) && (yc - r > ymin)
+    A = pi * r^2;
+else
+    % Compute the distances from the center of the circle to each of the
+    % four vertices of the rectangle.
+    c(1) = sqrt( (xc - xmin)^2 + (yc - ymin)^2 ); % Bottom left vertex
+    c(2) = sqrt( (xc - xmin)^2 + (yc - ymax)^2 ); % Bottom right vertex
+    c(3) = sqrt( (xc - xmax)^2 + (yc - ymax)^2 ); % Top right vertex
+    c(4) = sqrt( (xc - xmax)^2 + (yc - ymin)^2 ); % Top left vertex
+    
+    if r >= max( c )
+        % Return the area of the box.
+        A = (xmax-xmin) * (ymax-ymin);
+    else
+        % Subtract the area of the circle lying outside the rectangle.
+        A = pi * r^2;
+        if xc + r > xmax
+            d = xmax - xc;
+            A = subtractExternalArea( r, d, A );
+        end % if
+        if xc - r < xmin
+            d = xc - xmin;
+            A = subtractExternalArea( r, d, A );
+        end % if
+        if yc + r > ymax
+            d = ymax - yc;
+            A = subtractExternalArea( r, d, A );
+        end % if
+        if yc - r < ymin
+            d = yc - ymin;
+            A = subtractExternalArea( r, d, A );
+        end % if
+        % If necessary, add back the intersection of the external areas.
+        if r > c(1)
+            dx = xc - xmin;
+            dy = yc - ymin;
+            A = addExternalIntersectionArea( dx, dy, r, A );
+        end % if
+        if r > c(2)
+            dx = xc - xmin;
+            dy = ymax - yc;
+            A = addExternalIntersectionArea( dx, dy, r, A );
+        end % if
+        if r > c(3)
+            dx = xmax - xc;
+            dy = ymax - yc;
+            A = addExternalIntersectionArea( dx, dy, r, A );
+        end % if
+        if r > c(4)
+            dx = xmax - xc;
+            dy = yc - ymin;
+            A = addExternalIntersectionArea( dx, dy, r, A );
+        end % if
+        
+    end % if
+    
+end % if
+
+    function newArea = subtractExternalArea( r, d, oldArea )
+        
+        % Compute the area outside the rectangle and inside the circle in
+        % either the x or y direction (a "half-moon").
+        theta = acos( d/r );
+        sectorArea = 0.5 * theta * r^2;
+        triangleArea = 0.5 * r * sin( theta ) * d;
+        externalArea = sectorArea - triangleArea;
+        % Subtract this area from the input area.
+        newArea = oldArea - externalArea;
+        
+    end % subtractExternalArea
+
+    function newArea = addExternalIntersectionArea( dx, dy, r, oldArea )
+        
+        % Evaluate the area of the "quarter-moon".
+        thetax = asin( dy/r );
+        thetay = asin( dx/r );
+        b1 = r * cos( thetax ) - dx;
+        b2 = r * cos( thetay ) - dy;
+        sectorAngle = pi/2 - thetax - thetay;
+        sectorArea = 0.5 * sectorAngle * r^2;
+        triangleArea1 = 0.5 * b1 * dy;
+        triangleArea2 = 0.5 * b2 * dx;
+        externalArea = sectorArea - triangleArea1 - triangleArea2;
+        % Add this area to the input area.
+        newArea = oldArea + externalArea;
+        
+    end % addExternalIntersectionArea
+
+end % intersectionArea
+##### SOURCE END #####
+-->
+</body>
+</html>
