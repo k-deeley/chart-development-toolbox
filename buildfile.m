@@ -129,7 +129,7 @@ for exampleIdx = 1 : numel( exampleNames )
 
     % Export the script to HTML.
     exportName = fullfile( htmlOutputFolder, ...
-        exampleNames(exampleIdx) + ".html" );
+        exampleNames(exampleIdx) + ".html" );    
     export( exampleFullPaths(exampleIdx), exportName, ...
         "Format", "html", ...
         "Run", false );
@@ -138,7 +138,7 @@ for exampleIdx = 1 : numel( exampleNames )
     activateLinks( exportName )
 
     % Report progress.
-    fprintf( 1, "[+] %s\n", publishedFile )
+    fprintf( 1, "[+] %s\n", exportName )
 
 end % for
 
