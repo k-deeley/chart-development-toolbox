@@ -211,6 +211,6 @@ end % arguments ( Output )
 url = "https://files.printables.com/media/prints/34767/stls/" + ...
     "343468_b085a064-c28f-4861-b1a0-6a559929a7e2/avion31.stl";
 opts = weboptions( "ContentReader", @stlread );
-tr = webread(url, opts);
+tr = webread( url, opts );
 
 end % defaultAircraft

@@ -142,7 +142,7 @@ function exportEdgeworthBowleyChart()
 % Create the chart.
 f = uifigure();
 figureCleanup = onCleanup( @() delete( f ) );
-dataPath = fullfile( chartsDocRoot(), "data", "IndifferenceCurves.mat" );
+dataPath = fullfile( chartsRoot(), "data", "IndifferenceCurves.mat" );
 data = load( dataPath );
 data.A = data.A(:, 1:2:end);
 data.B = data.B(:, 1:2:end);
@@ -191,7 +191,7 @@ function exportImpliedVolatilityChart()
 % Create the chart.
 f = uifigure();
 figureCleanup = onCleanup( @() delete( f ) );
-data = load( fullfile( chartsDocRoot(), "data", "Option.mat" ) );
+data = load( fullfile( chartsRoot(), "data", "Option.mat" ) );
 D1 = data.D(data.D.Group == "G1", 1:4);
 IVC = ImpliedVolatilityChart( "Parent", f, ...
     "OptionData", D1, ...
@@ -214,7 +214,7 @@ function exportInductionMotorChart()
 % Create the chart.
 f = uifigure();
 figureCleanup = onCleanup( @() delete( f ) );
-dataFolder = fullfile( chartsDocRoot(), "data", "MotorParameters" );
+dataFolder = fullfile( chartsRoot(), "data", "MotorParameters" );
 IMP = InductionMotorParameters( dataFolder );
 IMC = InductionMotorChart( "Parent", f, ...
     "MotorParameters", IMP, ...
@@ -275,7 +275,7 @@ LSC = LineSelectorChart( "Parent", f, ...
     "XData", x, ...
     "YData", y, ...
     "SelectedColor", [1, 0.5, 0], ...
-    "TraceColor", [1, 1, 1], ...
+    "TraceColor", [0.5, 0.5, 0.5], ...
     "TraceLineWidth", 5, ...
     "SelectedLineWidth", 7 );
 pause( 0.5 )
@@ -368,7 +368,7 @@ function exportSankeyChart()
 % Create the chart.
 f = uifigure();
 figureCleanup = onCleanup( @() delete( f ) );
-data = load( fullfile( chartsDocRoot(), "data", "Graph.mat" ) );
+data = load( fullfile( chartsRoot(), "data", "Graph.mat" ) );
 SC = SankeyChart( "Parent", f, ...
     "GraphData", digraph( data.linkData ), ...
     "LinkColor", "gradient", ...
@@ -544,7 +544,7 @@ function exportSnailTrailChart()
 %EXPORTSNAILTRAILCHART Export the SnailTrailChart.
 
 % Load the chart data.
-data = load( fullfile( chartsDocRoot(), "data", "Returns.mat" ), "rets" );
+data = load( fullfile( chartsRoot(), "data", "Returns.mat" ), "rets" );
 
 % Create the chart.
 f = uifigure();
@@ -595,7 +595,7 @@ function exportTernaryChart()
 %EXPORTTERNARYCHART Export the TernaryChart.
 
 % Load the chart data.
-data = load( fullfile( chartsDocRoot(), "data", "Chemicals.mat" ) );
+data = load( fullfile( chartsRoot(), "data", "Chemicals.mat" ) );
 
 % Create the chart.
 f = uifigure();
@@ -652,7 +652,7 @@ function exportWindRoseChart()
 %EXPORTWINDROSECHART Export the WindRoseChart.
 
 % Load the chart data.
-data = load( fullfile( chartsDocRoot(), "data", "Wind.mat" ) );
+data = load( fullfile( chartsRoot(), "data", "Wind.mat" ) );
 
 % Create the chart.
 f = uifigure();

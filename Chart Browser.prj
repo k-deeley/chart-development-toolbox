@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.apptool" plugin-version="1.0">
-  <configuration build-checksum="2729578587" file="C:\Users\kdeeley\Files\MathWorks\Publications\04_Charts\Examples\Chart Browser.prj" location="C:\Users\kdeeley\Files\MathWorks\Publications\04_Charts\Examples" name="Chart Browser" target="target.mlapps" target-name="Package App">
+  <configuration build-checksum="3071498792" file="C:\Users\kdeeley\Files\MathWorks\Publications\04_Charts\Examples\Chart Browser.prj" location="C:\Users\kdeeley\Files\MathWorks\Publications\04_Charts\Examples" name="Chart Browser" target="target.mlapps" target-name="Package App">
     <param.appname>Chart Browser</param.appname>
     <param.authnamewatermark>Ken Deeley</param.authnamewatermark>
     <param.email>kdeeley@mathworks.com</param.email>

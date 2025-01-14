@@ -9,7 +9,7 @@
     "ToolboxFolder":"./charts",
     "ToolboxMatlabPath": ["./charts", "./charts/app", "./charts/charts", "./charts/examples", "./charts/validators"],
     "ToolboxImageFile":"./charts/app/images/toolboxLogo.png",
-    "ToolboxGettingStartedGuide":"./charts/doc/GettingStarted.mlx",
+    "ToolboxGettingStartedGuide":"./charts/doc/GettingStarted.m",
     "MinimumMatlabRelease":"R2024b"
 }
  

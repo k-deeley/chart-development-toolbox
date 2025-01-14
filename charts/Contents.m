@@ -1,20 +1,25 @@
 % Chart Development Toolbox
-% Version 2.2 (R2024b) 31-Jan-2025
+% Version 2.2 (R2025a) 31-Jan-2025
 
 % Copyright 2018-2025 The MathWorks, Inc.
 
-% App Launcher
-%   chartCatalog - Launch the chart catalog.
+% App
+%  chartBrowser - Launch the chart browser
 
 % Charts
+%   AircraftChart
 %   AnnulusChart
 %   CircularNetFlowChart
+%   ClockChart
 %   CylinderChart
 %   EdgeworthBowleyChart
+%   GraphicsHierarchyChart
 %   ImpliedVolatilityChart
+%   InductionMotorChart
 %   LineGradientChart
 %   LineSelectorChart
-%   RadarChart
+%   PolarChart
+%   RadarScope
 %   RangefinderChart
 %   SankeyChart
 %   ScatterBoxChart

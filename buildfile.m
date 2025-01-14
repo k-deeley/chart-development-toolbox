@@ -117,12 +117,12 @@ for chartIdx = 1 : numel( chartNames )
 
 end % for
 
-% Publish the Live Script examples as HTML documents.
+% Publish the examples as HTML documents.
 examplesFolder = context.Task.Inputs(2).Path;
 exampleNames = deblank( string( ls( ...
-    fullfile( examplesFolder, "*Examples.mlx" ) ) ) );
+    fullfile( examplesFolder, "*Examples.m" ) ) ) );
 exampleFullPaths = fullfile( examplesFolder, exampleNames );
-exampleNames = erase( exampleNames, ".mlx" );
+exampleNames = erase( exampleNames, ".m" );
 htmlOutputFolder = fullfile( chartsRoot(), "app", "html", "examples" );
 
 for exampleIdx = 1 : numel( exampleNames )
@@ -147,13 +147,13 @@ docFolder = context.Task.Inputs(3).Path;
 htmlOutputFolder = fullfile( chartsRoot(), "app", "html", "doc" );
 
 % Publish the getting started guide.
-exportToHTML( "GettingStarted.mlx" )
+exportToHTML( "GettingStarted.m" )
 
 % Do the same for the app version of the guide.
-exportToHTML( "GettingStartedApp.mlx" )
+exportToHTML( "GettingStartedApp.m" )
 
 % Publish the chart development guide.
-exportToHTML( "CreatingSpecializedCharts.mlx" )
+exportToHTML( "CreatingSpecializedCharts.m" )
 
 % Publish the motivational example.
 %exportToHTML( "WhatIsAChart.mlx" )
@@ -180,7 +180,7 @@ function packageTask( context )
 projectRoot = context.Plan.RootFolder;
 appPackagingProject = fullfile( projectRoot, "Chart Browser.prj" );
 matlab.apputil.package( appPackagingProject )
-fprintf( 1, "** Updated Chart Browser app.\n" )
+fprintf( 1, "** Updated the Chart Browser app\n" )
 
 % Toolbox short name.
 toolboxShortName = "charts";
