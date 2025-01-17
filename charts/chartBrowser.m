@@ -10,11 +10,11 @@ function varargout = chartBrowser()
 nargoutchk( 0, 1 )
 
 % Launch the application.
-app = chartBrowserLauncher();
+CBL = ChartBrowserLauncher();
 
 % Return the app as output, if requested.
 if nargout == 1
-    varargout{1} = app;
+    varargout{1} = CBL.App;
 end % if
 
 end % chartBrowser

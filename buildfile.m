@@ -99,18 +99,7 @@ for chartIdx = 1 : numel( chartNames )
     publish( chartFullPaths(chartIdx), ...
         "format", "html", ...
         "outputDir", htmlOutputFolder, ...
-        "evalCode", false );
-
-    % Erase the footer.
-    publishedFile = fullfile( htmlOutputFolder, ...
-        chartNames(chartIdx) + ".html" );
-    rawHTML = splitlines( fileread( publishedFile ) );
-    footerStartIdx = find( startsWith( rawHTML, "<p class=""footer"">" ) );
-    footerEndIdx = find( startsWith( rawHTML, "</p>" ) );
-    footerEndIdx = footerEndIdx( find( footerEndIdx > footerStartIdx, ...
-        1, "first" ) );
-    rawHTML(footerStartIdx:footerEndIdx) = [];
-    writelines( rawHTML, publishedFile )
+        "evalCode", false );    
 
     % Report progress.
     fprintf( 1, "[+] %s\n", publishedFile )
@@ -168,6 +157,7 @@ exportToHTML( "CreatingSpecializedCharts.m" )
         export( scriptFullPath, exportName, ...
             "Format", "html", ...
             "Run", false );
+        activateLinks( exportName )
 
     end % exportToHTML
 
@@ -177,10 +167,10 @@ function packageTask( context )
 % Package the Chart Development Toolbox.
 
 % Package the Chart Browser app.
-projectRoot = context.Plan.RootFolder;
-appPackagingProject = fullfile( projectRoot, "Chart Browser.prj" );
-matlab.apputil.package( appPackagingProject )
-fprintf( 1, "** Updated the Chart Browser app\n" )
+%projectRoot = context.Plan.RootFolder;
+%appPackagingProject = fullfile( projectRoot, "Chart Browser.prj" );
+%matlab.apputil.package( appPackagingProject )
+%fprintf( 1, "** Updated the Chart Browser app\n" )
 
 % Toolbox short name.
 toolboxShortName = "charts";

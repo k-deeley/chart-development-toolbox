@@ -1,7 +1,7 @@
 # Chart Examples
 
-[![View Chart Examples on File Exchange](images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/65857-chart-development-toolbox)
-[![Open in MATLAB Online](images/open-in-matlab-online.svg)](https://matlab.mathworks.com/open/github/v1?repo=mathworks/chart-examples&project=Charts.prj)
+[![View Chart Examples on File Exchange](readme/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/65857-chart-development-toolbox)
+[![Open in MATLAB Online](readme/open-in-matlab-online.svg)](https://matlab.mathworks.com/open/github/v1?repo=mathworks/chart-examples&project=Charts.prj)
 
 This toolbox contains the MATLAB® code and examples for the technical article [_Creating Specialized Charts with MATLAB Object-Oriented Programming_](https://www.mathworks.com/company/newsletters/articles/creating-specialized-charts-with-matlab-object-oriented-programming.html).
 
@@ -11,7 +11,7 @@ The toolbox comprises several diverse examples of custom MATLAB charts, together
 
 You can inspect the source code, explore the features and functionality, and run examples demonstrating the use of each chart. The toolbox also has documentation and resources to help you develop your own charts.
 
-![Chart Examples](images/chartMontage.png)
+![Chart Examples](readme/chartMontage.png)
 
 ## Installation and Getting Started
 This submission is a MATLAB toolbox.

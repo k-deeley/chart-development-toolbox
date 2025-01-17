@@ -482,6 +482,12 @@ classdef AnnulusChart < Component
 
         end % view
 
+        function exportgraphics( obj, varargin )
+
+            exportgraphics( obj.Axes, varargin{:} )
+
+        end % exportgraphics
+
         function resetView( obj )
             %RESETVIEW Restore the default chart view.
 

@@ -1,10 +1,16 @@
-% Chart Development Toolbox
+% Chart Examples
 % Version 2.2 (R2025a) 31-Jan-2025
 
 % Copyright 2018-2025 The MathWorks, Inc.
 
 % App
-%  chartBrowser - Launch the chart browser
+%  chartBrowser
+
+% Classes
+%   Blip
+%   Chart
+%   Component
+%   InductionMotorParameters
 
 % Charts
 %   AircraftChart
@@ -32,3 +38,10 @@
 %   TernaryChart
 %   ValueAtRiskChart
 %   WindRoseChart
+
+% Functions
+%   chartsRoot
+%   exampleFigure
+%   kids2graph
+%   plotkids
+%   polarDistance

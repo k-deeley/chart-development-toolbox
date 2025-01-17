@@ -1,12 +1,12 @@
 %[text] # **Chart Examples: Getting Started**
 %[text] ## Overview
-%[text] This toolbox contains the MATLAB code and examples for the technical article [*Creating Specialized Charts with MATLAB Object-Oriented Programming*](https://www.mathworks.com/company/newsletters/articles/creating-specialized-charts-with-matlab-object-oriented-programming.html).
+%[text] This toolbox contains the MATLAB code and examples for the technical article [*Creating Specialized Charts with MATLAB Object-Oriented Programming*](<matlab: web("https://www.mathworks.com/company/newsletters/articles/creating-specialized-charts-with-matlab-object-oriented-programming.html")>).
 %[text] A chart provides a task-specific application programming interface (API) for creating custom visualizations. Designing and implementing a chart not only provides a convenient API for end users, but simultaneously removes the need for the user to manipulate low-level graphics objects. 
 %[text] This toolbox comprises several diverse examples of custom MATLAB charts, together with an app for browsing the available charts and their documentation. You can inspect the source code, explore the features and functionality, and run examples demonstrating the use of each chart. The toolbox also has documentation and resources to help you develop your own charts.
 %[text] ![chartMontage.png](text:image:1b71)
-%[text] ## [MathWorks](https://www.mathworks.com) Product Requirements
+%[text] ## [MathWorks](<matlab: web("https://www.mathworks.com")>) Product Requirements
 %[text] This toolbox requires MATLAB release R2024b or later.
-%[text] - [MATLAB](https://www.mathworks.com/products/matlab.html) \
+%[text] - [MATLAB](<matlab: web("https://www.mathworks.com/products/matlab.html")>) \
 %[text] Some example charts in the toolbox rely on additional toolboxes
 %[text] ## Documentation and Chart Examples
 %[text] Open the `Chart Browser` app from the MATLAB apps gallery to browse the documentation and chart examples.

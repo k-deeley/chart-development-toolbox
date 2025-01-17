@@ -1,4 +1,4 @@
-function exportChartImage( chartNames )
+function exportChartImage( names )
 %EXPORTCHARTIMAGE Export chart images with transparent backgrounds for use
 %in the example scripts, and smaller icons for use with the chart browser.
 %Call this function with no inputs to regenerate and export all images.
@@ -8,16 +8,16 @@ function exportChartImage( chartNames )
 % Copyright 2024-2025 The MathWorks, Inc.
 
 arguments ( Input )
-    chartNames(1, :) string {mustBeChartName} = string.empty( 1, 0 )
+    names(1, :) string {mustBeChartName} = string.empty( 1, 0 )
 end % arguments ( Input )
 
 % No input or an empty string means we should update all images.
-if isempty( chartNames )
-    chartNames = allChartNames();
+if isempty( names )
+    names = chartNames();
 end % if
 
 % Export the required images.
-for name = chartNames
+for name = names
     feval( "export" + name )
 end % for
 
@@ -78,12 +78,12 @@ AC = AnnulusChart( "Parent", f, ...
     "LabelVisible", "off" );
 
 % Remove the title and fix the view.
-t = title( AC, "" );
+title( AC, "" );
 view( AC, 2 )
 pause( 0.5 )
 
 % Export.
-exportImage( "AnnulusChart", t.Parent )
+exportImage( "AnnulusChart", AC )
 
 end % exportAnnulusChart
 
