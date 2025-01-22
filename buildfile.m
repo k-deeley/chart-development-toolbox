@@ -35,7 +35,7 @@ plan("doc").Inputs = [
 
 % Obfuscate the required files.
 appFolder = fullfile( chartsRoot(), "app" );
-sourceFile = fullfile( appFolder, "chartBrowserLauncher.m" );
+sourceFile = fullfile( appFolder, "ChartBrowserLauncher.m" );
 plan("pcode") = matlab.buildtool.tasks.PcodeTask( ...
     sourceFile, appFolder, ...
     "Description", "Obfuscate the required code files.", ...
@@ -96,13 +96,53 @@ htmlOutputFolder = fullfile( chartsRoot(), "app", "html", "charts" );
 for chartIdx = 1 : numel( chartNames )
 
     % Export the chart classdef file to an HTML document.
-    publish( chartFullPaths(chartIdx), ...
+    publishedFile = publish( chartFullPaths(chartIdx), ...
         "format", "html", ...
         "outputDir", htmlOutputFolder, ...
         "evalCode", false );    
 
     % Report progress.
     fprintf( 1, "[+] %s\n", publishedFile )
+
+    % Create a copy of the published file.
+    darkThemeFilename = chartNames(chartIdx) + "DarkTheme.html";
+    destinationFile = fullfile( htmlOutputFolder, darkThemeFilename );
+    copyfile( publishedFile, destinationFile )
+
+    % Open it for editing.
+    rawHTML = readlines( destinationFile );
+
+    % Replace the HTML body color and background color.
+    htmlBodyIdx = contains( rawHTML, "html body" ) & ...
+        contains( rawHTML, "color:#000" );
+    rawHTML(htmlBodyIdx) = replace( rawHTML(htmlBodyIdx), ...
+        ["color:#000", "background:#fff"], ...
+        ["color:#d9d9d9", "background:#121212"] );
+
+    % Replace the code input background color.
+    codeInputIdx = contains( rawHTML, "pre.codeinput" );
+    rawHTML(codeInputIdx) = replace( rawHTML(codeInputIdx), ...
+        "background:#f7f7f7", "background:#121212" );
+
+    % Replace the keyword, comment, string, and type section colors.
+    keywordIdx = contains( rawHTML, "span.keyword" );
+    rawHTML(keywordIdx) = replace( rawHTML(keywordIdx), ...
+        "color:#0000FF", "color:#7da9ff" );
+    commentIdx = contains( rawHTML, "span.comment" );
+    rawHTML(commentIdx) = replace( rawHTML(commentIdx), ...
+        "color:#228B22", "color:94ef84" );
+    stringIdx = contains( rawHTML, "span.string" );
+    rawHTML(stringIdx) = replace( rawHTML(stringIdx), ...
+        "color:#A020F0", "color:#d694ff" );
+    typesectionIdx = contains( rawHTML, "span.typesection" );
+    rawHTML(typesectionIdx) = replace( rawHTML(typesectionIdx), ...
+        "color:#A0522D", "color:#cb845d" );
+
+    % Export the updated file.
+    writelines( rawHTML, destinationFile )
+
+    % Report progress.
+    fprintf( 1, "[+] %s\n", destinationFile )
 
 end % for
 
@@ -145,7 +185,10 @@ exportToHTML( "GettingStartedApp.m" )
 exportToHTML( "CreatingSpecializedCharts.m" )
 
 % Publish the motivational example.
-%exportToHTML( "WhatIsAChart.mlx" )
+exportToHTML( "WhatIsAChart.m" )
+
+% Publish the technical artciel.
+exportToHTML( "TechnicalArticle.m" )
 
     function exportToHTML( scriptName )
         %EXPORTTOHTML Export the given script to HTML format.
@@ -201,7 +244,7 @@ opts = matlab.addons.toolbox.ToolboxOptions( ...
     toolboxFolder, toolboxID, meta );
 
 % Remove unnecessary files.
-tf = endsWith( opts.ToolboxFiles, "chartBrowserLauncher.m" ) | ...
+tf = endsWith( opts.ToolboxFiles, "ChartBrowserLauncher.m" ) | ...
     endsWith( opts.ToolboxFiles, ...
     "app\images\" + lettersPattern() + "Chart.png" );
 opts.ToolboxFiles(tf) = [];
@@ -239,7 +282,7 @@ commands = extractBetween( anchors, """", """" );
 replacementAnchors = "<a href = ""#"" onclick=""handleClick(" + ...
     "'" + commands + "'" + "); return false;"">";
 % Replace the original anchors with the new anchors.
-for k = 1:length( anchors )
+for k = 1 : numel( anchors )
     htmlFileContents = replace( htmlFileContents, ...
         anchors(k), replacementAnchors(k) );
 end % for
