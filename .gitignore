@@ -1,5 +1,5 @@
 # List of untracked files to ignore
-charts/app/html
-charts/app/images
-charts/app/chartBrowserLauncher.m
-charts/app/Chart Browser.mlappinstall
+tbx/charts/app/html
+tbx/charts/app/images
+tbx/charts/app/ChartBrowserLauncher.m
+tbx/charts/app/Chart Browser.mlappinstall

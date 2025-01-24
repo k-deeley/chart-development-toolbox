@@ -6,10 +6,10 @@
     "AuthorCompany":"MathWorks",
     "AuthorName":"Ken Deeley",
     "AuthorEmail":"kdeeley@mathworks.com",
-    "ToolboxFolder":"./charts",
-    "ToolboxMatlabPath": ["./charts", "./charts/app", "./charts/charts", "./charts/examples", "./charts/validators"],
-    "ToolboxImageFile":"./charts/app/images/toolboxLogo.png",
-    "ToolboxGettingStartedGuide":"./charts/doc/GettingStarted.m",
+    "ToolboxFolder":"./tbx",
+    "ToolboxMatlabPath": ["./tbx/charts", "./tbx/charts/app", "./tbx/charts/charts", "./tbx/charts/examples", "./tbx/charts/validators"],
+    "ToolboxImageFile":"./tbx/charts/app/images/toolboxLogo.png",
+    "ToolboxGettingStartedGuide":"./tbx/charts/doc/GettingStarted.m",
     "MinimumMatlabRelease":"R2025a"
 }
  
