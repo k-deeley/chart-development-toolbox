@@ -425,7 +425,8 @@ classdef ScatterFitChart < Component
                 "FontWeight", "bold" );
             p.Layout.Column = 2;
             controlLayout = uigridlayout( p, [8, 2], ...
-                "RowHeight", repmat( "fit", 1, 8 ) );
+                "RowHeight", repmat( "fit", 1, 8 ), ...
+                "ColumnWidth", ["fit", "1x"] );
 
             % Summary label.
             obj.SummaryLabel = uilabel( "Parent", controlLayout, ...
