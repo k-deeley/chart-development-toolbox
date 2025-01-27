@@ -1,4 +1,4 @@
-%[text] %[text:anchor:T_EDCE38FD] # **Creating Specialized Charts with MATLAB Object-Oriented Programming**
+%[text] %[text:anchor:T_EDCE38FD] # **Chart Development Guide**
 %[text] %[text:anchor:H_FB11F72E] ## Introduction
 %[text] Developing advanced MATLAB visualizations often involves managing multiple low-level graphics objects. This is especially the case for applications containing graphics that update dynamically. Such applications may require time-consuming programming.
 %[text] A chart object provides a high-level application programming interface (API) for creating custom visualizations. A chart not only provides a user-friendly and convenient visualization API for the end users; it also removes the need for the user to implement low-level graphics programming.

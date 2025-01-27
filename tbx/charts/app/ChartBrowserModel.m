@@ -215,7 +215,7 @@ classdef ChartBrowserModel < handle
                         name = "What is a Chart?";
                     case "GettingStartedApp"
                         name = "Getting Started";
-                    case "CreatingSpecializedCharts"
+                    case "ChartDevelopmentGuide"
                         name = "Development Guide";
                     case "TechnicalArticle"
                         name = "Technical Article";

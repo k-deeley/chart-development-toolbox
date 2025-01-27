@@ -99,7 +99,7 @@ for chartIdx = 1 : numel( chartNames )
     publishedFile = publish( chartFullPaths(chartIdx), ...
         "format", "html", ...
         "outputDir", htmlOutputFolder, ...
-        "evalCode", false );    
+        "evalCode", false );
 
     % Report progress.
     fprintf( 1, "[+] %s\n", publishedFile )
@@ -158,7 +158,7 @@ for exampleIdx = 1 : numel( exampleNames )
 
     % Export the script to HTML.
     exportName = fullfile( htmlOutputFolder, ...
-        exampleNames(exampleIdx) + ".html" );    
+        exampleNames(exampleIdx) + ".html" );
     export( exampleFullPaths(exampleIdx), exportName, ...
         "Format", "html", ...
         "Run", false );
@@ -175,20 +175,11 @@ end % for
 docFolder = context.Task.Inputs(3).Path;
 htmlOutputFolder = fullfile( chartsRoot(), "app", "html", "doc" );
 
-% Publish the getting started guide.
-exportToHTML( "GettingStarted.m" )
-
-% Do the same for the app version of the guide.
-exportToHTML( "GettingStartedApp.m" )
-
-% Publish the chart development guide.
-exportToHTML( "CreatingSpecializedCharts.m" )
-
-% Publish the motivational example.
-exportToHTML( "WhatIsAChart.m" )
-
-% Publish the technical artciel.
-exportToHTML( "TechnicalArticle.m" )
+% Publish the documentation files.
+docFilenames = deblank( string( ls( fullfile( docFolder, "*.m" ) ) ) );
+for fileIdx = 1 : numel( docFilenames )
+    exportToHTML( docFilenames(fileIdx) )
+end % for
 
     function exportToHTML( scriptName )
         %EXPORTTOHTML Export the given script to HTML format.
