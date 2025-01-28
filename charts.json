@@ -7,7 +7,7 @@
     "AuthorName":"Ken Deeley",
     "AuthorEmail":"kdeeley@mathworks.com",
     "ToolboxFolder":"./tbx",
-    "ToolboxMatlabPath": ["./tbx", "./tbx/charts", "./tbx/charts/app", "./tbx/charts/charts", "./tbx/charts/examples", "./tbx/charts/validators"],
+    "ToolboxMatlabPath": ["./tbx", "./tbx/charts", "./tbx/charts/app", "./tbx/charts/charts", "./tbx/charts/examples", "./tbx/charts/tests", "./tbx/charts/validators"],
     "ToolboxImageFile":"./tbx/charts/app/images/toolboxLogo.png",
     "ToolboxGettingStartedGuide":"./tbx/charts/doc/GettingStarted.m",
     "MinimumMatlabRelease":"R2025a"
