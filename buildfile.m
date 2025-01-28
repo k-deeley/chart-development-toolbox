@@ -101,48 +101,23 @@ for chartIdx = 1 : numel( chartNames )
         "outputDir", htmlOutputFolder, ...
         "evalCode", false );
 
+    % Open it for editing.
+    htmlFileContents = fileread( publishedFile );
+
+    % Insert the JavaScript code.
+    jsFile = fullfile( chartsRoot(), "app", "html", ...
+        "respondToThemeChanges.js" );
+    jsCode = fileread( jsFile );
+    htmlFileContents = insertBefore( htmlFileContents, "</body>", ...
+        "<script type=""text/javascript"">" + jsCode + "</script>" );
+
+    % Replace the file contents.
+    fileID = fopen( publishedFile, "w" );
+    fprintf( fileID, "%s", htmlFileContents );
+    fclose( fileID ); 
+
     % Report progress.
     fprintf( 1, "[+] %s\n", publishedFile )
-
-    % Create a copy of the published file.
-    darkThemeFilename = chartNames(chartIdx) + "DarkTheme.html";
-    destinationFile = fullfile( htmlOutputFolder, darkThemeFilename );
-    copyfile( publishedFile, destinationFile )
-
-    % Open it for editing.
-    rawHTML = readlines( destinationFile );
-
-    % Replace the HTML body color and background color.
-    htmlBodyIdx = contains( rawHTML, "html body" ) & ...
-        contains( rawHTML, "color:#000" );
-    rawHTML(htmlBodyIdx) = replace( rawHTML(htmlBodyIdx), ...
-        ["color:#000", "background:#fff"], ...
-        ["color:#d9d9d9", "background:#121212"] );
-
-    % Replace the code input background color.
-    codeInputIdx = contains( rawHTML, "pre.codeinput" );
-    rawHTML(codeInputIdx) = replace( rawHTML(codeInputIdx), ...
-        "background:#f7f7f7", "background:#121212" );
-
-    % Replace the keyword, comment, string, and type section colors.
-    keywordIdx = contains( rawHTML, "span.keyword" );
-    rawHTML(keywordIdx) = replace( rawHTML(keywordIdx), ...
-        "color:#0000FF", "color:#7da9ff" );
-    commentIdx = contains( rawHTML, "span.comment" );
-    rawHTML(commentIdx) = replace( rawHTML(commentIdx), ...
-        "color:#228B22", "color:94ef84" );
-    stringIdx = contains( rawHTML, "span.string" );
-    rawHTML(stringIdx) = replace( rawHTML(stringIdx), ...
-        "color:#A020F0", "color:#d694ff" );
-    typesectionIdx = contains( rawHTML, "span.typesection" );
-    rawHTML(typesectionIdx) = replace( rawHTML(typesectionIdx), ...
-        "color:#A0522D", "color:#cb845d" );
-
-    % Export the updated file.
-    writelines( rawHTML, destinationFile )
-
-    % Report progress.
-    fprintf( 1, "[+] %s\n", destinationFile )
 
 end % for
 
@@ -267,11 +242,14 @@ htmlFileContents = string( fileread( file ) );
 % Extract the anchors.
 anchors = extractBetween( htmlFileContents, "<a href = ""matlab:", ">", ...
     "Boundaries", "inclusive" );
+
 % Extract the commands.
 commands = extractBetween( anchors, """", """" );
+
 % Format the JavaScript-enabled anchors.
 replacementAnchors = "<a href = ""#"" onclick=""handleClick(" + ...
     "'" + commands + "'" + "); return false;"">";
+
 % Replace the original anchors with the new anchors.
 for k = 1 : numel( anchors )
     htmlFileContents = replace( htmlFileContents, ...
@@ -279,13 +257,10 @@ for k = 1 : numel( anchors )
 end % for
 
 % Insert the JavaScript block.
+jsFile = fullfile( chartsRoot(), "app", "html", "activateLinks.js" );
+jsCode = fileread( jsFile );
 htmlFileContents = insertBefore( htmlFileContents, "</body>", ...
-    "<script type = ""text/javascript"">" + ...
-    "function setup( htmlComponent ) " + ...
-    "{ window.htmlComponent = htmlComponent };" + ...
-    "function handleClick(command) {" + newline() + ...
-    "window.htmlComponent.sendEventToMATLAB( ""LinkClicked"", " + ...
-    "command ) } </script>" );
+    "<script type = ""text/javascript"">" + jsCode + "</script>" );
 
 % Replace the file contents.
 fileID = fopen( file, "w" );

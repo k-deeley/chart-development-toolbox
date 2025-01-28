@@ -1,6 +1,8 @@
 # List of untracked files to ignore
 .buildtool/
-tbx/charts/app/html
+tbx/charts/app/html/charts
+tbx/charts/app/html/doc
+tbx/charts/app/html/examples
 tbx/charts/app/images
 tbx/charts/app/ChartBrowserLauncher.m
 tbx/charts/app/Chart Browser.mlappinstall

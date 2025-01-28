@@ -14,7 +14,7 @@ classdef HTMLBlob < matlab.ui.componentcontainer.ComponentContainer
         % Grid layout.
         Grid(:, 1) matlab.ui.container.GridLayout {mustBeScalarOrEmpty}
         % HTML container.
-        HTMLContainer(:, 1) matlab.ui.control.HTML {mustBeScalarOrEmpty}        
+        HTMLContainer(:, 1) matlab.ui.control.HTML {mustBeScalarOrEmpty}
     end % properties ( GetAccess = ?matlab.unittest.TestCase, ...
     % SetAccess = private )
 
@@ -35,9 +35,16 @@ classdef HTMLBlob < matlab.ui.componentcontainer.ComponentContainer
                 "Position", [0, 0, 1, 1] )
 
             % Set any user-defined propertie.s
-            set( obj, namedArgs )            
-            
+            set( obj, namedArgs )
+
         end % constructor
+
+        function sendEventToHTMLSource( obj, varargin )
+            %SENDEVENTTOHTMLSOURCE Send an event to the underlying HTML.
+
+            obj.HTMLContainer.sendEventToHTMLSource( varargin{:} )
+
+        end % sendEventToHTMLSource
 
     end % methods
 
