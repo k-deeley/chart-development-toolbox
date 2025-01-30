@@ -16,12 +16,12 @@ You can inspect the source code, explore the features and functionality, and run
 ## Installation and Getting Started
 This submission is a MATLAB toolbox.
 1. Double-click on the toolbox installer (the `.mltbx` file) to install the toolbox.
-2. See the `GettingStarted.mlx` guide for introductory information.
+2. See the `GettingStarted.m` guide for introductory information.
 3. Open the `Chart Browser` app from the Apps gallery to access further documentation resources and view the example charts.
 
 ## [MathWorks](https://www.mathworks.com) Product Requirements
 
-This toolbox requires MATLAB release R2024b or later.
+This toolbox requires MATLAB release R2025a or later.
 - [MATLAB](https://www.mathworks.com/products/matlab.html)
 
 Some example charts in the toolbox rely on additional toolboxes.
