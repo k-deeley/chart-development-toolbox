@@ -1,5 +1,5 @@
 % Chart Examples
-% Version 2.2.1 (R2025a) 31-Jan-2025
+% Version 2.2.2 (R2025a) 04-Feb-2025
 
 % Copyright 2018-2025 The MathWorks, Inc.
 

@@ -88,7 +88,8 @@ function docTask( context )
 
 % Publish the chart classes as HTML documents.
 chartsFolder = context.Task.Inputs(1).Path;
-chartNames = deblank( string( ls( fullfile( chartsFolder, "*.m" ) ) ) );
+chartsInfo = struct2table( dir( fullfile( chartsFolder, "*.m" ) ) );
+chartNames = string( chartsInfo.name );
 chartFullPaths = fullfile( chartsFolder, chartNames );
 chartNames = erase( chartNames, ".m" );
 htmlOutputFolder = fullfile( chartsRoot(), "app", "html", "charts" );
@@ -123,8 +124,9 @@ end % for
 
 % Publish the examples as HTML documents.
 examplesFolder = context.Task.Inputs(2).Path;
-exampleNames = deblank( string( ls( ...
-    fullfile( examplesFolder, "*Examples.m" ) ) ) );
+examplesInfo = struct2table( dir( fullfile( ...
+    examplesFolder, "*Examples.m" ) ) );
+exampleNames = string( examplesInfo.name );
 exampleFullPaths = fullfile( examplesFolder, exampleNames );
 exampleNames = erase( exampleNames, ".m" );
 htmlOutputFolder = fullfile( chartsRoot(), "app", "html", "examples" );
@@ -151,7 +153,8 @@ docFolder = context.Task.Inputs(3).Path;
 htmlOutputFolder = fullfile( chartsRoot(), "app", "html", "doc" );
 
 % Publish the documentation files.
-docFilenames = deblank( string( ls( fullfile( docFolder, "*.m" ) ) ) );
+docInfo = struct2table( dir( fullfile( docFolder, "*.m" ) ) );
+docFilenames = string( docInfo.name );
 for fileIdx = 1 : numel( docFilenames )
     exportToHTML( docFilenames(fileIdx) )
 end % for

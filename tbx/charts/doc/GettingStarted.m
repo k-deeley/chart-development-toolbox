@@ -5,7 +5,7 @@
 %[text] This toolbox comprises several diverse examples of custom MATLAB charts, together with an app for browsing the available charts and their documentation. You can inspect the source code, explore the features and functionality, and run examples demonstrating the use of each chart. The toolbox also has documentation and resources to help you develop your own charts.
 %[text] ![chartMontage.png](text:image:1b71)
 %[text] ## [MathWorks](<matlab: web("https://www.mathworks.com")>) Product Requirements
-%[text] This toolbox requires MATLAB release R2024b or later.
+%[text] This toolbox requires MATLAB release R2025a or later.
 %[text] - [MATLAB](<matlab: web("https://www.mathworks.com/products/matlab.html")>) \
 %[text] Some example charts in the toolbox rely on additional toolboxes
 %[text] ## Documentation and Chart Examples

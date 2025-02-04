@@ -50,9 +50,11 @@ classdef ChartBrowserModel < handle
                 "Examples";
 
             % Obtain a list of documentation files.
-            docFiles = ls( fullfile( chartsRoot(), "doc", "*.m" ) );
-            docFiles = extractBefore( string( docFiles ), ".m" );
-            obj.DocumentationNames = docFiles.';
+            docFolder = fullfile( chartsRoot(), "doc" );            
+            docFilesInfo = struct2table( dir( ...
+                fullfile( docFolder, "*.m" ) ) );
+            docFiles = string( docFilesInfo.name );            
+            obj.DocumentationNames = extractBefore( docFiles, ".m" );            
 
             % List the icon files corresponding to the accessible charts.
             iconFiles = fullfile( chartsRoot(), "app", "images", ...
